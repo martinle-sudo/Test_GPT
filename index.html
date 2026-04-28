@@ -7,7 +7,7 @@
 <meta name="theme-color" content="#0a0a0b">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-<title>Momentum — v2.2</title>
+<title>Momentum — v2.3</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=JetBrains+Mono:wght@400;500;600&family=Geist:wght@300;400;500;600;700&display=swap" rel="stylesheet">
@@ -956,6 +956,185 @@ input:focus, textarea:focus { outline: none; }
   color: var(--text-muted);
 }
 
+/* ============ MEALS ============ */
+.meals-mode {
+  position: fixed;
+  inset: 0;
+  background: var(--bg);
+  z-index: 200;
+  display: none;
+  flex-direction: column;
+  padding: env(safe-area-inset-top) 0 env(safe-area-inset-bottom);
+  animation: fadeIn 0.3s;
+  overflow-y: auto;
+}
+.meals-mode.show { display: flex; }
+.meals-header {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 18px 20px 8px;
+}
+.meals-title {
+  font-family: 'Instrument Serif', serif;
+  font-size: 28px;
+  font-style: italic;
+  letter-spacing: -0.02em;
+}
+.meals-content {
+  padding: 0 20px 40px;
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+.meals-input-row {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+.meals-input {
+  flex: 1;
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 14px 16px;
+  color: var(--text);
+  font-size: 15px;
+  font-family: inherit;
+}
+.meals-input:focus { border-color: var(--accent); }
+.meals-add-btn {
+  width: 48px; height: 48px;
+  border-radius: 12px;
+  background: var(--accent);
+  color: var(--bg);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 22px;
+  font-weight: 600;
+  flex-shrink: 0;
+}
+.meals-add-btn:active { transform: scale(0.94); }
+
+.meals-section-label {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 10px;
+  text-transform: uppercase;
+  letter-spacing: 0.18em;
+  color: var(--text-subtle);
+  margin-bottom: 8px;
+}
+
+.meals-bank {
+  background: var(--bg-card);
+  border: 1px dashed var(--border-strong);
+  border-radius: 14px;
+  padding: 14px;
+  min-height: 64px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  transition: border-color 0.15s, background 0.15s;
+}
+.meals-bank.drag-over {
+  border-color: var(--accent);
+  background: var(--accent-glow);
+}
+.meals-bank-empty {
+  color: var(--text-subtle);
+  font-size: 13px;
+  font-style: italic;
+  align-self: center;
+  width: 100%;
+  text-align: center;
+}
+
+.day-card {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  padding: 12px 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  transition: border-color 0.15s, background 0.15s;
+}
+.day-card.drag-over {
+  border-color: var(--accent);
+  background: var(--accent-glow);
+}
+.day-card.today {
+  border-color: var(--accent);
+}
+.day-card-header {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+}
+.day-card-name {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.15em;
+  color: var(--text-muted);
+}
+.day-card.today .day-card-name { color: var(--accent); }
+.day-card-count {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 10px;
+  color: var(--text-subtle);
+}
+.day-card-meals {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  min-height: 28px;
+}
+.day-card-empty {
+  color: var(--text-subtle);
+  font-size: 12px;
+  font-style: italic;
+}
+
+.meal-chip {
+  background: var(--bg-elevated);
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  padding: 7px 10px 7px 12px;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 13px;
+  color: var(--text);
+  cursor: grab;
+  user-select: none;
+  transition: transform 0.15s, opacity 0.15s, background 0.15s;
+  max-width: 100%;
+}
+.meal-chip:active { cursor: grabbing; transform: scale(0.97); }
+.meal-chip.dragging { opacity: 0.4; }
+.meal-chip-emoji { font-size: 16px; line-height: 1; }
+.meal-chip-name {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 200px;
+}
+.meal-chip-del {
+  width: 18px; height: 18px;
+  border-radius: 50%;
+  background: var(--bg-hover);
+  color: var(--text-muted);
+  font-size: 13px;
+  line-height: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-left: 2px;
+}
+.meal-chip-del:active { background: var(--priority-high); color: var(--bg); }
+
 /* ============ MODAL ============ */
 .modal-overlay {
   position: fixed;
@@ -1179,7 +1358,7 @@ input:focus, textarea:focus { outline: none; }
 <body>
 
 <header class="app-header">
-  <div class="logo"><em>Mo</em><span>mentum</span><span class="logo-version">v2.2</span></div>
+  <div class="logo"><em>Mo</em><span>mentum</span><span class="logo-version">v2.3</span></div>
   <div class="header-actions">
     <button class="icon-btn" onclick="openSettings()">
       <svg viewBox="0 0 24 24" fill="none" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
@@ -1277,6 +1456,10 @@ input:focus, textarea:focus { outline: none; }
     <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="3"/></svg>
     <span class="nav-item-label">Focus</span>
   </button>
+  <button class="nav-item" onclick="enterMealsMode()">
+    <svg viewBox="0 0 24 24"><path d="M3 11h18M5 11V7a3 3 0 0 1 3-3h8a3 3 0 0 1 3 3v4M5 11v8a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-8M9 4v3M15 4v3"/></svg>
+    <span class="nav-item-label">Repas</span>
+  </button>
   <button class="nav-item" onclick="planMyDay()">
     <svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
     <span class="nav-item-label">Plan</span>
@@ -1309,6 +1492,36 @@ input:focus, textarea:focus { outline: none; }
       ✓ Marquer comme terminée
     </button>
     <button class="focus-btn skip" onclick="nextFocusTask()">Suivante →</button>
+  </div>
+</div>
+
+<!-- Meals mode -->
+<div class="meals-mode" id="mealsMode">
+  <div class="meals-header">
+    <button class="focus-close" onclick="exitMealsMode()">
+      <svg viewBox="0 0 24 24" fill="none" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+    </button>
+    <div class="meals-title">Repas de la semaine</div>
+  </div>
+  <div class="meals-content">
+    <div class="meals-input-row">
+      <input type="text" class="meals-input" id="mealInput"
+             placeholder="Idée de repas (ex: pâtes carbonara)"
+             onkeydown="if(event.key==='Enter')addMeal()">
+      <button class="meals-add-btn" onclick="addMeal()">+</button>
+    </div>
+    <div>
+      <div class="meals-section-label">Banque d'idées</div>
+      <div class="meals-bank" id="mealsBank"
+           data-day="null"
+           ondragover="mealDragOver(event)"
+           ondragleave="mealDragLeave(event)"
+           ondrop="mealDrop(event,null)"></div>
+    </div>
+    <div>
+      <div class="meals-section-label">Planning de la semaine</div>
+      <div id="mealsWeek" style="display:flex;flex-direction:column;gap:10px;"></div>
+    </div>
   </div>
 </div>
 
@@ -1425,7 +1638,8 @@ const STATE = {
   focusIndex: 0,
   pomoStats: {
     totalCompleted: 0
-  }
+  },
+  meals: []
 };
 
 const POMO = {
@@ -1466,6 +1680,7 @@ function load() {
       if (Array.isArray(parsed.tasks)) {
         parsed.tasks.forEach(t => { if (!t.emoji) t.emoji = detectEmoji(t.title || ''); });
       }
+      if (!Array.isArray(parsed.meals)) parsed.meals = [];
       Object.assign(STATE, parsed);
     }
   } catch(e) { console.error(e); }
@@ -1565,6 +1780,8 @@ function openEmojiPicker(taskId) {
   if (!task) return;
   EMOJI_PICKER_TARGET = taskId;
   const grid = document.getElementById('emojiGrid');
+  grid.style.gridTemplateColumns = '';
+  document.querySelector('.emoji-picker-title').textContent = 'Choisir un emoji';
   grid.innerHTML = PICKER_EMOJIS.map(e =>
     `<button class="emoji-grid-item ${e === task.emoji ? 'current' : ''}" onclick="setTaskEmoji('${taskId}','${e}')">${e}</button>`
   ).join('');
@@ -1595,6 +1812,184 @@ function openEmojiPickerForCurrentFocus() {
 }
 function openEmojiPickerForCurrentPomo() {
   if (POMO.taskId) openEmojiPicker(POMO.taskId);
+}
+
+// ============ MEALS ============
+const DAYS = [
+  ['lundi','Lundi'],
+  ['mardi','Mardi'],
+  ['mercredi','Mercredi'],
+  ['jeudi','Jeudi'],
+  ['vendredi','Vendredi'],
+  ['samedi','Samedi'],
+  ['dimanche','Dimanche']
+];
+function todayDayKey() {
+  // 0=Sunday..6=Saturday → map to lundi..dimanche
+  const d = new Date().getDay();
+  return d === 0 ? 'dimanche' : DAYS[d-1][0];
+}
+function enterMealsMode() {
+  document.getElementById('mealsMode').classList.add('show');
+  renderMeals();
+}
+function exitMealsMode() {
+  document.getElementById('mealsMode').classList.remove('show');
+}
+const MEAL_EMOJI_MAP = [
+  ['🍝', /(pates|pasta|spaghetti|carbonara|lasagne|tagliatelle|penne|ravioli)/],
+  ['🍕', /(pizza|calzone)/],
+  ['🍔', /(burger|hamburger|cheeseburger)/],
+  ['🌮', /(\btaco\b|tacos)/],
+  ['🌯', /(wrap|burrito|fajita)/],
+  ['🍣', /(sushi|sashimi|maki|nigiri)/],
+  ['🍱', /(\bbento\b|poke\b)/],
+  ['🥗', /(salade|salad|cesar)/],
+  ['🍲', /(soupe|\bsoup\b|ragout|minestrone|chaudree)/],
+  ['🍗', /(poulet|chicken|coq\b|volaille)/],
+  ['🥩', /(steak|\bboeuf\b|beef|viande|filet|cote\s+de\s+boeuf)/],
+  ['🐟', /(poisson|saumon|\bfish\b|salmon|truite|morue|thon)/],
+  ['🍤', /(crevette|shrimp|gambas)/],
+  ['🍚', /(\briz\b|\brice\b|risotto)/],
+  ['🥘', /(paella|\bcurry\b|tajine|cassoulet)/],
+  ['🥣', /(cereales|porridge|granola|gruau)/],
+  ['🥞', /(\bpancake|crepe|gaufre|waffle)/],
+  ['🌭', /(hot\s*dog|saucisse)/],
+  ['🥪', /(sandwich|panini|grilled\s+cheese)/],
+  ['🍳', /(omelette|oeuf|\beggs?\b|brouille)/],
+  ['🍜', /(ramen|\bpho\b|udon|nouilles)/],
+];
+function detectMealEmoji(text) {
+  const norm = normalizeForMatch(text);
+  for (const [emoji, re] of MEAL_EMOJI_MAP) {
+    if (re.test(norm)) return emoji;
+  }
+  return '🍽️';
+}
+function addMeal() {
+  const input = document.getElementById('mealInput');
+  const name = input.value.trim();
+  if (!name) return;
+  STATE.meals.push({
+    id: uid(),
+    name,
+    emoji: detectMealEmoji(name),
+    day: null
+  });
+  input.value = '';
+  save();
+  renderMeals();
+}
+function deleteMeal(id) {
+  STATE.meals = STATE.meals.filter(m => m.id !== id);
+  save();
+  renderMeals();
+}
+function moveMealToDay(id, day) {
+  const meal = STATE.meals.find(m => m.id === id);
+  if (!meal) return;
+  meal.day = day;
+  save();
+  renderMeals();
+}
+function mealChipHTML(m) {
+  return `<div class="meal-chip" draggable="true" data-meal-id="${m.id}"
+              ondragstart="mealDragStart(event,'${m.id}')"
+              ondragend="mealDragEnd(event)"
+              onclick="openMealMoveSheet('${m.id}')">
+    <span class="meal-chip-emoji">${m.emoji || '🍽️'}</span>
+    <span class="meal-chip-name">${escapeHTML(m.name)}</span>
+    <span class="meal-chip-del" onclick="event.stopPropagation();deleteMeal('${m.id}')">×</span>
+  </div>`;
+}
+function renderMeals() {
+  const bank = document.getElementById('mealsBank');
+  const inBank = STATE.meals.filter(m => !m.day);
+  bank.innerHTML = inBank.length
+    ? inBank.map(mealChipHTML).join('')
+    : '<div class="meals-bank-empty">Aucune idée — ajoute-en une ci-dessus.</div>';
+
+  const today = todayDayKey();
+  const week = document.getElementById('mealsWeek');
+  week.innerHTML = DAYS.map(([key,label]) => {
+    const meals = STATE.meals.filter(m => m.day === key);
+    const isToday = key === today;
+    return `<div class="day-card ${isToday ? 'today' : ''}"
+                 data-day="${key}"
+                 ondragover="mealDragOver(event)"
+                 ondragleave="mealDragLeave(event)"
+                 ondrop="mealDrop(event,'${key}')">
+      <div class="day-card-header">
+        <span class="day-card-name">${label}${isToday ? " · aujourd'hui" : ''}</span>
+        <span class="day-card-count">${meals.length} repas</span>
+      </div>
+      <div class="day-card-meals">
+        ${meals.length ? meals.map(mealChipHTML).join('') : '<div class="day-card-empty">— rien de prévu</div>'}
+      </div>
+    </div>`;
+  }).join('');
+}
+
+// Drag & drop
+let DRAG_MEAL_ID = null;
+function mealDragStart(e, id) {
+  DRAG_MEAL_ID = id;
+  e.dataTransfer.effectAllowed = 'move';
+  try { e.dataTransfer.setData('text/plain', id); } catch(_) {}
+  e.currentTarget.classList.add('dragging');
+}
+function mealDragEnd(e) {
+  e.currentTarget.classList.remove('dragging');
+  document.querySelectorAll('.day-card.drag-over, .meals-bank.drag-over')
+    .forEach(el => el.classList.remove('drag-over'));
+  DRAG_MEAL_ID = null;
+}
+function mealDragOver(e) {
+  e.preventDefault();
+  e.dataTransfer.dropEffect = 'move';
+  e.currentTarget.classList.add('drag-over');
+}
+function mealDragLeave(e) {
+  if (e.currentTarget.contains(e.relatedTarget)) return;
+  e.currentTarget.classList.remove('drag-over');
+}
+function mealDrop(e, day) {
+  e.preventDefault();
+  e.currentTarget.classList.remove('drag-over');
+  const id = DRAG_MEAL_ID || e.dataTransfer.getData('text/plain');
+  if (id) moveMealToDay(id, day);
+}
+
+// Touch fallback: tap chip → bottom sheet of destinations
+function openMealMoveSheet(id) {
+  const meal = STATE.meals.find(m => m.id === id);
+  if (!meal) return;
+  const grid = document.getElementById('emojiGrid');
+  const title = document.querySelector('.emoji-picker-title');
+  title.textContent = `Déplacer « ${meal.name} » vers…`;
+  const options = [
+    ['null', '🗂️ Banque d\'idées', null],
+    ...DAYS.map(([k,l]) => [k, l, k])
+  ];
+  grid.style.gridTemplateColumns = '1fr';
+  grid.innerHTML = options.map(([key,label,day]) => {
+    const current = (day === meal.day) || (day === null && !meal.day);
+    return `<button class="emoji-grid-item ${current ? 'current' : ''}"
+                    style="aspect-ratio:auto;font-size:14px;justify-content:flex-start;padding:14px 16px;font-family:inherit;"
+                    onclick="moveMealAndClose('${id}', ${day === null ? 'null' : `'${day}'`})">${label}${current ? ' ·  actuel' : ''}</button>`;
+  }).join('');
+  document.getElementById('emojiPicker').classList.add('show');
+}
+function moveMealAndClose(id, day) {
+  moveMealToDay(id, day);
+  closeMealSheet();
+}
+function closeMealSheet() {
+  // Restore picker defaults so the emoji picker keeps working
+  document.querySelector('.emoji-picker-title').textContent = 'Choisir un emoji';
+  const grid = document.getElementById('emojiGrid');
+  grid.style.gridTemplateColumns = '';
+  closeEmojiPicker();
 }
 
 function resolveTag(text) {
