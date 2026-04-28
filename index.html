@@ -1,0 +1,2093 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="theme-color" content="#0a0a0b">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<title>Momentum — v2</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=JetBrains+Mono:wght@400;500;600&family=Geist:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<link rel="manifest" href='data:application/json,{"name":"Momentum","short_name":"Momentum","start_url":".","display":"standalone","background_color":"%230a0a0b","theme_color":"%230a0a0b","icons":[{"src":"data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 192 192%22%3E%3Crect fill=%22%230a0a0b%22 width=%22192%22 height=%22192%22 rx=%2240%22/%3E%3Ctext x=%2296%22 y=%22128%22 font-size=%22120%22 text-anchor=%22middle%22 fill=%22%23d4ff3a%22 font-family=%22serif%22 font-style=%22italic%22%3EM%3C/text%3E%3C/svg%3E","sizes":"192x192","type":"image/svg+xml"}]}'>
+<style>
+:root {
+  --bg: #0a0a0b;
+  --bg-elevated: #131316;
+  --bg-card: #18181c;
+  --bg-hover: #1f1f24;
+  --border: #26262c;
+  --border-strong: #3a3a42;
+  --text: #fafafa;
+  --text-muted: #8a8a94;
+  --text-subtle: #5a5a64;
+  --accent: #d4ff3a;
+  --accent-glow: rgba(212, 255, 58, 0.15);
+  --accent-dim: #a8cc2e;
+  --danger: #ff5b5b;
+  --warning: #ffb84d;
+  --success: #4ade80;
+  --info: #60a5fa;
+  --priority-high: #ff5b5b;
+  --priority-med: #ffb84d;
+  --priority-low: #6b7280;
+}
+
+* { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+
+html, body {
+  height: 100%;
+  background: var(--bg);
+  color: var(--text);
+  font-family: 'Geist', -apple-system, sans-serif;
+  font-weight: 400;
+  overflow-x: hidden;
+  overscroll-behavior: none;
+}
+
+body {
+  background:
+    radial-gradient(ellipse 80% 50% at 50% -10%, rgba(212, 255, 58, 0.08), transparent),
+    radial-gradient(ellipse 60% 40% at 100% 50%, rgba(212, 255, 58, 0.03), transparent),
+    var(--bg);
+  min-height: 100vh;
+  padding-bottom: 90px;
+  padding-top: env(safe-area-inset-top);
+}
+
+button { background: none; border: none; color: inherit; font: inherit; cursor: pointer; }
+input, textarea { font: inherit; color: inherit; background: none; border: none; outline: none; width: 100%; }
+input:focus, textarea:focus { outline: none; }
+
+/* ============ HEADER ============ */
+.app-header {
+  padding: 20px 20px 8px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.logo {
+  font-family: 'Instrument Serif', serif;
+  font-size: 28px;
+  font-style: italic;
+  letter-spacing: -0.02em;
+}
+.logo span { color: var(--accent); }
+.logo-version {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 10px;
+  color: var(--text-subtle);
+  vertical-align: super;
+  margin-left: 4px;
+}
+
+.header-actions {
+  display: flex;
+  gap: 8px;
+}
+
+.icon-btn {
+  width: 38px; height: 38px;
+  border-radius: 10px;
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s;
+}
+.icon-btn:active { transform: scale(0.95); background: var(--bg-hover); }
+.icon-btn svg { width: 18px; height: 18px; stroke: var(--text-muted); }
+
+/* ============ STATS ============ */
+.stats { padding: 12px 20px 20px; }
+
+.score-card {
+  background:
+    radial-gradient(ellipse at top right, var(--accent-glow), transparent 60%),
+    var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: 20px;
+  padding: 24px;
+  position: relative;
+  overflow: hidden;
+}
+
+.score-card::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(180deg, rgba(255,255,255,0.03), transparent 50%);
+  pointer-events: none;
+}
+
+.score-label {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 11px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+  margin-bottom: 8px;
+}
+
+.score-value {
+  font-family: 'Instrument Serif', serif;
+  font-size: 72px;
+  line-height: 1;
+  font-weight: 400;
+  letter-spacing: -0.04em;
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+}
+.score-value .max {
+  font-size: 24px;
+  color: var(--text-subtle);
+  font-style: italic;
+}
+
+.score-bar {
+  margin-top: 16px;
+  height: 6px;
+  background: var(--bg-elevated);
+  border-radius: 99px;
+  overflow: hidden;
+}
+.score-bar-fill {
+  height: 100%;
+  background: linear-gradient(90deg, var(--accent-dim), var(--accent));
+  border-radius: 99px;
+  transition: width 0.6s cubic-bezier(0.34, 1.56, 0.64, 1);
+  box-shadow: 0 0 12px var(--accent-glow);
+}
+
+.mini-stats {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 10px;
+  margin-top: 12px;
+}
+
+.mini-stat {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  padding: 14px;
+}
+.mini-stat-label {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 9px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--text-subtle);
+  margin-bottom: 4px;
+}
+.mini-stat-value {
+  font-size: 22px;
+  font-weight: 600;
+  letter-spacing: -0.02em;
+  display: flex;
+  align-items: baseline;
+  gap: 4px;
+}
+.mini-stat-value .unit {
+  font-size: 11px;
+  color: var(--text-muted);
+  font-weight: 400;
+}
+.mini-stat .level-name {
+  font-size: 13px;
+  color: var(--accent);
+  font-family: 'Instrument Serif', serif;
+  font-style: italic;
+}
+
+/* ============ CAPTURE ============ */
+.capture { padding: 0 20px 16px; }
+
+.capture-card {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  padding: 14px 16px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  transition: border-color 0.2s;
+}
+.capture-card:focus-within {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 4px var(--accent-glow);
+}
+
+.capture-input {
+  flex: 1;
+  font-size: 16px;
+  background: transparent;
+  min-width: 0;
+}
+.capture-input::placeholder { color: var(--text-subtle); }
+
+.capture-btn {
+  width: 36px; height: 36px;
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  transition: transform 0.15s;
+}
+.capture-btn.primary { background: var(--accent); }
+.capture-btn.primary svg { stroke: var(--bg); }
+.capture-btn.secondary {
+  background: var(--bg-elevated);
+  border: 1px solid var(--border);
+}
+.capture-btn.secondary svg { stroke: var(--accent); }
+.capture-btn:active { transform: scale(0.92); }
+.capture-btn svg { width: 18px; height: 18px; stroke-width: 2.5; }
+
+.tags-row {
+  display: flex;
+  gap: 8px;
+  margin-top: 10px;
+  overflow-x: auto;
+  padding-bottom: 4px;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: none;
+}
+.tags-row::-webkit-scrollbar { display: none; }
+
+.tag {
+  flex-shrink: 0;
+  padding: 6px 12px;
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: 99px;
+  font-size: 12px;
+  color: var(--text-muted);
+  font-family: 'JetBrains Mono', monospace;
+  transition: all 0.15s;
+}
+.tag.active {
+  background: var(--accent);
+  color: var(--bg);
+  border-color: var(--accent);
+}
+.tag:active { transform: scale(0.95); }
+
+/* ============ SECTION ============ */
+.section-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 20px 20px 12px;
+}
+.section-title {
+  font-family: 'Instrument Serif', serif;
+  font-size: 22px;
+  font-style: italic;
+  letter-spacing: -0.02em;
+}
+.section-count {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 12px;
+  color: var(--text-subtle);
+}
+.section-action {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 11px;
+  color: var(--accent);
+  letter-spacing: 0.05em;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+/* ============ AI BOX ============ */
+.ai-suggest {
+  margin: 0 20px 16px;
+  background: linear-gradient(135deg, var(--bg-card), var(--bg-elevated));
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  padding: 16px;
+  position: relative;
+  overflow: hidden;
+}
+.ai-suggest::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0; height: 1px;
+  background: linear-gradient(90deg, transparent, var(--accent), transparent);
+}
+.ai-suggest-label {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 10px;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  color: var(--accent);
+  margin-bottom: 6px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.ai-suggest-label::before {
+  content: '';
+  width: 6px; height: 6px;
+  border-radius: 50%;
+  background: var(--accent);
+  box-shadow: 0 0 8px var(--accent);
+  animation: pulse 2s infinite;
+}
+@keyframes pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.4; }
+}
+.ai-suggest-text {
+  font-size: 15px;
+  line-height: 1.45;
+  color: var(--text);
+  white-space: pre-wrap;
+}
+.ai-suggest-actions {
+  display: flex;
+  gap: 8px;
+  margin-top: 12px;
+  flex-wrap: wrap;
+}
+.ai-action {
+  padding: 8px 14px;
+  background: var(--bg-elevated);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--text-muted);
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.ai-action.primary {
+  background: var(--accent);
+  color: var(--bg);
+  border-color: var(--accent);
+}
+
+/* ============ TASKS ============ */
+.tasks { padding: 0 20px; }
+
+.task {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  padding: 14px;
+  margin-bottom: 8px;
+  transition: all 0.25s;
+  position: relative;
+  overflow: hidden;
+  animation: slideIn 0.3s ease-out;
+}
+@keyframes slideIn {
+  from { opacity: 0; transform: translateY(-8px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.task.has-subtasks {
+  padding-bottom: 8px;
+}
+
+.task-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.task.completing {
+  animation: completeTask 0.5s forwards;
+}
+@keyframes completeTask {
+  0% { transform: scale(1); }
+  50% { transform: scale(1.02); background: var(--accent-glow); border-color: var(--accent); }
+  100% { transform: scale(0.95); opacity: 0; max-height: 0; padding: 0; margin: 0; border: 0; }
+}
+
+.task-checkbox {
+  width: 24px; height: 24px;
+  border: 2px solid var(--border-strong);
+  border-radius: 8px;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s;
+}
+.task-checkbox:active { transform: scale(0.9); }
+.task-checkbox svg {
+  width: 14px; height: 14px;
+  stroke: var(--bg);
+  stroke-width: 3;
+  opacity: 0;
+}
+
+.task-content {
+  flex: 1;
+  min-width: 0;
+}
+.task-title {
+  font-size: 15px;
+  line-height: 1.3;
+  color: var(--text);
+  margin-bottom: 4px;
+  word-break: break-word;
+}
+.task-meta {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  font-size: 11px;
+  color: var(--text-subtle);
+  font-family: 'JetBrains Mono', monospace;
+  flex-wrap: wrap;
+}
+.task-tag {
+  padding: 2px 7px;
+  background: var(--bg-elevated);
+  border-radius: 4px;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  font-size: 9px;
+}
+.task-priority {
+  width: 6px; height: 6px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+.priority-high { background: var(--priority-high); box-shadow: 0 0 6px var(--priority-high); }
+.priority-med { background: var(--priority-med); }
+.priority-low { background: var(--priority-low); }
+
+.task-xp {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 11px;
+  color: var(--accent);
+  font-weight: 600;
+  flex-shrink: 0;
+}
+
+.task-actions-mini {
+  display: flex;
+  gap: 4px;
+  flex-shrink: 0;
+}
+.task-mini-btn {
+  width: 28px; height: 28px;
+  border-radius: 8px;
+  background: var(--bg-elevated);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.task-mini-btn svg { width: 14px; height: 14px; stroke: var(--text-muted); fill: none; stroke-width: 2; }
+.task-mini-btn:active { background: var(--bg-hover); }
+.task-mini-btn.pomodoro svg { stroke: var(--accent); }
+
+/* ============ SUBTASKS ============ */
+.subtasks {
+  margin-top: 10px;
+  padding-left: 36px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.subtask {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 6px 0;
+  font-size: 13px;
+  color: var(--text-muted);
+}
+.subtask-check {
+  width: 16px; height: 16px;
+  border: 1.5px solid var(--border-strong);
+  border-radius: 5px;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.subtask-check svg { width: 10px; height: 10px; stroke: var(--bg); stroke-width: 3; opacity: 0; }
+.subtask.done .subtask-check { background: var(--accent); border-color: var(--accent); }
+.subtask.done .subtask-check svg { opacity: 1; }
+.subtask.done .subtask-text {
+  text-decoration: line-through;
+  color: var(--text-subtle);
+}
+.subtask-text { flex: 1; }
+
+/* ============ EMPTY ============ */
+.empty {
+  text-align: center;
+  padding: 40px 20px;
+  color: var(--text-subtle);
+}
+.empty-icon {
+  font-family: 'Instrument Serif', serif;
+  font-size: 48px;
+  font-style: italic;
+  color: var(--accent);
+  margin-bottom: 12px;
+  opacity: 0.6;
+}
+.empty-title {
+  font-family: 'Instrument Serif', serif;
+  font-size: 22px;
+  font-style: italic;
+  color: var(--text);
+  margin-bottom: 6px;
+}
+.empty-text {
+  font-size: 14px;
+  color: var(--text-muted);
+}
+
+/* ============ BOTTOM NAV ============ */
+.bottom-nav {
+  position: fixed;
+  bottom: 0; left: 0; right: 0;
+  background: rgba(10, 10, 11, 0.85);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border-top: 1px solid var(--border);
+  padding: 8px 20px calc(8px + env(safe-area-inset-bottom));
+  display: flex;
+  justify-content: space-around;
+  z-index: 100;
+}
+
+.nav-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+  padding: 8px 12px;
+  border-radius: 10px;
+  color: var(--text-subtle);
+  min-width: 56px;
+}
+.nav-item.active { color: var(--accent); }
+.nav-item:active { background: var(--bg-hover); }
+.nav-item svg { width: 22px; height: 22px; stroke: currentColor; fill: none; stroke-width: 2; }
+.nav-item-label {
+  font-size: 10px;
+  font-family: 'JetBrains Mono', monospace;
+  letter-spacing: 0.05em;
+}
+
+/* ============ POMODORO ============ */
+.pomodoro-fab {
+  position: fixed;
+  bottom: calc(95px + env(safe-area-inset-bottom));
+  right: 20px;
+  background: var(--bg-card);
+  border: 1px solid var(--accent);
+  border-radius: 99px;
+  padding: 10px 16px;
+  display: none;
+  align-items: center;
+  gap: 10px;
+  z-index: 99;
+  box-shadow: 0 4px 20px rgba(0,0,0,0.4), 0 0 20px var(--accent-glow);
+  animation: slideInFab 0.3s ease-out;
+}
+.pomodoro-fab.show { display: flex; }
+@keyframes slideInFab {
+  from { transform: translateY(20px); opacity: 0; }
+  to { transform: translateY(0); opacity: 1; }
+}
+.pomodoro-fab-time {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--accent);
+}
+.pomodoro-fab-label {
+  font-size: 11px;
+  color: var(--text-muted);
+  font-family: 'JetBrains Mono', monospace;
+}
+
+.pomodoro-screen {
+  position: fixed;
+  inset: 0;
+  background:
+    radial-gradient(ellipse 80% 60% at 50% 30%, var(--accent-glow), transparent),
+    var(--bg);
+  z-index: 200;
+  display: none;
+  flex-direction: column;
+  padding: env(safe-area-inset-top) 24px env(safe-area-inset-bottom);
+  animation: fadeIn 0.3s;
+}
+.pomodoro-screen.show { display: flex; }
+@keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+
+.pomodoro-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 20px 0;
+}
+.pomodoro-mode {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 11px;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--accent);
+}
+
+.pomodoro-content {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  text-align: center;
+}
+
+.pomodoro-task {
+  font-family: 'Instrument Serif', serif;
+  font-size: 26px;
+  font-style: italic;
+  letter-spacing: -0.02em;
+  margin-bottom: 30px;
+  max-width: 90%;
+  line-height: 1.2;
+}
+
+.pomodoro-circle-wrap {
+  position: relative;
+  width: 280px;
+  height: 280px;
+  margin-bottom: 30px;
+}
+.pomodoro-circle {
+  width: 100%;
+  height: 100%;
+  transform: rotate(-90deg);
+}
+.pomodoro-circle-bg {
+  fill: none;
+  stroke: var(--bg-card);
+  stroke-width: 8;
+}
+.pomodoro-circle-progress {
+  fill: none;
+  stroke: var(--accent);
+  stroke-width: 8;
+  stroke-linecap: round;
+  transition: stroke-dashoffset 1s linear;
+  filter: drop-shadow(0 0 8px var(--accent-glow));
+}
+.pomodoro-time-display {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+.pomodoro-time {
+  font-family: 'Instrument Serif', serif;
+  font-size: 72px;
+  font-weight: 400;
+  letter-spacing: -0.03em;
+  line-height: 1;
+}
+.pomodoro-cycle-info {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 11px;
+  color: var(--text-muted);
+  letter-spacing: 0.1em;
+  margin-top: 8px;
+}
+
+.pomodoro-controls {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding-bottom: 30px;
+  width: 100%;
+}
+.pomodoro-btn {
+  padding: 16px;
+  border-radius: 14px;
+  font-size: 15px;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+}
+.pomodoro-btn.primary {
+  background: var(--accent);
+  color: var(--bg);
+}
+.pomodoro-btn.secondary {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  color: var(--text-muted);
+}
+
+.pomo-stats-row {
+  display: flex;
+  gap: 16px;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 11px;
+  color: var(--text-muted);
+  margin-top: 8px;
+}
+.pomo-stats-row strong {
+  color: var(--accent);
+  font-size: 13px;
+}
+
+/* ============ FOCUS MODE ============ */
+.focus-mode {
+  position: fixed;
+  inset: 0;
+  background:
+    radial-gradient(ellipse 60% 40% at 50% 30%, var(--accent-glow), transparent),
+    var(--bg);
+  z-index: 200;
+  display: none;
+  flex-direction: column;
+  padding: env(safe-area-inset-top) 24px env(safe-area-inset-bottom);
+  animation: fadeIn 0.3s;
+}
+.focus-mode.show { display: flex; }
+
+.focus-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 20px 0;
+}
+.focus-close {
+  width: 38px; height: 38px;
+  border-radius: 10px;
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.focus-close svg { width: 16px; height: 16px; stroke: var(--text); }
+.focus-counter {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 12px;
+  color: var(--text-muted);
+}
+
+.focus-content {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  text-align: center;
+}
+.focus-label {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 11px;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--accent);
+  margin-bottom: 24px;
+}
+.focus-task-title {
+  font-family: 'Instrument Serif', serif;
+  font-size: 42px;
+  line-height: 1.15;
+  letter-spacing: -0.02em;
+  font-style: italic;
+  margin-bottom: 32px;
+}
+.focus-tag {
+  display: inline-block;
+  padding: 6px 14px;
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: 99px;
+  font-size: 12px;
+  font-family: 'JetBrains Mono', monospace;
+  color: var(--text-muted);
+  margin-bottom: 40px;
+}
+
+.focus-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding-bottom: 40px;
+}
+.focus-btn {
+  padding: 18px;
+  border-radius: 14px;
+  font-size: 15px;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+}
+.focus-btn.complete {
+  background: var(--accent);
+  color: var(--bg);
+}
+.focus-btn.skip {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  color: var(--text-muted);
+}
+
+/* ============ MODAL ============ */
+.modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.7);
+  backdrop-filter: blur(10px);
+  z-index: 300;
+  display: none;
+  align-items: flex-end;
+  justify-content: center;
+  animation: fadeIn 0.2s;
+}
+.modal-overlay.show { display: flex; }
+
+.modal {
+  background: var(--bg-elevated);
+  border: 1px solid var(--border);
+  border-bottom: none;
+  border-radius: 24px 24px 0 0;
+  width: 100%;
+  max-height: 90vh;
+  overflow-y: auto;
+  padding: 24px 20px calc(24px + env(safe-area-inset-bottom));
+  animation: slideUp 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+@keyframes slideUp {
+  from { transform: translateY(100%); }
+  to { transform: translateY(0); }
+}
+
+.modal-handle {
+  width: 40px; height: 4px;
+  background: var(--border-strong);
+  border-radius: 99px;
+  margin: 0 auto 20px;
+}
+.modal-title {
+  font-family: 'Instrument Serif', serif;
+  font-size: 28px;
+  font-style: italic;
+  margin-bottom: 20px;
+  letter-spacing: -0.02em;
+}
+.field { margin-bottom: 16px; }
+.field-label {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 11px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+  margin-bottom: 8px;
+  display: block;
+}
+.field-input, .field-select {
+  width: 100%;
+  padding: 14px;
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  font-size: 15px;
+  color: var(--text);
+}
+.field-input:focus, .field-select:focus { border-color: var(--accent); }
+.field-select {
+  appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%238a8a94' stroke-width='2'%3E%3Cpolyline points='6 9 12 15 18 9'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 14px center;
+  padding-right: 40px;
+}
+.field-help {
+  font-size: 12px;
+  color: var(--text-subtle);
+  margin-top: 6px;
+  line-height: 1.4;
+}
+
+.field-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+}
+
+.btn-primary {
+  width: 100%;
+  padding: 16px;
+  background: var(--accent);
+  color: var(--bg);
+  border-radius: 12px;
+  font-weight: 600;
+  font-size: 15px;
+  margin-top: 12px;
+}
+.btn-secondary {
+  width: 100%;
+  padding: 14px;
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  color: var(--text);
+  border-radius: 12px;
+  font-weight: 500;
+  font-size: 14px;
+  margin-top: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+}
+
+/* ============ HEATMAP ============ */
+.heatmap {
+  margin-top: 16px;
+  padding: 16px;
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: 14px;
+}
+.heatmap-title {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 11px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+  margin-bottom: 12px;
+}
+.heatmap-grid {
+  display: grid;
+  grid-template-columns: repeat(15, 1fr);
+  gap: 4px;
+}
+.heatmap-cell {
+  aspect-ratio: 1;
+  background: var(--bg-elevated);
+  border-radius: 3px;
+}
+.heatmap-cell.l1 { background: rgba(212, 255, 58, 0.2); }
+.heatmap-cell.l2 { background: rgba(212, 255, 58, 0.4); }
+.heatmap-cell.l3 { background: rgba(212, 255, 58, 0.7); }
+.heatmap-cell.l4 { background: var(--accent); }
+
+/* ============ TOAST ============ */
+.xp-toast {
+  position: fixed;
+  top: 50%; left: 50%;
+  transform: translate(-50%, -50%) scale(0.5);
+  font-family: 'Instrument Serif', serif;
+  font-size: 64px;
+  font-style: italic;
+  color: var(--accent);
+  text-shadow: 0 0 30px var(--accent-glow), 0 0 60px var(--accent-glow);
+  pointer-events: none;
+  z-index: 500;
+  opacity: 0;
+}
+.xp-toast.show {
+  animation: xpPop 1.2s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+}
+@keyframes xpPop {
+  0% { transform: translate(-50%, -50%) scale(0.3); opacity: 0; }
+  20% { transform: translate(-50%, -50%) scale(1.1); opacity: 1; }
+  60% { transform: translate(-50%, -80%) scale(1); opacity: 1; }
+  100% { transform: translate(-50%, -120%) scale(0.9); opacity: 0; }
+}
+
+.confetti {
+  position: fixed;
+  width: 8px; height: 8px;
+  pointer-events: none;
+  z-index: 499;
+}
+
+/* ============ STREAK FLAME ============ */
+.streak-flame {
+  display: inline-block;
+  animation: flicker 1.5s infinite;
+  margin-right: 2px;
+}
+@keyframes flicker {
+  0%, 100% { transform: scale(1) rotate(-2deg); }
+  50% { transform: scale(1.1) rotate(2deg); }
+}
+
+/* ============ SPINNER ============ */
+.spinner {
+  display: inline-block;
+  width: 14px; height: 14px;
+  border: 2px solid var(--border);
+  border-top-color: var(--accent);
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+  vertical-align: middle;
+  margin-right: 6px;
+}
+@keyframes spin { to { transform: rotate(360deg); } }
+
+/* ============ DAY PLAN ============ */
+.day-plan-item {
+  display: flex;
+  gap: 12px;
+  padding: 10px 0;
+  border-bottom: 1px solid var(--border);
+}
+.day-plan-item:last-child { border-bottom: none; }
+.day-plan-time {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 12px;
+  color: var(--accent);
+  font-weight: 600;
+  white-space: nowrap;
+  padding-top: 2px;
+}
+.day-plan-text {
+  font-size: 14px;
+  color: var(--text);
+  line-height: 1.4;
+}
+
+.hidden { display: none !important; }
+</style>
+</head>
+<body>
+
+<header class="app-header">
+  <div class="logo"><em>Mo</em><span>mentum</span><span class="logo-version">v2</span></div>
+  <div class="header-actions">
+    <button class="icon-btn" onclick="openSettings()">
+      <svg viewBox="0 0 24 24" fill="none" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+    </button>
+  </div>
+</header>
+
+<section class="stats">
+  <div class="score-card">
+    <div class="score-label">Score du jour</div>
+    <div class="score-value">
+      <span id="scoreValue">0</span>
+      <span class="max">/ 100</span>
+    </div>
+    <div class="score-bar">
+      <div class="score-bar-fill" id="scoreBar" style="width: 0%"></div>
+    </div>
+  </div>
+
+  <div class="mini-stats">
+    <div class="mini-stat">
+      <div class="mini-stat-label">Streak</div>
+      <div class="mini-stat-value">
+        <span class="streak-flame">🔥</span>
+        <span id="streakValue">0</span>
+        <span class="unit">j</span>
+      </div>
+    </div>
+    <div class="mini-stat">
+      <div class="mini-stat-label">Pomodoros</div>
+      <div class="mini-stat-value">
+        <span id="pomoToday">0</span>
+        <span class="unit">aujourd'hui</span>
+      </div>
+    </div>
+    <div class="mini-stat">
+      <div class="mini-stat-label">Niveau</div>
+      <div class="mini-stat-value level-name" id="levelName">Débutant</div>
+    </div>
+  </div>
+</section>
+
+<section class="capture">
+  <div class="capture-card">
+    <input type="text" class="capture-input" id="captureInput" placeholder="Que veux-tu accomplir?" autocomplete="off"/>
+    <button class="capture-btn secondary" onclick="addTaskWithDecomposition()" title="Décomposer avec IA">
+      <svg viewBox="0 0 24 24" fill="none"><path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/></svg>
+    </button>
+    <button class="capture-btn primary" onclick="addTask()">
+      <svg viewBox="0 0 24 24" fill="none"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+    </button>
+  </div>
+  <div class="tags-row" id="tagsRow">
+    <button class="tag active" data-tag="all">Tout</button>
+    <button class="tag" data-tag="travail">Travail</button>
+    <button class="tag" data-tag="perso">Perso</button>
+    <button class="tag" data-tag="idée">Idée</button>
+    <button class="tag" data-tag="urgent">Urgent</button>
+  </div>
+</section>
+
+<div class="ai-suggest hidden" id="aiSuggest">
+  <div class="ai-suggest-label">Assistant IA</div>
+  <div class="ai-suggest-text" id="aiSuggestText"></div>
+  <div class="ai-suggest-actions" id="aiSuggestActions"></div>
+</div>
+
+<div class="section-header">
+  <div class="section-title">À faire</div>
+  <div class="section-count" id="taskCount">0 tâches</div>
+</div>
+
+<section class="tasks" id="tasksList"></section>
+
+<section class="capture" style="padding-top: 8px;">
+  <div class="heatmap">
+    <div class="heatmap-title">15 derniers jours</div>
+    <div class="heatmap-grid" id="heatmapGrid"></div>
+  </div>
+</section>
+
+<!-- Pomodoro mini FAB -->
+<div class="pomodoro-fab" id="pomoFab" onclick="openPomodoroScreen()">
+  <span class="pomodoro-fab-time" id="fabTime">25:00</span>
+  <span class="pomodoro-fab-label" id="fabLabel">FOCUS</span>
+</div>
+
+<!-- Bottom nav -->
+<nav class="bottom-nav">
+  <button class="nav-item active" data-view="home" onclick="showView('home')">
+    <svg viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/></svg>
+    <span class="nav-item-label">Accueil</span>
+  </button>
+  <button class="nav-item" onclick="enterFocusMode()">
+    <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="3"/></svg>
+    <span class="nav-item-label">Focus</span>
+  </button>
+  <button class="nav-item" onclick="planMyDay()">
+    <svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+    <span class="nav-item-label">Plan</span>
+  </button>
+  <button class="nav-item" onclick="generateDayRecap()">
+    <svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+    <span class="nav-item-label">Bilan</span>
+  </button>
+</nav>
+
+<!-- Focus mode -->
+<div class="focus-mode" id="focusMode">
+  <div class="focus-header">
+    <button class="focus-close" onclick="exitFocusMode()">
+      <svg viewBox="0 0 24 24" fill="none" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+    </button>
+    <div class="focus-counter" id="focusCounter">1 / 1</div>
+  </div>
+  <div class="focus-content">
+    <div class="focus-label">Une chose à la fois</div>
+    <div class="focus-task-title" id="focusTitle">Aucune tâche</div>
+    <div><span class="focus-tag" id="focusTag">—</span></div>
+  </div>
+  <div class="focus-actions">
+    <button class="focus-btn complete" onclick="startPomoFromFocus()">
+      ⏱ Démarrer Pomodoro sur cette tâche
+    </button>
+    <button class="focus-btn complete" style="background:var(--success);color:var(--bg)" onclick="completeFocusTask()">
+      ✓ Marquer comme terminée
+    </button>
+    <button class="focus-btn skip" onclick="nextFocusTask()">Suivante →</button>
+  </div>
+</div>
+
+<!-- Pomodoro screen -->
+<div class="pomodoro-screen" id="pomoScreen">
+  <div class="pomodoro-header">
+    <button class="focus-close" onclick="closePomodoroScreen()">
+      <svg viewBox="0 0 24 24" fill="none" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+    </button>
+    <div class="pomodoro-mode" id="pomoModeLabel">FOCUS</div>
+  </div>
+  <div class="pomodoro-content">
+    <div class="pomodoro-task" id="pomoTaskName">—</div>
+    <div class="pomodoro-circle-wrap">
+      <svg class="pomodoro-circle" viewBox="0 0 280 280">
+        <circle class="pomodoro-circle-bg" cx="140" cy="140" r="130"/>
+        <circle class="pomodoro-circle-progress" id="pomoProgress" cx="140" cy="140" r="130"
+                stroke-dasharray="816.81" stroke-dashoffset="0"/>
+      </svg>
+      <div class="pomodoro-time-display">
+        <div class="pomodoro-time" id="pomoTime">25:00</div>
+        <div class="pomodoro-cycle-info" id="pomoCycle">Cycle 1 / 4</div>
+      </div>
+    </div>
+    <div class="pomo-stats-row">
+      <span><strong id="pomoCompletedSession">0</strong> session</span>
+      <span><strong id="pomoTotalToday">0</strong> aujourd'hui</span>
+      <span><strong id="pomoTotalAll">0</strong> total</span>
+    </div>
+  </div>
+  <div class="pomodoro-controls">
+    <button class="pomodoro-btn primary" id="pomoMainBtn" onclick="togglePomodoro()">
+      ▶ Démarrer
+    </button>
+    <button class="pomodoro-btn secondary" onclick="resetPomodoro()">Réinitialiser</button>
+  </div>
+</div>
+
+<!-- Settings modal -->
+<div class="modal-overlay" id="settingsModal" onclick="if(event.target===this)closeSettings()">
+  <div class="modal">
+    <div class="modal-handle"></div>
+    <h2 class="modal-title">Réglages</h2>
+
+    <div class="field">
+      <label class="field-label">Fournisseur d'IA</label>
+      <select class="field-select" id="aiProvider" onchange="updateProviderHelp()">
+        <option value="claude">Claude (Anthropic)</option>
+        <option value="gemini">Gemini (Google) — gratuit</option>
+        <option value="none">Aucun (mode manuel)</option>
+      </select>
+    </div>
+
+    <div class="field" id="apiKeyField">
+      <label class="field-label">Clé API</label>
+      <input type="password" class="field-input" id="apiKey" placeholder="sk-ant-... ou AIza..."/>
+      <div class="field-help" id="apiKeyHelp">Obtiens ta clé sur console.anthropic.com</div>
+    </div>
+
+    <div class="field">
+      <label class="field-label">Pomodoro (minutes)</label>
+      <div class="field-row">
+        <div>
+          <input type="number" class="field-input" id="pomoFocus" min="1" max="120" placeholder="Focus" value="25"/>
+        </div>
+        <div>
+          <input type="number" class="field-input" id="pomoBreak" min="1" max="60" placeholder="Pause" value="5"/>
+        </div>
+      </div>
+      <div class="field-help">Pause longue de 15 min après 4 cycles</div>
+    </div>
+
+    <div class="field">
+      <label class="field-label">Données</label>
+      <button class="btn-secondary" onclick="exportData()">📥 Exporter (JSON)</button>
+      <button class="btn-secondary" onclick="document.getElementById('importFile').click()">📤 Importer (JSON)</button>
+      <input type="file" id="importFile" accept=".json" style="display:none" onchange="importData(event)"/>
+    </div>
+
+    <button class="btn-primary" onclick="saveSettings()">Sauvegarder</button>
+  </div>
+</div>
+
+<div class="xp-toast" id="xpToast">+10 XP</div>
+
+<audio id="bellSound" preload="auto">
+  <source src="data:audio/wav;base64,UklGRtwGAABXQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YbgGAAB9hYqFbF1fdJivrJBhNjVgodDbq2EcBj+a2/LDciUFLIHO8tiJNwgZaLvt559NEAxQp+PwtmMcBTiR1/LMeSwFJHfH8N2QQAoUXrTp66hVFApGn+DyvmwhBSuBzvLZiTYIG2m98OScTgwOUarm7blmGgU7k9n1unEiBC13yO/eizEIHWq+8+OWT" type="audio/wav">
+</audio>
+
+<script>
+// ============ STATE ============
+const STATE = {
+  tasks: [],
+  history: {}, // 'YYYY-MM-DD': { completed, xp, score, pomos }
+  xp: 0,
+  streak: 0,
+  lastActiveDate: null,
+  filter: 'all',
+  settings: {
+    provider: 'claude',
+    apiKey: '',
+    pomoFocus: 25,
+    pomoBreak: 5,
+    pomoLongBreak: 15
+  },
+  focusIndex: 0,
+  pomoStats: {
+    totalCompleted: 0
+  }
+};
+
+const POMO = {
+  state: 'idle', // idle | running | paused | break
+  mode: 'focus', // focus | shortBreak | longBreak
+  remaining: 25 * 60,
+  total: 25 * 60,
+  cycle: 1,
+  intervalId: null,
+  taskId: null,
+  sessionCompleted: 0
+};
+
+const LEVELS = [
+  { name: 'Débutant', min: 0 },
+  { name: 'Apprenti', min: 100 },
+  { name: 'Régulier', min: 300 },
+  { name: 'Constant', min: 600 },
+  { name: 'Discipliné', min: 1000 },
+  { name: 'Expert', min: 1800 },
+  { name: 'Maître', min: 3000 },
+  { name: 'Légende', min: 5000 }
+];
+
+// ============ STORAGE ============
+function save() {
+  try { localStorage.setItem('momentum_v2', JSON.stringify(STATE)); }
+  catch(e) { console.error(e); }
+}
+function load() {
+  try {
+    const data = localStorage.getItem('momentum_v2');
+    if (data) {
+      const parsed = JSON.parse(data);
+      // Merge nested settings to keep defaults
+      parsed.settings = { ...STATE.settings, ...(parsed.settings || {}) };
+      parsed.pomoStats = { ...STATE.pomoStats, ...(parsed.pomoStats || {}) };
+      Object.assign(STATE, parsed);
+    }
+  } catch(e) { console.error(e); }
+}
+
+// ============ UTIL ============
+function todayKey() {
+  const d = new Date();
+  return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');
+}
+function dateKey(d) {
+  return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');
+}
+function uid() { return Date.now().toString(36) + Math.random().toString(36).slice(2,7); }
+function getLevel(xp) { let c = LEVELS[0]; for (const l of LEVELS) if (xp >= l.min) c = l; return c; }
+function escapeHTML(s) { return s.replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
+function fmtTime(s) {
+  const m = Math.floor(s / 60);
+  const sec = s % 60;
+  return String(m).padStart(2,'0') + ':' + String(sec).padStart(2,'0');
+}
+
+// ============ TASKS ============
+function detectTag(text) {
+  const l = text.toLowerCase();
+  if (/(urgent|asap|maintenant|tout de suite)/.test(l)) return 'urgent';
+  if (/(emblm|client|projet|réunion|reunion|email|rapport|dispatch|artopex)/.test(l)) return 'travail';
+  if (/(idée|idee|brainstorm|si on|peut-être|peut-etre)/.test(l)) return 'idée';
+  return 'perso';
+}
+function detectPriority(text) {
+  const l = text.toLowerCase();
+  if (/(urgent|asap|important|critique|maintenant)/.test(l)) return 'high';
+  if (/(bientôt|bientot|cette semaine|aujourd'hui|aujourdhui)/.test(l)) return 'med';
+  return 'low';
+}
+function calcXP(p) { return p === 'high' ? 25 : p === 'med' ? 15 : 10; }
+
+function addTask() {
+  const input = document.getElementById('captureInput');
+  const text = input.value.trim();
+  if (!text) return;
+  const tag = detectTag(text);
+  const priority = detectPriority(text);
+  STATE.tasks.unshift({
+    id: uid(), title: text, tag, priority,
+    xp: calcXP(priority), createdAt: Date.now(), completed: false,
+    subtasks: []
+  });
+  input.value = '';
+  save();
+  render();
+}
+
+async function addTaskWithDecomposition() {
+  const input = document.getElementById('captureInput');
+  const text = input.value.trim();
+  if (!text) {
+    showXPToast('Écris d\'abord une tâche');
+    return;
+  }
+
+  if (!STATE.settings.apiKey || STATE.settings.provider === 'none') {
+    showAIBox('Configure ta clé API dans les réglages pour activer la décomposition automatique.', [
+      { label: 'Ouvrir réglages', primary: true, action: 'openSettings()' }
+    ]);
+    return;
+  }
+
+  const tag = detectTag(text);
+  const priority = detectPriority(text);
+  const task = {
+    id: uid(), title: text, tag, priority,
+    xp: calcXP(priority), createdAt: Date.now(), completed: false,
+    subtasks: [], decomposing: true
+  };
+  STATE.tasks.unshift(task);
+  input.value = '';
+  save();
+  render();
+
+  try {
+    const prompt = `Décompose cette tâche en 3 à 6 sous-tâches concrètes et actionnables. Réponds UNIQUEMENT avec un JSON valide, rien d'autre. Format strict: {"subtasks":["étape 1","étape 2","étape 3"]}
+
+Tâche: "${text}"
+
+Les sous-tâches doivent être en français, courtes (max 8 mots chacune), et dans l'ordre logique.`;
+
+    const response = await callAI(prompt);
+    const jsonMatch = response.match(/\{[\s\S]*\}/);
+    if (!jsonMatch) throw new Error('Format JSON invalide');
+    const parsed = JSON.parse(jsonMatch[0]);
+
+    task.subtasks = (parsed.subtasks || []).map(t => ({
+      id: uid(), text: String(t).slice(0, 100), done: false
+    }));
+    task.decomposing = false;
+    save();
+    render();
+    showXPToast(task.subtasks.length + ' étapes');
+  } catch(e) {
+    task.decomposing = false;
+    save();
+    render();
+    showAIBox('Impossible de décomposer: ' + e.message, []);
+  }
+}
+
+function toggleTask(id) {
+  const task = STATE.tasks.find(t => t.id === id);
+  if (!task || task.completed) return;
+  const el = document.querySelector(`[data-task-id="${id}"]`);
+  if (el) {
+    el.classList.add('completing');
+    if (navigator.vibrate) navigator.vibrate(30);
+  }
+  task.completed = true;
+  task.completedAt = Date.now();
+  STATE.xp += task.xp;
+  const k = todayKey();
+  if (!STATE.history[k]) STATE.history[k] = { completed:0, xp:0, score:0, pomos:0 };
+  STATE.history[k].completed += 1;
+  STATE.history[k].xp += task.xp;
+  STATE.history[k].score = Math.min(100, STATE.history[k].score + Math.round(task.xp * 0.8));
+  updateStreak();
+  showXPToast('+' + task.xp + ' XP');
+  spawnConfetti();
+  save();
+  setTimeout(() => {
+    STATE.tasks = STATE.tasks.filter(t => !t.completed);
+    render();
+  }, 500);
+}
+
+function toggleSubtask(taskId, subId) {
+  const task = STATE.tasks.find(t => t.id === taskId);
+  if (!task) return;
+  const sub = task.subtasks.find(s => s.id === subId);
+  if (!sub) return;
+  sub.done = !sub.done;
+  if (sub.done) {
+    showXPToast('+5 XP');
+    STATE.xp += 5;
+    const k = todayKey();
+    if (!STATE.history[k]) STATE.history[k] = { completed:0, xp:0, score:0, pomos:0 };
+    STATE.history[k].xp += 5;
+    STATE.history[k].score = Math.min(100, STATE.history[k].score + 4);
+  }
+  // Auto-complete task if all subtasks done
+  if (task.subtasks.length > 0 && task.subtasks.every(s => s.done)) {
+    setTimeout(() => toggleTask(task.id), 300);
+  }
+  save();
+  render();
+}
+
+function updateStreak() {
+  const today = todayKey();
+  const y = new Date(); y.setDate(y.getDate() - 1);
+  const yKey = dateKey(y);
+  if (STATE.lastActiveDate === today) return;
+  if (STATE.lastActiveDate === yKey) STATE.streak += 1;
+  else STATE.streak = 1;
+  STATE.lastActiveDate = today;
+}
+
+// ============ FILTERS ============
+document.addEventListener('click', (e) => {
+  if (e.target.classList.contains('tag') && e.target.dataset.tag) {
+    document.querySelectorAll('.tag').forEach(t => t.classList.remove('active'));
+    e.target.classList.add('active');
+    STATE.filter = e.target.dataset.tag;
+    render();
+  }
+});
+
+// ============ RENDER ============
+function render() {
+  const today = STATE.history[todayKey()] || { score:0, pomos:0 };
+  document.getElementById('scoreValue').textContent = today.score;
+  document.getElementById('scoreBar').style.width = today.score + '%';
+  document.getElementById('streakValue').textContent = STATE.streak;
+  document.getElementById('pomoToday').textContent = today.pomos || 0;
+  document.getElementById('levelName').textContent = getLevel(STATE.xp).name;
+
+  const visible = STATE.tasks.filter(t =>
+    !t.completed && (STATE.filter === 'all' || t.tag === STATE.filter)
+  );
+  document.getElementById('taskCount').textContent =
+    visible.length + (visible.length === 1 ? ' tâche' : ' tâches');
+
+  const list = document.getElementById('tasksList');
+  if (visible.length === 0) {
+    list.innerHTML = `
+      <div class="empty">
+        <div class="empty-icon">∅</div>
+        <div class="empty-title">Tout est fait</div>
+        <div class="empty-text">Ajoute une nouvelle tâche pour continuer.</div>
+      </div>`;
+  } else {
+    list.innerHTML = visible.map(t => `
+      <div class="task ${t.subtasks && t.subtasks.length ? 'has-subtasks' : ''}" data-task-id="${t.id}">
+        <div class="task-row">
+          <button class="task-checkbox" onclick="toggleTask('${t.id}')">
+            <svg viewBox="0 0 24 24" fill="none"><polyline points="20 6 9 17 4 12"/></svg>
+          </button>
+          <div class="task-content">
+            <div class="task-title">${escapeHTML(t.title)}</div>
+            <div class="task-meta">
+              <div class="task-priority priority-${t.priority}"></div>
+              <span class="task-tag">${t.tag}</span>
+              ${t.decomposing ? '<span><span class="spinner"></span>Décomposition...</span>' : ''}
+              ${t.subtasks && t.subtasks.length ? `<span>${t.subtasks.filter(s=>s.done).length}/${t.subtasks.length} étapes</span>` : ''}
+            </div>
+          </div>
+          <div class="task-actions-mini">
+            <button class="task-mini-btn pomodoro" onclick="startPomoForTask('${t.id}')" title="Pomodoro">
+              <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+            </button>
+            ${!t.subtasks || t.subtasks.length === 0 ? `
+              <button class="task-mini-btn" onclick="decomposeTaskById('${t.id}')" title="Décomposer">
+                <svg viewBox="0 0 24 24"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/></svg>
+              </button>` : ''}
+          </div>
+          <div class="task-xp">+${t.xp}</div>
+        </div>
+        ${t.subtasks && t.subtasks.length ? `
+          <div class="subtasks">
+            ${t.subtasks.map(s => `
+              <div class="subtask ${s.done ? 'done' : ''}" onclick="toggleSubtask('${t.id}','${s.id}')">
+                <div class="subtask-check">
+                  <svg viewBox="0 0 24 24" fill="none"><polyline points="20 6 9 17 4 12"/></svg>
+                </div>
+                <div class="subtask-text">${escapeHTML(s.text)}</div>
+              </div>
+            `).join('')}
+          </div>` : ''}
+      </div>
+    `).join('');
+  }
+  renderHeatmap();
+}
+
+function renderHeatmap() {
+  const grid = document.getElementById('heatmapGrid');
+  let html = '';
+  for (let i = 14; i >= 0; i--) {
+    const d = new Date();
+    d.setDate(d.getDate() - i);
+    const k = dateKey(d);
+    const data = STATE.history[k];
+    let level = 0;
+    if (data) {
+      if (data.completed >= 8) level = 4;
+      else if (data.completed >= 5) level = 3;
+      else if (data.completed >= 3) level = 2;
+      else if (data.completed >= 1) level = 1;
+    }
+    html += `<div class="heatmap-cell ${level ? 'l'+level : ''}" title="${k}: ${data ? data.completed : 0} tâches"></div>`;
+  }
+  grid.innerHTML = html;
+}
+
+// ============ TOAST + CONFETTI ============
+function showXPToast(text) {
+  const t = document.getElementById('xpToast');
+  t.textContent = text;
+  t.classList.remove('show');
+  void t.offsetWidth;
+  t.classList.add('show');
+}
+function spawnConfetti() {
+  const colors = ['#d4ff3a','#a8cc2e','#4ade80','#ffb84d','#fafafa'];
+  for (let i = 0; i < 18; i++) {
+    const c = document.createElement('div');
+    c.className = 'confetti';
+    c.style.background = colors[Math.floor(Math.random()*colors.length)];
+    c.style.left = '50%'; c.style.top = '50%';
+    c.style.borderRadius = Math.random() > 0.5 ? '50%' : '2px';
+    document.body.appendChild(c);
+    const a = (Math.PI*2*i)/18 + Math.random()*0.5;
+    const dist = 100 + Math.random()*150;
+    c.animate([
+      { transform: 'translate(-50%, -50%) translate(0,0) rotate(0)', opacity: 1 },
+      { transform: `translate(-50%, -50%) translate(${Math.cos(a)*dist}px, ${Math.sin(a)*dist}px) rotate(${Math.random()*720}deg)`, opacity: 0 }
+    ], { duration: 800 + Math.random()*400, easing: 'cubic-bezier(0.2, 0.8, 0.4, 1)' });
+    setTimeout(() => c.remove(), 1300);
+  }
+}
+
+// ============ FOCUS MODE ============
+function enterFocusMode() {
+  const tasks = STATE.tasks.filter(t => !t.completed);
+  if (tasks.length === 0) { showXPToast('Rien à focus'); return; }
+  STATE.focusIndex = 0;
+  document.getElementById('focusMode').classList.add('show');
+  renderFocusTask();
+}
+function exitFocusMode() { document.getElementById('focusMode').classList.remove('show'); }
+function renderFocusTask() {
+  const tasks = STATE.tasks.filter(t => !t.completed);
+  if (tasks.length === 0) return exitFocusMode();
+  if (STATE.focusIndex >= tasks.length) STATE.focusIndex = 0;
+  const task = tasks[STATE.focusIndex];
+  document.getElementById('focusTitle').textContent = task.title;
+  document.getElementById('focusTag').textContent = task.tag + ' · +' + task.xp + ' XP';
+  document.getElementById('focusCounter').textContent = (STATE.focusIndex+1) + ' / ' + tasks.length;
+}
+function completeFocusTask() {
+  const tasks = STATE.tasks.filter(t => !t.completed);
+  if (tasks.length === 0) return exitFocusMode();
+  const task = tasks[STATE.focusIndex];
+  toggleTask(task.id);
+  setTimeout(() => {
+    const remaining = STATE.tasks.filter(t => !t.completed);
+    if (remaining.length === 0) exitFocusMode();
+    else { STATE.focusIndex = Math.min(STATE.focusIndex, remaining.length - 1); renderFocusTask(); }
+  }, 600);
+}
+function nextFocusTask() {
+  const tasks = STATE.tasks.filter(t => !t.completed);
+  if (!tasks.length) return;
+  STATE.focusIndex = (STATE.focusIndex + 1) % tasks.length;
+  renderFocusTask();
+}
+function startPomoFromFocus() {
+  const tasks = STATE.tasks.filter(t => !t.completed);
+  if (!tasks.length) return;
+  const task = tasks[STATE.focusIndex];
+  exitFocusMode();
+  startPomoForTask(task.id);
+}
+
+// ============ POMODORO ============
+function startPomoForTask(taskId) {
+  const task = STATE.tasks.find(t => t.id === taskId);
+  if (!task) return;
+  POMO.taskId = taskId;
+  POMO.mode = 'focus';
+  POMO.cycle = 1;
+  POMO.total = STATE.settings.pomoFocus * 60;
+  POMO.remaining = POMO.total;
+  POMO.state = 'idle';
+  openPomodoroScreen();
+  renderPomo();
+  // Auto-start
+  togglePomodoro();
+}
+
+function openPomodoroScreen() {
+  if (POMO.taskId) {
+    const task = STATE.tasks.find(t => t.id === POMO.taskId);
+    document.getElementById('pomoTaskName').textContent = task ? task.title : '—';
+  } else {
+    document.getElementById('pomoTaskName').textContent = 'Session libre';
+  }
+  document.getElementById('pomoScreen').classList.add('show');
+  renderPomo();
+}
+
+function closePomodoroScreen() {
+  document.getElementById('pomoScreen').classList.remove('show');
+  if (POMO.state === 'running') {
+    document.getElementById('pomoFab').classList.add('show');
+  }
+}
+
+function togglePomodoro() {
+  if (POMO.state === 'idle' || POMO.state === 'paused') {
+    POMO.state = 'running';
+    POMO.intervalId = setInterval(tickPomodoro, 1000);
+    document.getElementById('pomoMainBtn').textContent = '⏸ Pause';
+  } else if (POMO.state === 'running') {
+    POMO.state = 'paused';
+    clearInterval(POMO.intervalId);
+    document.getElementById('pomoMainBtn').textContent = '▶ Reprendre';
+  }
+  renderPomo();
+}
+
+function tickPomodoro() {
+  POMO.remaining -= 1;
+  if (POMO.remaining <= 0) {
+    completePomoSession();
+    return;
+  }
+  renderPomo();
+}
+
+function completePomoSession() {
+  clearInterval(POMO.intervalId);
+  if (navigator.vibrate) navigator.vibrate([200, 100, 200]);
+
+  if (POMO.mode === 'focus') {
+    // Award XP
+    POMO.sessionCompleted += 1;
+    STATE.pomoStats.totalCompleted += 1;
+    const k = todayKey();
+    if (!STATE.history[k]) STATE.history[k] = { completed:0, xp:0, score:0, pomos:0 };
+    STATE.history[k].pomos = (STATE.history[k].pomos || 0) + 1;
+    STATE.history[k].xp += 20;
+    STATE.history[k].score = Math.min(100, STATE.history[k].score + 15);
+    STATE.xp += 20;
+    showXPToast('+20 XP 🍅');
+    spawnConfetti();
+
+    // Decide break type
+    if (POMO.cycle % 4 === 0) {
+      POMO.mode = 'longBreak';
+      POMO.total = STATE.settings.pomoLongBreak * 60;
+    } else {
+      POMO.mode = 'shortBreak';
+      POMO.total = STATE.settings.pomoBreak * 60;
+    }
+    POMO.remaining = POMO.total;
+    POMO.state = 'idle';
+    document.getElementById('pomoMainBtn').textContent = '▶ Démarrer pause';
+  } else {
+    // Break ended
+    POMO.cycle += 1;
+    POMO.mode = 'focus';
+    POMO.total = STATE.settings.pomoFocus * 60;
+    POMO.remaining = POMO.total;
+    POMO.state = 'idle';
+    document.getElementById('pomoMainBtn').textContent = '▶ Démarrer focus';
+  }
+  save();
+  renderPomo();
+}
+
+function resetPomodoro() {
+  clearInterval(POMO.intervalId);
+  POMO.state = 'idle';
+  POMO.mode = 'focus';
+  POMO.cycle = 1;
+  POMO.sessionCompleted = 0;
+  POMO.total = STATE.settings.pomoFocus * 60;
+  POMO.remaining = POMO.total;
+  document.getElementById('pomoMainBtn').textContent = '▶ Démarrer';
+  renderPomo();
+  document.getElementById('pomoFab').classList.remove('show');
+}
+
+function renderPomo() {
+  document.getElementById('pomoTime').textContent = fmtTime(POMO.remaining);
+  document.getElementById('pomoCycle').textContent = `Cycle ${POMO.cycle} / 4`;
+  const modeLabel = POMO.mode === 'focus' ? 'FOCUS' : POMO.mode === 'shortBreak' ? 'PAUSE COURTE' : 'PAUSE LONGUE';
+  document.getElementById('pomoModeLabel').textContent = modeLabel;
+
+  const today = STATE.history[todayKey()] || { pomos: 0 };
+  document.getElementById('pomoCompletedSession').textContent = POMO.sessionCompleted;
+  document.getElementById('pomoTotalToday').textContent = today.pomos || 0;
+  document.getElementById('pomoTotalAll').textContent = STATE.pomoStats.totalCompleted;
+
+  const circumference = 2 * Math.PI * 130;
+  const progress = POMO.remaining / POMO.total;
+  const offset = circumference * (1 - progress);
+  const circle = document.getElementById('pomoProgress');
+  circle.setAttribute('stroke-dasharray', circumference);
+  circle.setAttribute('stroke-dashoffset', offset);
+
+  // FAB
+  const fab = document.getElementById('pomoFab');
+  if (POMO.state === 'running') {
+    document.getElementById('fabTime').textContent = fmtTime(POMO.remaining);
+    document.getElementById('fabLabel').textContent = modeLabel;
+  }
+}
+
+// ============ AI ============
+async function callAI(prompt) {
+  const { provider, apiKey } = STATE.settings;
+  if (!apiKey || provider === 'none') throw new Error('Aucune clé API configurée');
+
+  if (provider === 'claude') {
+    const res = await fetch('https://api.anthropic.com/v1/messages', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'x-api-key': apiKey,
+        'anthropic-version': '2023-06-01',
+        'anthropic-dangerous-direct-browser-access': 'true'
+      },
+      body: JSON.stringify({
+        model: 'claude-haiku-4-5-20251001',
+        max_tokens: 800,
+        messages: [{ role: 'user', content: prompt }]
+      })
+    });
+    if (!res.ok) {
+      const err = await res.text();
+      throw new Error('API: ' + res.status);
+    }
+    const data = await res.json();
+    return data.content[0].text;
+  } else if (provider === 'gemini') {
+    const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${apiKey}`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        contents: [{ parts: [{ text: prompt }] }],
+        generationConfig: { maxOutputTokens: 800 }
+      })
+    });
+    if (!res.ok) throw new Error('API: ' + res.status);
+    const data = await res.json();
+    return data.candidates[0].content.parts[0].text;
+  }
+}
+
+function showAIBox(text, actions) {
+  const box = document.getElementById('aiSuggest');
+  box.classList.remove('hidden');
+  document.getElementById('aiSuggestText').textContent = text;
+  const actionsEl = document.getElementById('aiSuggestActions');
+  actionsEl.innerHTML = (actions || []).map(a =>
+    `<button class="ai-action ${a.primary ? 'primary' : ''}" onclick="${a.action}">${a.label}</button>`
+  ).join('');
+  box.scrollIntoView({ behavior: 'smooth', block: 'center' });
+}
+
+function showAIBoxLoading(text) {
+  const box = document.getElementById('aiSuggest');
+  box.classList.remove('hidden');
+  document.getElementById('aiSuggestText').innerHTML = '<span class="spinner"></span>' + text;
+  document.getElementById('aiSuggestActions').innerHTML = '';
+  box.scrollIntoView({ behavior: 'smooth', block: 'center' });
+}
+
+async function decomposeTaskById(taskId) {
+  const task = STATE.tasks.find(t => t.id === taskId);
+  if (!task) return;
+  if (!STATE.settings.apiKey || STATE.settings.provider === 'none') {
+    showAIBox('Configure ta clé API pour décomposer.', [{ label: 'Réglages', primary: true, action: 'openSettings()' }]);
+    return;
+  }
+  task.decomposing = true;
+  render();
+  try {
+    const prompt = `Décompose cette tâche en 3 à 6 sous-tâches concrètes. Réponds UNIQUEMENT en JSON: {"subtasks":["étape 1","étape 2"]}\n\nTâche: "${task.title}"\n\nSous-tâches courtes en français, ordre logique.`;
+    const response = await callAI(prompt);
+    const m = response.match(/\{[\s\S]*\}/);
+    if (!m) throw new Error('Format invalide');
+    const parsed = JSON.parse(m[0]);
+    task.subtasks = (parsed.subtasks || []).map(t => ({ id: uid(), text: String(t).slice(0,100), done: false }));
+    task.decomposing = false;
+    save();
+    render();
+    showXPToast(task.subtasks.length + ' étapes');
+  } catch(e) {
+    task.decomposing = false;
+    save();
+    render();
+    showAIBox('Erreur: ' + e.message, []);
+  }
+}
+
+async function planMyDay() {
+  const tasks = STATE.tasks.filter(t => !t.completed);
+  if (!STATE.settings.apiKey || STATE.settings.provider === 'none') {
+    showAIBox('Configure ta clé API pour planifier ta journée.', [{ label: 'Réglages', primary: true, action: 'openSettings()' }]);
+    return;
+  }
+  if (tasks.length === 0) {
+    showAIBox('Aucune tâche à planifier. Ajoute des choses à accomplir!', []);
+    return;
+  }
+
+  showAIBoxLoading('Planification de ta journée...');
+
+  const hour = new Date().getHours();
+  const prompt = `Tu es un coach de productivité. Voici les tâches de l'utilisateur (il est ${hour}h):
+${tasks.map((t,i) => `${i+1}. [${t.priority}] ${t.title} (${t.tag})${t.subtasks && t.subtasks.length ? ' - ' + t.subtasks.length + ' sous-étapes' : ''}`).join('\n')}
+
+Crée un plan horaire réaliste pour le reste de la journée. Réponds UNIQUEMENT en JSON valide:
+{
+  "intro": "1-2 phrases motivantes sur la journée",
+  "blocks": [
+    {"time": "10:00", "task": "Description courte", "duration": "30 min"}
+  ],
+  "tip": "Un conseil pratique en 1 phrase"
+}
+
+Règles: blocs de 25-90 min, pauses entre les blocs intenses, priorise les tâches HIGH le matin, sois réaliste avec le temps restant dans la journée.`;
+
+  try {
+    const response = await callAI(prompt);
+    const m = response.match(/\{[\s\S]*\}/);
+    if (!m) throw new Error('Format invalide');
+    const plan = JSON.parse(m[0]);
+
+    const blocksHtml = (plan.blocks || []).map(b => `
+      <div class="day-plan-item">
+        <div class="day-plan-time">${escapeHTML(b.time)}<br><span style="color:var(--text-subtle);font-weight:400;font-size:10px">${escapeHTML(b.duration || '')}</span></div>
+        <div class="day-plan-text">${escapeHTML(b.task)}</div>
+      </div>
+    `).join('');
+
+    const box = document.getElementById('aiSuggest');
+    box.classList.remove('hidden');
+    document.getElementById('aiSuggestText').innerHTML = `
+      <div style="margin-bottom:12px">${escapeHTML(plan.intro || '')}</div>
+      <div style="background:var(--bg);border-radius:12px;padding:12px;margin-bottom:12px">
+        ${blocksHtml}
+      </div>
+      <div style="font-size:13px;color:var(--text-muted);font-style:italic">💡 ${escapeHTML(plan.tip || '')}</div>
+    `;
+    document.getElementById('aiSuggestActions').innerHTML = '<button class="ai-action primary" onclick="enterFocusMode()">Commencer →</button>';
+    box.scrollIntoView({ behavior: 'smooth', block: 'center' });
+  } catch(e) {
+    showAIBox('Erreur: ' + e.message, []);
+  }
+}
+
+async function generateDayRecap() {
+  showAIBoxLoading('Génération du bilan...');
+  const today = STATE.history[todayKey()] || { completed:0, xp:0, score:0, pomos:0 };
+  if (!STATE.settings.apiKey || STATE.settings.provider === 'none') {
+    showAIBox(`Bilan du jour\n${today.completed} tâche(s) · ${today.pomos || 0} pomodoros · ${today.xp} XP · Score ${today.score}/100\n\nConfigure une clé API pour un bilan IA personnalisé.`, []);
+    return;
+  }
+  const remaining = STATE.tasks.filter(t => !t.completed);
+  const prompt = `Bilan de la journée:
+- Tâches complétées: ${today.completed}
+- Pomodoros: ${today.pomos || 0}
+- XP gagnés: ${today.xp}
+- Score: ${today.score}/100
+- Streak: ${STATE.streak} jours
+- Tâches restantes: ${remaining.length}
+
+Écris un bilan court (3-4 phrases) en français, encourageant et honnête. Termine par UN conseil pour demain.`;
+  try {
+    const response = await callAI(prompt);
+    showAIBox(response.trim(), []);
+  } catch(e) {
+    showAIBox('Erreur: ' + e.message, []);
+  }
+}
+
+// ============ SETTINGS ============
+function openSettings() {
+  document.getElementById('aiProvider').value = STATE.settings.provider;
+  document.getElementById('apiKey').value = STATE.settings.apiKey;
+  document.getElementById('pomoFocus').value = STATE.settings.pomoFocus;
+  document.getElementById('pomoBreak').value = STATE.settings.pomoBreak;
+  updateProviderHelp();
+  document.getElementById('settingsModal').classList.add('show');
+}
+function closeSettings() { document.getElementById('settingsModal').classList.remove('show'); }
+function updateProviderHelp() {
+  const p = document.getElementById('aiProvider').value;
+  const help = document.getElementById('apiKeyHelp');
+  const field = document.getElementById('apiKeyField');
+  const input = document.getElementById('apiKey');
+  if (p === 'claude') {
+    help.textContent = 'Obtiens ta clé sur console.anthropic.com (sk-ant-...)';
+    input.placeholder = 'sk-ant-...';
+    field.style.display = '';
+  } else if (p === 'gemini') {
+    help.textContent = 'Gratuit sur aistudio.google.com/app/apikey (AIza...)';
+    input.placeholder = 'AIza...';
+    field.style.display = '';
+  } else {
+    field.style.display = 'none';
+  }
+}
+function saveSettings() {
+  STATE.settings.provider = document.getElementById('aiProvider').value;
+  STATE.settings.apiKey = document.getElementById('apiKey').value.trim();
+  STATE.settings.pomoFocus = parseInt(document.getElementById('pomoFocus').value) || 25;
+  STATE.settings.pomoBreak = parseInt(document.getElementById('pomoBreak').value) || 5;
+  // Apply to current pomo if idle
+  if (POMO.state === 'idle' && POMO.mode === 'focus') {
+    POMO.total = STATE.settings.pomoFocus * 60;
+    POMO.remaining = POMO.total;
+    renderPomo();
+  }
+  save();
+  closeSettings();
+  showXPToast('Sauvegardé');
+}
+function exportData() {
+  const blob = new Blob([JSON.stringify(STATE, null, 2)], { type: 'application/json' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = `momentum-${todayKey()}.json`;
+  a.click();
+  URL.revokeObjectURL(url);
+}
+function importData(event) {
+  const file = event.target.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = (e) => {
+    try {
+      const parsed = JSON.parse(e.target.result);
+      if (confirm('Remplacer toutes les données actuelles par l\'import?')) {
+        Object.assign(STATE, parsed);
+        save();
+        render();
+        closeSettings();
+        showXPToast('Importé');
+      }
+    } catch(err) {
+      alert('Fichier invalide: ' + err.message);
+    }
+  };
+  reader.readAsText(file);
+}
+
+function showView(name) {
+  document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+  document.querySelector(`[data-view="${name}"]`)?.classList.add('active');
+  if (name === 'home') window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+// ============ KEYBOARD ============
+document.getElementById('captureInput').addEventListener('keydown', (e) => {
+  if (e.key === 'Enter') addTask();
+});
+
+// ============ INIT ============
+load();
+render();
+POMO.total = STATE.settings.pomoFocus * 60;
+POMO.remaining = POMO.total;
+
+// PWA
+if ('serviceWorker' in navigator) {
+  const swCode = `
+    self.addEventListener('install', e => self.skipWaiting());
+    self.addEventListener('activate', e => self.clients.claim());
+    self.addEventListener('fetch', e => {});
+  `;
+  const blob = new Blob([swCode], { type: 'application/javascript' });
+  navigator.serviceWorker.register(URL.createObjectURL(blob)).catch(()=>{});
+}
+</script>
+</body>
+</html>
