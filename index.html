@@ -7,7 +7,7 @@
 <meta name="theme-color" content="#0a0a0b">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-<title>Momentum — v2.1</title>
+<title>Momentum — v2.2</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=JetBrains+Mono:wght@400;500;600&family=Geist:wght@300;400;500;600;700&display=swap" rel="stylesheet">
@@ -464,6 +464,109 @@ input:focus, textarea:focus { outline: none; }
   width: 6px; height: 6px;
   border-radius: 50%;
   flex-shrink: 0;
+}
+
+.task-emoji {
+  width: 36px; height: 36px;
+  border-radius: 10px;
+  background: var(--bg-elevated);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 20px;
+  flex-shrink: 0;
+  line-height: 1;
+  transition: transform 0.15s, background 0.15s;
+  border: 1px solid var(--border);
+  cursor: pointer;
+}
+.task-emoji:active { transform: scale(0.92); background: var(--bg-hover); }
+
+.focus-emoji {
+  font-size: 64px;
+  line-height: 1;
+  margin-bottom: 18px;
+  display: inline-block;
+  cursor: pointer;
+  user-select: none;
+  transition: transform 0.15s;
+}
+.focus-emoji:active { transform: scale(0.92); }
+
+.pomo-emoji {
+  font-size: 32px;
+  line-height: 1;
+  margin-right: 10px;
+  display: inline-block;
+  cursor: pointer;
+  vertical-align: middle;
+  user-select: none;
+  transition: transform 0.15s;
+}
+.pomo-emoji:active { transform: scale(0.92); }
+
+.emoji-picker {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.7);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  display: none;
+  align-items: flex-end;
+  justify-content: center;
+  z-index: 1000;
+  animation: fadeIn 0.2s;
+}
+.emoji-picker.show { display: flex; }
+.emoji-picker-content {
+  width: 100%;
+  max-width: 480px;
+  background: var(--bg-card);
+  border-top: 1px solid var(--border);
+  border-radius: 24px 24px 0 0;
+  padding: 20px 16px calc(20px + env(safe-area-inset-bottom));
+  animation: slideUp 0.25s ease-out;
+}
+@keyframes slideUp {
+  from { transform: translateY(100%); }
+  to   { transform: translateY(0); }
+}
+.emoji-picker-title {
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.15em;
+  color: var(--accent);
+  margin-bottom: 14px;
+  text-align: center;
+  font-family: 'JetBrains Mono', monospace;
+}
+.emoji-grid {
+  display: grid;
+  grid-template-columns: repeat(6, 1fr);
+  gap: 8px;
+}
+.emoji-grid-item {
+  aspect-ratio: 1;
+  background: var(--bg-elevated);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 24px;
+  line-height: 1;
+  transition: transform 0.15s, background 0.15s, border-color 0.15s;
+  cursor: pointer;
+  user-select: none;
+}
+.emoji-grid-item:active {
+  background: var(--accent-glow);
+  border-color: var(--accent);
+  transform: scale(0.92);
+}
+.emoji-grid-item.current {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 1px var(--accent);
 }
 .priority-high { background: var(--priority-high); box-shadow: 0 0 6px var(--priority-high); }
 .priority-med { background: var(--priority-med); }
@@ -1076,7 +1179,7 @@ input:focus, textarea:focus { outline: none; }
 <body>
 
 <header class="app-header">
-  <div class="logo"><em>Mo</em><span>mentum</span><span class="logo-version">v2.1</span></div>
+  <div class="logo"><em>Mo</em><span>mentum</span><span class="logo-version">v2.2</span></div>
   <div class="header-actions">
     <button class="icon-btn" onclick="openSettings()">
       <svg viewBox="0 0 24 24" fill="none" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
@@ -1194,6 +1297,7 @@ input:focus, textarea:focus { outline: none; }
   </div>
   <div class="focus-content">
     <div class="focus-label">Une chose à la fois</div>
+    <div class="focus-emoji" id="focusEmoji" onclick="openEmojiPickerForCurrentFocus()">📌</div>
     <div class="focus-task-title" id="focusTitle">Aucune tâche</div>
     <div><span class="focus-tag" id="focusTag">—</span></div>
   </div>
@@ -1208,6 +1312,14 @@ input:focus, textarea:focus { outline: none; }
   </div>
 </div>
 
+<!-- Emoji picker -->
+<div class="emoji-picker" id="emojiPicker" onclick="if(event.target===this)closeEmojiPicker()">
+  <div class="emoji-picker-content">
+    <div class="emoji-picker-title">Choisir un emoji</div>
+    <div class="emoji-grid" id="emojiGrid"></div>
+  </div>
+</div>
+
 <!-- Pomodoro screen -->
 <div class="pomodoro-screen" id="pomoScreen">
   <div class="pomodoro-header">
@@ -1217,7 +1329,7 @@ input:focus, textarea:focus { outline: none; }
     <div class="pomodoro-mode" id="pomoModeLabel">FOCUS</div>
   </div>
   <div class="pomodoro-content">
-    <div class="pomodoro-task" id="pomoTaskName">—</div>
+    <div class="pomodoro-task"><span class="pomo-emoji" id="pomoEmoji" onclick="openEmojiPickerForCurrentPomo()"></span><span id="pomoTaskName">—</span></div>
     <div class="pomodoro-circle-wrap">
       <svg class="pomodoro-circle" viewBox="0 0 280 280">
         <circle class="pomodoro-circle-bg" cx="140" cy="140" r="130"/>
@@ -1351,6 +1463,9 @@ function load() {
       // Merge nested settings to keep defaults
       parsed.settings = { ...STATE.settings, ...(parsed.settings || {}) };
       parsed.pomoStats = { ...STATE.pomoStats, ...(parsed.pomoStats || {}) };
+      if (Array.isArray(parsed.tasks)) {
+        parsed.tasks.forEach(t => { if (!t.emoji) t.emoji = detectEmoji(t.title || ''); });
+      }
       Object.assign(STATE, parsed);
     }
   } catch(e) { console.error(e); }
@@ -1389,6 +1504,99 @@ function detectPriority(text) {
 }
 function calcXP(p) { return p === 'high' ? 25 : p === 'med' ? 15 : 10; }
 
+// ============ EMOJI DETECTION ============
+const EMOJI_MAP = [
+  ['⚡',  /\b(urgent|asap|rapide|important|critique|maintenant)\b/],
+  ['🏥', /(rdv\s*medic|medecin|docteur|hopital|\bsante\b|hospital|doctor)/],
+  ['🎂', /(anniversaire|\bfete\b|celebrer|birthday|party)/],
+  ['📐', /(plan\s+technique|dessin\s+technique|\bmesure\b|blueprint)/],
+  ['🏢', /(bureau|\bemblm\b|dispatch|artopex|\boffice\b)/],
+  ['🤝', /(client|fournisseur|negocier|contrat|\bdeal\b|vendor|customer)/],
+  ['✈️', /(voyage|\bvol\b|avion|vacances|travel|flight|vacation)/],
+  ['🐶', /(\bchien\b|\banimal\b|veterinaire|\bdog\b|\bcat\b|\bpet\b|\bvet\b)/],
+  ['🌱', /(jardin|plante|arroser|garden|\bplant\b|watering)/],
+  ['🛒', /(epicerie|courses|acheter|magasin|grocery|shopping|grocer)/],
+  ['🍳', /(cuisiner|cuisine|repas|souper|diner|dejeuner|cook|cooking|breakfast|lunch|dinner)/],
+  ['🏋️', /(\bsport\b|\bgym\b|entrainement|\bcourir\b|exercice|running|workout|fitness)/],
+  ['📞', /(appel|appeler|telephone|\bcall\b|telephoner|phone)/],
+  ['💬', /(message|slack|texto|\bsms\b|discuter|\bchat\b|messenger)/],
+  ['📅', /(meeting|reunion|rendez-vous|\brdv\b|agenda)/],
+  ['📦', /(colis|livraison|commande|expedier|package|delivery|shipping)/],
+  ['📧', /(\bemail\b|courriel|\bmail\b|ecrire\s+a\b|\benvoyer\b)/],
+  ['💻', /(\bcode\b|coder|\bdev\b|developper|programmer|\bapp\b|coding|software)/],
+  ['🎨', /(design|maquette|creer|dessiner|figma|\bdraw\b|paint)/],
+  ['📊', /(analyse|donnees|dashboard|\bstats\b|analytics|\bdata\b|metric)/],
+  ['🧹', /(menage|nettoyer|ranger|organiser|cleaning|\bclean\b|tidy)/],
+  ['🚗', /(voiture|conduire|garage|transport|driving|\bdrive\b|\bcar\b)/],
+  ['🔧', /(reparer|fixer|depanner|\bfix\b|\brepair\b)/],
+  ['🏠', /(maison|bricoler|\bhome\b|household)/],
+  ['💰', /(facture|paiement|payer|budget|banque|finance|invoice|\bbill\b|\bpay\b|bank)/],
+  ['📚', /(\blire\b|\blivre\b|etudier|apprendre|formation|\bread\b|\bbook\b|learn|study)/],
+  ['🎯', /(objectif|planifier|strategie|\bplan\b|\bgoal\b|strategy)/],
+  ['💡', /(\bidee\b|brainstorm|reflechir|\bthink\b|concept)/],
+  ['📋', /(checklist|\btodo\b|suivi|tracking)/],
+  ['📝', /(rapport|document|rediger|ecrire|\bnote\b|writing|report)/],
+];
+
+const PICKER_EMOJIS = [
+  '📞','📧','💬','📅','🛒','🍳',
+  '🏋️','📝','💻','🎨','📊','🧹',
+  '🚗','🏠','💰','📚','🎯','🐶',
+  '✈️','🏥','🎂','📦','🔧','🌱',
+  '💡','⚡','🤝','📋','🏢','📐',
+  '📌','✅','⏰','🎵','🔔','❤️'
+];
+
+function normalizeForMatch(s) {
+  return s.toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '');
+}
+
+function detectEmoji(text) {
+  const norm = normalizeForMatch(text);
+  for (const [emoji, re] of EMOJI_MAP) {
+    if (re.test(norm)) return emoji;
+  }
+  return '📌';
+}
+
+let EMOJI_PICKER_TARGET = null;
+function openEmojiPicker(taskId) {
+  const task = STATE.tasks.find(t => t.id === taskId);
+  if (!task) return;
+  EMOJI_PICKER_TARGET = taskId;
+  const grid = document.getElementById('emojiGrid');
+  grid.innerHTML = PICKER_EMOJIS.map(e =>
+    `<button class="emoji-grid-item ${e === task.emoji ? 'current' : ''}" onclick="setTaskEmoji('${taskId}','${e}')">${e}</button>`
+  ).join('');
+  document.getElementById('emojiPicker').classList.add('show');
+}
+function closeEmojiPicker() {
+  document.getElementById('emojiPicker').classList.remove('show');
+  EMOJI_PICKER_TARGET = null;
+}
+function setTaskEmoji(taskId, emoji) {
+  const task = STATE.tasks.find(t => t.id === taskId);
+  if (!task) return;
+  task.emoji = emoji;
+  save();
+  closeEmojiPicker();
+  render();
+  if (document.getElementById('focusMode').classList.contains('show')) renderFocusTask();
+  if (document.getElementById('pomoScreen').classList.contains('show')) {
+    const e = document.getElementById('pomoEmoji');
+    if (POMO.taskId === taskId) e.textContent = emoji;
+  }
+}
+function openEmojiPickerForCurrentFocus() {
+  const tasks = STATE.tasks.filter(t => !t.completed);
+  if (!tasks.length) return;
+  const task = tasks[STATE.focusIndex];
+  if (task) openEmojiPicker(task.id);
+}
+function openEmojiPickerForCurrentPomo() {
+  if (POMO.taskId) openEmojiPicker(POMO.taskId);
+}
+
 function resolveTag(text) {
   return STATE.filter && STATE.filter !== 'all' ? STATE.filter : detectTag(text);
 }
@@ -1401,6 +1609,7 @@ function addTask() {
   const priority = detectPriority(text);
   STATE.tasks.unshift({
     id: uid(), title: text, tag, priority,
+    emoji: detectEmoji(text),
     xp: calcXP(priority), createdAt: Date.now(), completed: false,
     subtasks: []
   });
@@ -1428,6 +1637,7 @@ async function addTaskWithDecomposition() {
   const priority = detectPriority(text);
   const task = {
     id: uid(), title: text, tag, priority,
+    emoji: detectEmoji(text),
     xp: calcXP(priority), createdAt: Date.now(), completed: false,
     subtasks: [], decomposing: true
   };
@@ -1561,6 +1771,7 @@ function render() {
           <button class="task-checkbox" onclick="toggleTask('${t.id}')">
             <svg viewBox="0 0 24 24" fill="none"><polyline points="20 6 9 17 4 12"/></svg>
           </button>
+          <button class="task-emoji" onclick="openEmojiPicker('${t.id}')" title="Changer l'emoji">${t.emoji || '📌'}</button>
           <div class="task-content">
             <div class="task-title">${escapeHTML(t.title)}</div>
             <div class="task-meta">
@@ -1660,6 +1871,7 @@ function renderFocusTask() {
   if (STATE.focusIndex >= tasks.length) STATE.focusIndex = 0;
   const task = tasks[STATE.focusIndex];
   document.getElementById('focusTitle').textContent = task.title;
+  document.getElementById('focusEmoji').textContent = task.emoji || '📌';
   document.getElementById('focusTag').textContent = task.tag + ' · +' + task.xp + ' XP';
   document.getElementById('focusCounter').textContent = (STATE.focusIndex+1) + ' / ' + tasks.length;
 }
@@ -1705,11 +1917,14 @@ function startPomoForTask(taskId) {
 }
 
 function openPomodoroScreen() {
+  const emojiEl = document.getElementById('pomoEmoji');
   if (POMO.taskId) {
     const task = STATE.tasks.find(t => t.id === POMO.taskId);
     document.getElementById('pomoTaskName').textContent = task ? task.title : '—';
+    emojiEl.textContent = task ? (task.emoji || '📌') : '';
   } else {
     document.getElementById('pomoTaskName').textContent = 'Session libre';
+    emojiEl.textContent = '';
   }
   document.getElementById('pomoScreen').classList.add('show');
   renderPomo();
