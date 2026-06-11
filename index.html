@@ -5,7 +5,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <meta name="theme-color" content="#0b0f12">
-<title>Lustre — Gestion d'entretien ménager v3.1</title>
+<title>Lustre — Gestion d'entretien ménager v3.2</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=JetBrains+Mono:wght@400;500;600&family=Geist:wght@300;400;500;600;700&display=swap" rel="stylesheet">
@@ -404,6 +404,128 @@ main { flex: 1; padding: 26px 30px 60px; max-width: 1280px; min-width: 0; }
   .view-title { font-size: 25px; }
 }
 
+/* ============ UX POLISH ============ */
+:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; border-radius: 6px; }
+input:focus-visible, select:focus-visible, textarea:focus-visible { outline: none; }
+::-webkit-scrollbar { width: 8px; height: 8px; }
+::-webkit-scrollbar-thumb { background: var(--border-strong); border-radius: 99px; }
+::-webkit-scrollbar-thumb:hover { background: var(--text-subtle); }
+::-webkit-scrollbar-track { background: transparent; }
+.num, .totals-val, .kpi-value, .list-row-end, .deal-card-value { font-variant-numeric: tabular-nums; }
+.panel:has(.tbl) { overflow-x: auto; }
+kbd {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 10px;
+  background: var(--bg-elevated);
+  border: 1px solid var(--border-strong);
+  border-bottom-width: 2px;
+  border-radius: 5px;
+  padding: 1px 6px;
+  color: var(--text-muted);
+  white-space: nowrap;
+}
+@keyframes modalIn {
+  from { opacity: 0; transform: translateY(10px) scale(0.98); }
+  to   { opacity: 1; transform: none; }
+}
+.modal { animation: modalIn 0.22s ease-out; }
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+.invalid { border-color: var(--danger) !important; animation: shake 0.3s; }
+@keyframes shake {
+  25% { transform: translateX(-4px); }
+  75% { transform: translateX(4px); }
+}
+
+.toast.error { border-color: var(--danger); color: var(--danger); }
+.toast.actionable { pointer-events: auto; }
+.toast-btn {
+  margin-left: 14px;
+  padding: 3px 12px;
+  border-radius: 8px;
+  background: var(--accent);
+  color: #06231f;
+  font-family: 'Geist', sans-serif;
+  font-weight: 600;
+  font-size: 12px;
+}
+.toast-btn:active { transform: scale(0.95); }
+
+.quick-actions { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 22px; }
+
+.empty-cta { padding: 22px 4px; text-align: center; }
+.empty-cta .empty-note { padding: 0 0 12px; }
+
+/* ============ COMMAND PALETTE ============ */
+.palette-overlay {
+  position: fixed; inset: 0;
+  background: rgba(0,0,0,0.72);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  display: none;
+  justify-content: center;
+  align-items: flex-start;
+  padding: 12vh 20px 20px;
+  z-index: 600;
+  animation: fadeIn 0.15s;
+}
+.palette-overlay.show { display: flex; }
+.palette {
+  width: 100%; max-width: 560px;
+  background: var(--bg-card);
+  border: 1px solid var(--border-strong);
+  border-radius: 16px;
+  overflow: hidden;
+  box-shadow: 0 24px 70px rgba(0,0,0,0.5);
+  animation: modalIn 0.18s ease-out;
+}
+.palette-input {
+  width: 100%;
+  background: transparent;
+  border: none;
+  border-bottom: 1px solid var(--border);
+  border-radius: 0;
+  padding: 16px 18px;
+  font-size: 15px;
+}
+.palette-list { max-height: 46vh; overflow-y: auto; padding: 8px; }
+.palette-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 12px;
+  border-radius: 10px;
+  cursor: pointer;
+}
+.palette-item.active { background: var(--accent-glow); }
+.palette-item.active .palette-label { color: var(--accent); }
+.palette-type {
+  flex-shrink: 0;
+  width: 76px;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 9px;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: var(--text-subtle);
+}
+.palette-label { font-size: 13.5px; font-weight: 500; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.palette-sub { font-size: 11.5px; color: var(--text-subtle); margin-left: auto; flex-shrink: 0; }
+.palette-empty { padding: 22px; text-align: center; color: var(--text-subtle); font-size: 13px; font-style: italic; }
+.palette-foot {
+  display: flex;
+  gap: 16px;
+  padding: 10px 16px;
+  border-top: 1px solid var(--border);
+  color: var(--text-subtle);
+  font-size: 11px;
+}
+
 /* ============ PRINT ============ */
 #printArea { display: none; }
 @media print {
@@ -460,8 +582,12 @@ main { flex: 1; padding: 26px 30px 60px; max-width: 1280px; min-width: 0; }
 <body>
 
 <div class="app">
-<aside class="sidebar">
-  <div class="logo"><em>Lu</em>stre<span class="logo-version">v3.1</span></div>
+<aside class="sidebar" aria-label="Navigation principale">
+  <div class="logo"><em>Lu</em>stre<span class="logo-version">v3.2</span></div>
+  <button class="nav-btn" onclick="openPalette()" aria-label="Recherche rapide">
+    <svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+    <span style="flex:1;text-align:left">Recherche</span><kbd>Ctrl K</kbd>
+  </button>
   <button class="nav-btn active" data-view="dashboard" onclick="showView('dashboard')">
     <svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="9" rx="1"/><rect x="14" y="3" width="7" height="5" rx="1"/><rect x="14" y="12" width="7" height="9" rx="1"/><rect x="3" y="16" width="7" height="5" rx="1"/></svg>
     <span>Tableau de bord</span>
@@ -507,6 +633,13 @@ main { flex: 1; padding: 26px 30px 60px; max-width: 1280px; min-width: 0; }
       <div class="view-title">Tableau de bord</div>
       <div class="view-sub" id="dashDate"></div>
     </div>
+  </div>
+  <div class="quick-actions">
+    <button class="btn sm" onclick="showView('quotes');newQuote()">+ Soumission</button>
+    <button class="btn sm" onclick="showView('invoices');newInvoice()">+ Facture</button>
+    <button class="btn sm" onclick="showView('pipeline');openDealModal()">+ Opportunité</button>
+    <button class="btn sm" onclick="showView('schedule');openShiftModal(null, todayISO())">+ Quart</button>
+    <button class="btn sm" onclick="showView('clients');openClientModal()">+ Client</button>
   </div>
   <div class="kpi-grid" id="dashKpis"></div>
   <div class="dash-cols">
@@ -638,10 +771,23 @@ main { flex: 1; padding: 26px 30px 60px; max-width: 1280px; min-width: 0; }
 </div>
 
 <div class="modal-overlay" id="modalOverlay" onclick="if(event.target===this)closeModal()">
-  <div class="modal" id="modalBox"></div>
+  <div class="modal" id="modalBox" role="dialog" aria-modal="true"></div>
 </div>
 
-<div class="toast" id="toast"></div>
+<div class="palette-overlay" id="paletteOverlay" onclick="if(event.target===this)closePalette()">
+  <div class="palette" role="dialog" aria-modal="true" aria-label="Recherche rapide">
+    <input class="palette-input" id="paletteInput" placeholder="Rechercher un client, une soumission, une action…"
+           oninput="renderPalette()" onkeydown="paletteKey(event)" autocomplete="off">
+    <div class="palette-list" id="paletteList"></div>
+    <div class="palette-foot">
+      <span><kbd>↑</kbd> <kbd>↓</kbd> naviguer</span>
+      <span><kbd>↵</kbd> ouvrir</span>
+      <span><kbd>Esc</kbd> fermer</span>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast" role="status" aria-live="polite"></div>
 <div id="printArea"></div>
 
 <script>
@@ -783,12 +929,29 @@ function clientMargin(client) {
   if (client && client.margin != null && client.margin !== '') return parseNum(client.margin);
   return parseNum(STATE.settings.margeDefaut);
 }
-function showToast(msg) {
+let TOAST_ACTION = null;
+function showToast(msg, opts = {}) {
   const t = document.getElementById('toast');
-  t.textContent = msg;
-  t.classList.add('show');
+  TOAST_ACTION = opts.action ? opts.action.fn : null;
+  t.className = 'toast show' + (opts.variant ? ' ' + opts.variant : '') + (opts.action ? ' actionable' : '');
+  t.innerHTML = escapeHTML(msg) +
+    (opts.action ? `<button class="toast-btn" onclick="runToastAction()">${escapeHTML(opts.action.label)}</button>` : '');
   clearTimeout(t._timer);
-  t._timer = setTimeout(() => t.classList.remove('show'), 2200);
+  t._timer = setTimeout(() => { t.classList.remove('show'); TOAST_ACTION = null; }, opts.action ? 6000 : 2200);
+}
+function runToastAction() {
+  const t = document.getElementById('toast');
+  if (TOAST_ACTION) TOAST_ACTION();
+  TOAST_ACTION = null;
+  t.classList.remove('show');
+}
+// Champ obligatoire manquant ou invalide : surbrillance + focus
+function markInvalid(id) {
+  const el = document.getElementById(id);
+  if (!el) return;
+  el.classList.add('invalid');
+  el.focus();
+  setTimeout(() => el.classList.remove('invalid'), 1200);
 }
 
 // ============ SEED ============
@@ -901,8 +1064,11 @@ function showView(name) {
 
 // ============ MODAL ============
 function openModal(html) {
-  document.getElementById('modalBox').innerHTML = html;
+  const box = document.getElementById('modalBox');
+  box.innerHTML = html;
   document.getElementById('modalOverlay').classList.add('show');
+  const first = box.querySelector('input:not([type="radio"]), select, textarea');
+  if (first) setTimeout(() => first.focus(), 60);
 }
 function closeModal() {
   document.getElementById('modalOverlay').classList.remove('show');
@@ -1080,9 +1246,10 @@ function openDealModal(id) {
 }
 function saveDeal(id) {
   const get = x => document.getElementById(x).value;
+  if (!get('dealTitle').trim()) { markInvalid('dealTitle'); return; }
   const data = {
     clientId: get('dealClient'),
-    title: get('dealTitle').trim() || 'Sans titre',
+    title: get('dealTitle').trim(),
     value: parseNum(get('dealValue')),
     freq: get('dealFreq'),
     stage: get('dealStage'),
@@ -1098,8 +1265,12 @@ function saveDeal(id) {
   save(); closeModal(); renderPipeline(); showToast('Opportunité enregistrée');
 }
 function deleteDeal(id) {
-  STATE.deals = STATE.deals.filter(d => d.id !== id);
+  const idx = STATE.deals.findIndex(d => d.id === id);
+  if (idx < 0) return;
+  const [d] = STATE.deals.splice(idx, 1);
   save(); closeModal(); renderPipeline();
+  showToast('Opportunité supprimée', { action: { label: 'Annuler',
+    fn: () => { STATE.deals.splice(idx, 0, d); save(); renderPipeline(); } } });
 }
 function createQuoteFromDeal(id) {
   const deal = STATE.deals.find(d => d.id === id);
@@ -1159,7 +1330,7 @@ function renderServices() {
   }).join('');
   document.getElementById('servicesTable').innerHTML = `
     <tr><th>Service</th><th>Main-d'œuvre</th><th class="num">Coût</th><th class="num">Marge</th><th class="num">Prix suggéré</th></tr>
-    ${rows || '<tr><td colspan="5"><div class="empty-note">Aucun service au catalogue.</div></td></tr>'}`;
+    ${rows || '<tr><td colspan="5"><div class="empty-cta"><div class="empty-note">Aucun service au catalogue.</div><button class="btn sm primary" onclick="openServiceModal()">Créer un service</button></div></td></tr>'}`;
 }
 function openServiceModal(id) {
   const svc = id ? STATE.services.find(x => x.id === id) : null;
@@ -1196,9 +1367,10 @@ function svcPreview() {
 }
 function saveService(id) {
   const g = x => document.getElementById(x).value;
+  if (!g('svcName').trim()) { markInvalid('svcName'); return; }
   const marginRaw = g('svcMargin').trim();
   const data = {
-    name: g('svcName').trim() || 'Service sans nom',
+    name: g('svcName').trim(),
     category: g('svcCat'),
     unit: g('svcUnit'),
     laborType: g('svcLaborType'),
@@ -1211,8 +1383,12 @@ function saveService(id) {
   save(); closeModal(); renderServices(); showToast('Service enregistré');
 }
 function deleteService(id) {
-  STATE.services = STATE.services.filter(x => x.id !== id);
+  const idx = STATE.services.findIndex(x => x.id === id);
+  if (idx < 0) return;
+  const [svc] = STATE.services.splice(idx, 1);
   save(); closeModal(); renderServices();
+  showToast('Service « ' + svc.name + ' » supprimé', { action: { label: 'Annuler',
+    fn: () => { STATE.services.splice(idx, 0, svc); save(); renderServices(); } } });
 }
 // Sélecteur de service pour insérer une ligne dans une soumission/facture
 function openServicePicker(target) {
@@ -1264,7 +1440,7 @@ function renderClients() {
     </tr>`).join('');
   document.getElementById('clientsTable').innerHTML = `
     <tr><th>Client</th><th>Type</th><th>Contact</th><th style="text-align:right">Marge</th><th style="text-align:right">Historique</th></tr>
-    ${rows || '<tr><td colspan="5"><div class="empty-note">Aucun client.</div></td></tr>'}`;
+    ${rows || '<tr><td colspan="5"><div class="empty-cta"><div class="empty-note">Aucun client pour l\'instant.</div><button class="btn sm primary" onclick="openClientModal()">Ajouter un client</button></div></td></tr>'}`;
 }
 function openClientModal(id) {
   const c = id ? clientById(id) : null;
@@ -1288,9 +1464,10 @@ function openClientModal(id) {
 }
 function saveClient(id) {
   const get = x => document.getElementById(x).value;
+  if (!get('cName').trim()) { markInvalid('cName'); return; }
   const marginRaw = get('cMargin').trim();
   const data = {
-    name: get('cName').trim() || 'Sans nom',
+    name: get('cName').trim(),
     contact: get('cContact').trim(),
     type: get('cType'),
     margin: marginRaw === '' ? null : parseNum(marginRaw),
@@ -1304,13 +1481,12 @@ function saveClient(id) {
   save(); closeModal(); renderClients(); showToast('Client enregistré');
 }
 function deleteClient(id) {
-  const used = STATE.deals.some(d => d.clientId === id) ||
-               STATE.quotes.some(q => q.clientId === id) ||
-               STATE.invoices.some(i => i.clientId === id) ||
-               STATE.shifts.some(s => s.clientId === id);
-  if (used && !confirm('Ce client est lié à des soumissions, factures ou quarts. Supprimer quand même ?')) return;
-  STATE.clients = STATE.clients.filter(c => c.id !== id);
+  const idx = STATE.clients.findIndex(c => c.id === id);
+  if (idx < 0) return;
+  const [c] = STATE.clients.splice(idx, 1);
   save(); closeModal(); renderClients();
+  showToast('Client « ' + c.name + ' » supprimé', { action: { label: 'Annuler',
+    fn: () => { STATE.clients.splice(idx, 0, c); save(); renderClients(); } } });
 }
 
 // ============ QUOTES ============
@@ -1339,7 +1515,7 @@ function renderQuotes() {
   }).join('');
   document.getElementById('quotesTable').innerHTML = `
     <tr><th>N°</th><th>Client</th><th>Date</th><th>Statut</th><th style="text-align:right">Total</th></tr>
-    ${rows || '<tr><td colspan="5"><div class="empty-note">Aucune soumission. Crée-en une ou pars d\'une opportunité du pipeline.</div></td></tr>'}`;
+    ${rows || '<tr><td colspan="5"><div class="empty-cta"><div class="empty-note">Aucune soumission pour l\'instant.</div><button class="btn sm primary" onclick="newQuote()">Créer une soumission</button></div></td></tr>'}`;
 }
 
 function newQuote(clientId) {
@@ -1382,7 +1558,7 @@ function renderQuoteEditor() {
   ed.style.display = 'block';
   ed.innerHTML = `
     <div class="editor-head">
-      <button class="editor-back" onclick="closeQuoteEditor();renderQuotes()">
+      <button class="editor-back" onclick="closeQuoteEditor();renderQuotes()" aria-label="Retour à la liste">
         <svg viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"/></svg>
       </button>
       <span class="editor-num">${q.number}</span>
@@ -1424,7 +1600,7 @@ function renderQuoteEditor() {
             <td><input class="qty" inputmode="decimal" value="${it.qty}" onchange="updateItem(${i},'qty',parseNum(this.value))" ${readonly ? 'disabled' : ''}></td>
             <td><select onchange="updateItem(${i},'unit',this.value)" ${readonly ? 'disabled' : ''}>${UNITS.map(u => `<option ${it.unit === u ? 'selected' : ''}>${u}</option>`).join('')}</select></td>
             <td><input class="price" inputmode="decimal" value="${it.price}" onchange="updateItem(${i},'price',parseNum(this.value))" ${readonly ? 'disabled' : ''}></td>
-            <td>${readonly ? '' : `<button class="item-del" onclick="removeItem(${i})">×</button>`}</td>
+            <td>${readonly ? '' : `<button class="item-del" onclick="removeItem(${i})" aria-label="Supprimer la ligne">×</button>`}</td>
           </tr>`).join('')}
       </table>
       ${readonly ? '' : `<div style="display:flex;gap:8px;margin-top:10px;flex-wrap:wrap;">
@@ -1480,9 +1656,12 @@ function newQuoteVersion() {
   showToast('Version v' + (last.rev + 1) + ' créée');
 }
 function deleteQuote() {
-  if (!confirm('Supprimer cette soumission et toutes ses versions ?')) return;
-  STATE.quotes = STATE.quotes.filter(x => x.id !== OPEN_QUOTE_ID);
+  const idx = STATE.quotes.findIndex(x => x.id === OPEN_QUOTE_ID);
+  if (idx < 0) return;
+  const [q] = STATE.quotes.splice(idx, 1);
   save(); closeQuoteEditor(); renderQuotes();
+  showToast('Soumission ' + q.number + ' supprimée', { action: { label: 'Annuler',
+    fn: () => { STATE.quotes.splice(idx, 0, q); save(); renderQuotes(); } } });
 }
 function printQuote() {
   const q = curQuote();
@@ -1544,7 +1723,9 @@ function renderInvoices() {
   }).join('');
   document.getElementById('invoicesTable').innerHTML = `
     <tr><th>N°</th><th>Client</th><th>Date</th><th>Échéance</th><th>Statut</th><th style="text-align:right">Total</th></tr>
-    ${rows || '<tr><td colspan="6"><div class="empty-note">Aucune facture dans ce filtre.</div></td></tr>'}`;
+    ${rows || (INV_FILTER === 'all'
+      ? '<tr><td colspan="6"><div class="empty-cta"><div class="empty-note">Aucune facture pour l\'instant.</div><button class="btn sm primary" onclick="newInvoice()">Créer une facture</button></div></td></tr>'
+      : '<tr><td colspan="6"><div class="empty-note">Aucune facture dans ce filtre.</div></td></tr>')}`;
 }
 
 function newInvoice(clientId) {
@@ -1581,7 +1762,7 @@ function renderInvoiceEditor() {
   ed.style.display = 'block';
   ed.innerHTML = `
     <div class="editor-head">
-      <button class="editor-back" onclick="closeInvoiceEditor();renderInvoices()">
+      <button class="editor-back" onclick="closeInvoiceEditor();renderInvoices()" aria-label="Retour à la liste">
         <svg viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"/></svg>
       </button>
       <span class="editor-num">${inv.number}</span>
@@ -1614,7 +1795,7 @@ function renderInvoiceEditor() {
             <td><input class="qty" inputmode="decimal" value="${it.qty}" onchange="updateInvItem(${i},'qty',parseNum(this.value))"></td>
             <td><select onchange="updateInvItem(${i},'unit',this.value)">${UNITS.map(u => `<option ${it.unit === u ? 'selected' : ''}>${u}</option>`).join('')}</select></td>
             <td><input class="price" inputmode="decimal" value="${it.price}" onchange="updateInvItem(${i},'price',parseNum(this.value))"></td>
-            <td><button class="item-del" onclick="removeInvItem(${i})">×</button></td>
+            <td><button class="item-del" onclick="removeInvItem(${i})" aria-label="Supprimer la ligne">×</button></td>
           </tr>`).join('')}
       </table>
       <div style="display:flex;gap:8px;margin-top:10px;flex-wrap:wrap;">
@@ -1650,9 +1831,12 @@ function markInvoicePaid() {
   save(); renderInvoiceEditor(); showToast('💰 Facture payée');
 }
 function deleteInvoice() {
-  if (!confirm('Supprimer cette facture ?')) return;
-  STATE.invoices = STATE.invoices.filter(x => x.id !== OPEN_INV_ID);
+  const idx = STATE.invoices.findIndex(x => x.id === OPEN_INV_ID);
+  if (idx < 0) return;
+  const [inv] = STATE.invoices.splice(idx, 1);
   save(); closeInvoiceEditor(); renderInvoices();
+  showToast('Facture ' + inv.number + ' supprimée', { action: { label: 'Annuler',
+    fn: () => { STATE.invoices.splice(idx, 0, inv); save(); renderInvoices(); } } });
 }
 function printInvoice() { printDoc('invoice', curInv(), null); }
 
@@ -1702,7 +1886,7 @@ function renderSchedule() {
     return `<div class="sched-day ${iso === today ? 'today' : ''}">
       <div class="sched-day-head">
         <span class="sched-day-name">${DAY_NAMES[i]} ${parseInt(iso.slice(8), 10)}</span>
-        <button class="sched-add" onclick="openShiftModal(null, '${iso}')">+</button>
+        <button class="sched-add" onclick="openShiftModal(null, '${iso}')" aria-label="Ajouter un quart le ${DAY_NAMES[i]}">+</button>
       </div>
       ${shifts.map(s => {
         const team = STATE.teams.find(t => t.id === s.teamId);
@@ -1737,10 +1921,17 @@ function openShiftModal(id, presetDate) {
 }
 function saveShift(id) {
   const get = x => document.getElementById(x).value;
+  const start = get('shStart') || '08:00';
+  const end = get('shEnd') || '12:00';
+  if (end <= start) {
+    markInvalid('shEnd');
+    showToast('L\'heure de fin doit être après le début', { variant: 'error' });
+    return;
+  }
   const data = {
     date: get('shDate'),
-    start: get('shStart') || '08:00',
-    end: get('shEnd') || '12:00',
+    start,
+    end,
     teamId: get('shTeam'),
     clientId: get('shClient'),
     notes: get('shNotes')
@@ -1750,8 +1941,12 @@ function saveShift(id) {
   save(); closeModal(); renderSchedule(); showToast('Quart enregistré');
 }
 function deleteShift(id) {
-  STATE.shifts = STATE.shifts.filter(s => s.id !== id);
+  const idx = STATE.shifts.findIndex(s => s.id === id);
+  if (idx < 0) return;
+  const [s] = STATE.shifts.splice(idx, 1);
   save(); closeModal(); renderSchedule();
+  showToast('Quart supprimé', { action: { label: 'Annuler',
+    fn: () => { STATE.shifts.splice(idx, 0, s); save(); renderSchedule(); } } });
 }
 function duplicateShift(id) {
   const s = STATE.shifts.find(x => x.id === id);
@@ -1789,10 +1984,12 @@ function saveTeam(id) {
   save(); closeModal(); renderSchedule(); showToast('Équipe enregistrée');
 }
 function deleteTeam(id) {
-  if (STATE.shifts.some(s => s.teamId === id) &&
-      !confirm('Des quarts sont assignés à cette équipe. Supprimer quand même ?')) return;
-  STATE.teams = STATE.teams.filter(t => t.id !== id);
+  const idx = STATE.teams.findIndex(t => t.id === id);
+  if (idx < 0) return;
+  const [t] = STATE.teams.splice(idx, 1);
   save(); closeModal(); renderSchedule();
+  showToast('Équipe « ' + t.name + ' » supprimée', { action: { label: 'Annuler',
+    fn: () => { STATE.teams.splice(idx, 0, t); save(); renderSchedule(); } } });
 }
 
 // ============ SETTINGS ============
@@ -1917,6 +2114,124 @@ function printDoc(kind, doc, rev) {
   </div>`;
   window.print();
 }
+
+// ============ COMMAND PALETTE ============
+let PALETTE_IDX = 0;
+let PALETTE_RESULTS = [];
+function normStr(s) {
+  return String(s || '').toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '');
+}
+function paletteSources() {
+  const src = [
+    { type: 'Action', label: 'Nouvelle soumission', run: () => { showView('quotes'); newQuote(); } },
+    { type: 'Action', label: 'Nouvelle facture', run: () => { showView('invoices'); newInvoice(); } },
+    { type: 'Action', label: 'Nouvelle opportunité', run: () => { showView('pipeline'); openDealModal(); } },
+    { type: 'Action', label: 'Nouveau client', run: () => { showView('clients'); openClientModal(); } },
+    { type: 'Action', label: 'Nouveau service', run: () => { showView('services'); openServiceModal(); } },
+    { type: 'Action', label: 'Nouveau quart de travail', run: () => { showView('schedule'); openShiftModal(null, todayISO()); } },
+    { type: 'Action', label: 'Réglages de l\'entreprise', run: () => openSettings() },
+    { type: 'Vue', label: 'Tableau de bord', run: () => showView('dashboard') },
+    { type: 'Vue', label: 'Pipeline de vente', run: () => showView('pipeline') },
+    { type: 'Vue', label: 'Soumissions', run: () => showView('quotes') },
+    { type: 'Vue', label: 'Services et tarifs', run: () => showView('services') },
+    { type: 'Vue', label: 'Horaires des équipes', run: () => showView('schedule') },
+    { type: 'Vue', label: 'Factures', run: () => showView('invoices') },
+    { type: 'Vue', label: 'Clients', run: () => showView('clients') }
+  ];
+  STATE.clients.forEach(c => src.push({
+    type: 'Client', label: c.name, sub: c.type,
+    run: () => { showView('clients'); openClientModal(c.id); }
+  }));
+  STATE.quotes.forEach(q => src.push({
+    type: 'Soumission', label: q.number + ' — ' + clientName(q.clientId),
+    sub: fmtMoney(calcTotals(q.versions[q.currentRev].items, STATE.settings).total),
+    run: () => { showView('quotes'); openQuote(q.id); }
+  }));
+  STATE.invoices.forEach(i => src.push({
+    type: 'Facture', label: i.number + ' — ' + clientName(i.clientId),
+    sub: fmtMoney(calcTotals(i.items, STATE.settings).total),
+    run: () => { showView('invoices'); openInvoice(i.id); }
+  }));
+  STATE.deals.forEach(d => src.push({
+    type: 'Pipeline', label: d.title, sub: clientName(d.clientId),
+    run: () => { showView('pipeline'); openDealModal(d.id); }
+  }));
+  STATE.services.forEach(svc => src.push({
+    type: 'Service', label: svc.name, sub: fmtMoney(servicePrice(svc)) + ' /' + svc.unit,
+    run: () => { showView('services'); openServiceModal(svc.id); }
+  }));
+  return src;
+}
+function searchPalette(q) {
+  const src = paletteSources();
+  const nq = normStr(q).trim();
+  if (!nq) return src.slice(0, 9);
+  const toks = nq.split(/\s+/);
+  return src.filter(it => {
+    const hay = normStr(it.type + ' ' + it.label + ' ' + (it.sub || ''));
+    return toks.every(t => hay.includes(t));
+  }).slice(0, 12);
+}
+function openPalette() {
+  document.getElementById('paletteOverlay').classList.add('show');
+  const input = document.getElementById('paletteInput');
+  input.value = '';
+  renderPalette();
+  setTimeout(() => input.focus(), 40);
+}
+function closePalette() {
+  document.getElementById('paletteOverlay').classList.remove('show');
+}
+function paletteIsOpen() {
+  return document.getElementById('paletteOverlay').classList.contains('show');
+}
+function renderPalette() {
+  PALETTE_RESULTS = searchPalette(document.getElementById('paletteInput').value);
+  PALETTE_IDX = 0;
+  paintPalette();
+}
+function paintPalette() {
+  const list = document.getElementById('paletteList');
+  list.innerHTML = PALETTE_RESULTS.length
+    ? PALETTE_RESULTS.map((r, i) => `
+        <div class="palette-item ${i === PALETTE_IDX ? 'active' : ''}" onclick="runPaletteItem(${i})" onmousemove="if(PALETTE_IDX!==${i}){PALETTE_IDX=${i};paintPalette();}">
+          <span class="palette-type">${r.type}</span>
+          <span class="palette-label">${escapeHTML(r.label)}</span>
+          ${r.sub ? `<span class="palette-sub">${escapeHTML(r.sub)}</span>` : ''}
+        </div>`).join('')
+    : '<div class="palette-empty">Aucun résultat.</div>';
+}
+function runPaletteItem(i) {
+  const r = PALETTE_RESULTS[i];
+  if (!r) return;
+  closePalette();
+  r.run();
+}
+function paletteKey(e) {
+  if (e.key === 'ArrowDown') { e.preventDefault(); PALETTE_IDX = Math.min(PALETTE_IDX + 1, PALETTE_RESULTS.length - 1); paintPalette(); }
+  else if (e.key === 'ArrowUp') { e.preventDefault(); PALETTE_IDX = Math.max(PALETTE_IDX - 1, 0); paintPalette(); }
+  else if (e.key === 'Enter') { e.preventDefault(); runPaletteItem(PALETTE_IDX); }
+}
+
+// ============ KEYBOARD ============
+document.addEventListener('keydown', (e) => {
+  if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'k') {
+    e.preventDefault();
+    paletteIsOpen() ? closePalette() : openPalette();
+    return;
+  }
+  if (e.key === 'Escape') {
+    if (paletteIsOpen()) closePalette();
+    else if (document.getElementById('modalOverlay').classList.contains('show')) closeModal();
+  }
+});
+// Entrée dans un champ de modal = bouton principal
+document.getElementById('modalBox').addEventListener('keydown', (e) => {
+  if (e.key === 'Enter' && e.target.tagName === 'INPUT') {
+    const btn = document.querySelector('#modalBox .modal-actions .btn.primary');
+    if (btn) { e.preventDefault(); btn.click(); }
+  }
+});
 
 // ============ INIT ============
 load();

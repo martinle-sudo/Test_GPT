@@ -1,4 +1,4 @@
-# Lustre — Gestion d'entretien ménager (v3.1)
+# Lustre — Gestion d'entretien ménager (v3.2)
 
 Application web monofichier (`index.html`) pour gérer une entreprise d'entretien ménager.
 Conçue pour un usage par le gestionnaire uniquement — aucun compte utilisateur,
@@ -32,6 +32,13 @@ prix suggéré        = coût × (1 + marge %)
   service s'ajuste automatiquement selon le client choisi dans la soumission.
 - Le catalogue affiche, pour chaque service, le coût de revient, la marge et le **profit réel**
   (exprimé en % du prix de vente).
+
+## Raccourcis & UX
+
+- **Ctrl+K** (ou Cmd+K) : recherche rapide — clients, soumissions, factures, services et actions
+- **Esc** : ferme la palette ou le modal ouvert ; **Entrée** dans un formulaire = bouton principal
+- Les suppressions affichent un bouton **Annuler** (6 s) au lieu d'une confirmation bloquante
+- Accessibilité : focus visible au clavier, ARIA sur les dialogues, respect de `prefers-reduced-motion`
 
 ## Export PDF
 
