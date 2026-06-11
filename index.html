@@ -5,30 +5,42 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <meta name="theme-color" content="#0b0f12">
-<title>Lustre — Gestion d'entretien ménager v3.2</title>
+<title>Lustre — Gestion d'entretien ménager v3.3</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=JetBrains+Mono:wght@400;500;600&family=Geist:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 <style>
 :root {
-  --bg: #0b0f12;
-  --bg-card: #12181d;
-  --bg-elevated: #1a2229;
-  --bg-hover: #222c35;
-  --border: #1f2a32;
-  --border-strong: #2c3a45;
-  --text: #eef3f6;
-  --text-muted: #93a4b1;
-  --text-subtle: #5c6d7a;
-  --accent: #45d6c4;
-  --accent-glow: rgba(69, 214, 196, 0.12);
-  --accent-dim: #2a8c80;
-  --warn: #ffb84d;
-  --danger: #ff5b6a;
-  --success: #5ee08a;
-  --purple: #a78bfa;
-  --blue: #5aa7ff;
-  --pink: #ff8fc7;
+  --bg: #ffffff;
+  --bg-card: #f7f8fa;
+  --bg-elevated: #ffffff;
+  --bg-hover: #eef0f4;
+  --bg-sidebar: #f7f8fa;
+  --bg-active: #ffffff;
+  --border: #e7eaef;
+  --border-strong: #d8dde3;
+  --text: #1f2329;
+  --text-muted: #5c6470;
+  --text-subtle: #9ca3af;
+  --accent: #0d9488;
+  --accent-soft: #ccfbf1;
+  --accent-glow: rgba(13, 148, 136, 0.08);
+  --accent-dim: #14b8a6;
+  --warn: #f59e0b;
+  --warn-soft: #fef3c7;
+  --danger: #ef4444;
+  --danger-soft: #fee2e2;
+  --success: #16a34a;
+  --success-soft: #dcfce7;
+  --purple: #8b5cf6;
+  --purple-soft: #ede9fe;
+  --blue: #3b82f6;
+  --blue-soft: #dbeafe;
+  --pink: #ec4899;
+  --pink-soft: #fce7f3;
+  --shadow-sm: 0 1px 2px rgba(16, 24, 40, 0.05);
+  --shadow-md: 0 4px 14px rgba(16, 24, 40, 0.06);
+  --shadow-lg: 0 16px 40px rgba(16, 24, 40, 0.1);
 }
 * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
 html { scroll-behavior: smooth; }
@@ -38,6 +50,8 @@ body {
   font-family: 'Geist', -apple-system, sans-serif;
   font-size: 14px;
   line-height: 1.5;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
 }
 button { background: none; border: none; color: inherit; font: inherit; cursor: pointer; }
 input, select, textarea {
@@ -46,23 +60,26 @@ input, select, textarea {
   border-radius: 8px;
   color: var(--text);
   font: inherit;
-  padding: 8px 10px;
+  padding: 9px 12px;
   width: 100%;
+  transition: border-color 0.15s, box-shadow 0.15s;
 }
-input:focus, select:focus, textarea:focus { outline: none; border-color: var(--accent); }
+input:hover, select:hover, textarea:hover { border-color: var(--text-subtle); }
+input:focus, select:focus, textarea:focus { outline: none; border-color: var(--accent); box-shadow: 0 0 0 3px var(--accent-glow); }
 textarea { resize: vertical; min-height: 70px; }
 ::placeholder { color: var(--text-subtle); }
 
 /* ============ LAYOUT ============ */
 .app { display: flex; min-height: 100vh; }
 .sidebar {
-  width: 220px;
+  width: 224px;
   flex-shrink: 0;
+  background: var(--bg-sidebar);
   border-right: 1px solid var(--border);
-  padding: 22px 14px;
+  padding: 20px 12px;
   display: flex;
   flex-direction: column;
-  gap: 4px;
+  gap: 2px;
   position: sticky;
   top: 0;
   height: 100vh;
@@ -72,10 +89,11 @@ textarea { resize: vertical; min-height: 70px; }
   font-size: 26px;
   font-style: italic;
   letter-spacing: -0.02em;
-  padding: 0 10px 18px;
+  padding: 4px 10px 18px;
   display: flex;
   align-items: baseline;
   gap: 8px;
+  color: var(--text);
 }
 .logo em { color: var(--accent); font-style: italic; }
 .logo-version {
@@ -88,73 +106,86 @@ textarea { resize: vertical; min-height: 70px; }
   display: flex;
   align-items: center;
   gap: 11px;
-  padding: 10px 12px;
-  border-radius: 10px;
+  padding: 8px 11px;
+  border-radius: 8px;
   color: var(--text-muted);
   font-weight: 500;
+  font-size: 13.5px;
   transition: background 0.15s, color 0.15s;
   text-align: left;
 }
-.nav-btn svg { width: 17px; height: 17px; stroke: currentColor; fill: none; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; flex-shrink: 0; }
-.nav-btn:hover { background: var(--bg-card); }
-.nav-btn.active { background: var(--accent-glow); color: var(--accent); }
+.nav-btn svg { width: 16px; height: 16px; stroke: currentColor; fill: none; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; flex-shrink: 0; opacity: 0.85; }
+.nav-btn:hover { background: var(--bg-hover); color: var(--text); }
+.nav-btn.active {
+  background: var(--bg-active);
+  color: var(--text);
+  box-shadow: var(--shadow-sm);
+  border: 1px solid var(--border);
+  padding: 7px 10px;
+}
+.nav-btn.active svg { color: var(--accent); opacity: 1; }
 .nav-spacer { flex: 1; }
 .nav-foot {
   font-family: 'JetBrains Mono', monospace;
   font-size: 10px;
   color: var(--text-subtle);
-  padding: 10px 12px;
+  padding: 12px 12px 4px;
+  line-height: 1.55;
 }
-main { flex: 1; padding: 26px 30px 60px; max-width: 1280px; min-width: 0; }
+main { flex: 1; padding: 28px 36px 60px; max-width: 1340px; min-width: 0; }
 
 .view { display: none; }
 .view.active { display: block; animation: fadeIn 0.25s; }
 @keyframes fadeIn { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: none; } }
 
 .view-header { display: flex; align-items: center; justify-content: space-between; gap: 14px; margin-bottom: 22px; flex-wrap: wrap; }
-.view-title { font-family: 'Instrument Serif', serif; font-size: 32px; font-style: italic; letter-spacing: -0.02em; }
-.view-sub { color: var(--text-subtle); font-size: 13px; margin-top: 2px; }
+.view-title { font-family: 'Instrument Serif', serif; font-size: 32px; font-style: italic; letter-spacing: -0.02em; color: var(--text); line-height: 1.1; }
+.view-sub { color: var(--text-muted); font-size: 13.5px; margin-top: 4px; }
 
 .btn {
   display: inline-flex;
   align-items: center;
-  gap: 7px;
-  padding: 9px 16px;
-  border-radius: 10px;
+  gap: 6px;
+  padding: 7px 14px;
+  border-radius: 8px;
   background: var(--bg-elevated);
   border: 1px solid var(--border-strong);
   color: var(--text);
   font-weight: 500;
   font-size: 13px;
-  transition: background 0.15s, transform 0.1s;
+  transition: background 0.15s, transform 0.1s, box-shadow 0.15s;
   white-space: nowrap;
+  box-shadow: var(--shadow-sm);
 }
 .btn:hover { background: var(--bg-hover); }
 .btn:active { transform: scale(0.97); }
-.btn.primary { background: var(--accent); color: #06231f; border-color: var(--accent); font-weight: 600; }
-.btn.primary:hover { filter: brightness(1.08); }
-.btn.danger { color: var(--danger); border-color: rgba(255,91,106,0.3); }
-.btn.ghost { background: transparent; border-color: transparent; color: var(--text-muted); }
-.btn.sm { padding: 5px 10px; font-size: 12px; border-radius: 8px; }
-.btn svg { width: 14px; height: 14px; stroke: currentColor; fill: none; stroke-width: 2.2; stroke-linecap: round; }
+.btn.primary { background: var(--accent); color: #ffffff; border-color: var(--accent); font-weight: 600; box-shadow: 0 1px 2px rgba(13,148,136,0.18); }
+.btn.primary:hover { background: #0f766e; }
+.btn.danger { color: var(--danger); border-color: var(--border-strong); background: var(--bg-elevated); }
+.btn.danger:hover { background: var(--danger-soft); }
+.btn.ghost { background: transparent; border-color: transparent; color: var(--text-muted); box-shadow: none; }
+.btn.ghost:hover { background: var(--bg-hover); color: var(--text); }
+.btn.sm { padding: 5px 10px; font-size: 12px; border-radius: 7px; }
+.btn svg { width: 14px; height: 14px; stroke: currentColor; fill: none; stroke-width: 2; stroke-linecap: round; }
 
 /* ============ CARDS / KPI ============ */
 .kpi-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(190px, 1fr)); gap: 14px; margin-bottom: 26px; }
 .kpi {
-  background: var(--bg-card);
+  background: var(--bg-elevated);
   border: 1px solid var(--border);
-  border-radius: 16px;
+  border-radius: 12px;
   padding: 18px;
+  box-shadow: var(--shadow-sm);
 }
-.kpi-label { font-family: 'JetBrains Mono', monospace; font-size: 10px; text-transform: uppercase; letter-spacing: 0.14em; color: var(--text-subtle); margin-bottom: 10px; }
-.kpi-value { font-family: 'Instrument Serif', serif; font-size: 30px; font-style: italic; letter-spacing: -0.02em; line-height: 1; }
+.kpi-label { font-family: 'JetBrains Mono', monospace; font-size: 10px; text-transform: uppercase; letter-spacing: 0.12em; color: var(--text-subtle); margin-bottom: 10px; }
+.kpi-value { font-family: 'Instrument Serif', serif; font-size: 30px; font-style: italic; letter-spacing: -0.02em; line-height: 1; color: var(--text); }
 .kpi-value.accent { color: var(--accent); }
 .kpi-value.warn { color: var(--warn); }
 .kpi-value.danger { color: var(--danger); }
-.kpi-hint { font-size: 11px; color: var(--text-subtle); margin-top: 8px; }
+.kpi-hint { font-size: 11.5px; color: var(--text-subtle); margin-top: 8px; }
 
-.panel { background: var(--bg-card); border: 1px solid var(--border); border-radius: 16px; padding: 18px; margin-bottom: 18px; }
-.panel-title { font-family: 'JetBrains Mono', monospace; font-size: 10px; text-transform: uppercase; letter-spacing: 0.14em; color: var(--text-subtle); margin-bottom: 13px; }
+.panel { background: var(--bg-elevated); border: 1px solid var(--border); border-radius: 12px; padding: 18px; margin-bottom: 16px; box-shadow: var(--shadow-sm); }
+.panel-title { font-family: 'JetBrains Mono', monospace; font-size: 10px; text-transform: uppercase; letter-spacing: 0.12em; color: var(--text-subtle); margin-bottom: 13px; }
 .dash-cols { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; }
 @media (max-width: 900px) { .dash-cols { grid-template-columns: 1fr; } }
 
@@ -168,7 +199,7 @@ main { flex: 1; padding: 26px 30px 60px; max-width: 1280px; min-width: 0; }
   border-radius: 6px;
 }
 .list-row:last-child { border-bottom: none; }
-.list-row:hover { background: var(--bg-elevated); }
+.list-row:hover { background: var(--bg-card); }
 .list-row-main { flex: 1; min-width: 0; }
 .list-row-title { font-weight: 500; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .list-row-sub { font-size: 12px; color: var(--text-subtle); }
@@ -182,84 +213,92 @@ main { flex: 1; padding: 26px 30px 60px; max-width: 1280px; min-width: 0; }
   gap: 5px;
   padding: 3px 9px;
   border-radius: 99px;
-  font-family: 'JetBrains Mono', monospace;
-  font-size: 10px;
-  text-transform: uppercase;
-  letter-spacing: 0.08em;
-  background: var(--bg-elevated);
+  font-family: 'Geist', sans-serif;
+  font-size: 11px;
+  font-weight: 500;
+  letter-spacing: 0;
+  background: var(--bg-card);
   color: var(--text-muted);
-  border: 1px solid var(--border-strong);
+  border: 1px solid var(--border);
   white-space: nowrap;
 }
-.badge.accent { color: var(--accent); border-color: rgba(69,214,196,0.35); background: var(--accent-glow); }
-.badge.warn { color: var(--warn); border-color: rgba(255,184,77,0.35); background: rgba(255,184,77,0.08); }
-.badge.danger { color: var(--danger); border-color: rgba(255,91,106,0.35); background: rgba(255,91,106,0.08); }
-.badge.success { color: var(--success); border-color: rgba(94,224,138,0.35); background: rgba(94,224,138,0.08); }
-.badge.purple { color: var(--purple); border-color: rgba(167,139,250,0.35); background: rgba(167,139,250,0.08); }
+.badge.accent { color: var(--accent); background: var(--accent-soft); border-color: transparent; }
+.badge.warn { color: #b45309; background: var(--warn-soft); border-color: transparent; }
+.badge.danger { color: #b91c1c; background: var(--danger-soft); border-color: transparent; }
+.badge.success { color: #166534; background: var(--success-soft); border-color: transparent; }
+.badge.purple { color: #6d28d9; background: var(--purple-soft); border-color: transparent; }
+.badge.blue { color: #1d4ed8; background: var(--blue-soft); border-color: transparent; }
+.badge.pink { color: #be185d; background: var(--pink-soft); border-color: transparent; }
 
 /* ============ PIPELINE / KANBAN ============ */
 .kanban { display: flex; gap: 12px; overflow-x: auto; padding-bottom: 14px; align-items: flex-start; }
 .kanban-col {
-  width: 250px;
+  width: 260px;
   flex-shrink: 0;
   background: var(--bg-card);
   border: 1px solid var(--border);
-  border-radius: 14px;
+  border-radius: 12px;
   padding: 12px;
   transition: border-color 0.15s, background 0.15s;
 }
 .kanban-col.drag-over { border-color: var(--accent); background: var(--accent-glow); }
 .kanban-col-head { display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 4px; padding: 0 2px; }
-.kanban-col-name { font-family: 'JetBrains Mono', monospace; font-size: 10px; text-transform: uppercase; letter-spacing: 0.12em; color: var(--text-muted); }
+.kanban-col-name { font-family: 'JetBrains Mono', monospace; font-size: 10px; text-transform: uppercase; letter-spacing: 0.1em; color: var(--text-muted); }
 .kanban-col-sum { font-family: 'JetBrains Mono', monospace; font-size: 10px; color: var(--text-subtle); }
 .kanban-cards { display: flex; flex-direction: column; gap: 8px; min-height: 30px; padding-top: 8px; }
 .deal-card {
   background: var(--bg-elevated);
-  border: 1px solid var(--border-strong);
-  border-radius: 11px;
-  padding: 11px 12px;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 12px 13px;
   cursor: grab;
-  transition: transform 0.12s, opacity 0.12s, border-color 0.12s;
+  transition: transform 0.12s, opacity 0.12s, border-color 0.12s, box-shadow 0.15s;
+  box-shadow: var(--shadow-sm);
 }
-.deal-card:hover { border-color: var(--accent-dim); }
+.deal-card:hover { border-color: var(--border-strong); box-shadow: var(--shadow-md); }
 .deal-card:active { cursor: grabbing; }
 .deal-card.dragging { opacity: 0.35; }
-.deal-card-title { font-weight: 600; font-size: 13px; margin-bottom: 3px; }
-.deal-card-client { font-size: 12px; color: var(--text-muted); margin-bottom: 7px; }
+.deal-card-title { font-weight: 600; font-size: 13.5px; margin-bottom: 3px; color: var(--text); }
+.deal-card-client { font-size: 12px; color: var(--text-muted); margin-bottom: 8px; }
 .deal-card-foot { display: flex; justify-content: space-between; align-items: center; }
-.deal-card-value { font-family: 'JetBrains Mono', monospace; font-size: 12px; color: var(--accent); }
-.deal-card-freq { font-size: 10px; color: var(--text-subtle); text-transform: uppercase; letter-spacing: 0.06em; }
+.deal-card-value { font-family: 'JetBrains Mono', monospace; font-size: 12px; color: var(--accent); font-weight: 600; }
+.deal-card-freq { font-size: 10.5px; color: var(--text-subtle); }
 
 /* ============ TABLES ============ */
 .tbl { width: 100%; border-collapse: collapse; }
 .tbl th {
   text-align: left;
-  font-family: 'JetBrains Mono', monospace;
-  font-size: 10px;
-  text-transform: uppercase;
-  letter-spacing: 0.12em;
+  font-family: 'Geist', sans-serif;
+  font-size: 11.5px;
+  letter-spacing: 0;
   color: var(--text-subtle);
-  padding: 8px 10px;
-  border-bottom: 1px solid var(--border-strong);
+  padding: 10px 12px;
+  border-bottom: 1px solid var(--border);
   font-weight: 500;
+  background: var(--bg-card);
 }
-.tbl td { padding: 11px 10px; border-bottom: 1px solid var(--border); vertical-align: middle; }
-.tbl tr.clickable { cursor: pointer; }
-.tbl tr.clickable:hover td { background: var(--bg-elevated); }
+.tbl th:first-child { border-top-left-radius: 8px; }
+.tbl th:last-child  { border-top-right-radius: 8px; }
+.tbl td { padding: 12px; border-bottom: 1px solid var(--border); vertical-align: middle; font-size: 13.5px; }
+.tbl tr.clickable { cursor: pointer; transition: background 0.12s; }
+.tbl tr.clickable:hover td { background: var(--bg-card); }
 .tbl .num { text-align: right; font-family: 'JetBrains Mono', monospace; font-size: 12.5px; }
 
 /* ============ DOC EDITOR ============ */
 .editor-head { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; margin-bottom: 20px; }
 .editor-back {
-  width: 36px; height: 36px;
-  border-radius: 10px;
-  background: var(--bg-card);
-  border: 1px solid var(--border);
+  width: 34px; height: 34px;
+  border-radius: 8px;
+  background: var(--bg-elevated);
+  border: 1px solid var(--border-strong);
+  box-shadow: var(--shadow-sm);
   display: flex; align-items: center; justify-content: center;
   flex-shrink: 0;
+  transition: background 0.15s;
 }
-.editor-back svg { width: 15px; height: 15px; stroke: var(--text); fill: none; stroke-width: 2; }
-.editor-num { font-family: 'JetBrains Mono', monospace; font-size: 18px; font-weight: 600; }
+.editor-back:hover { background: var(--bg-hover); }
+.editor-back svg { width: 14px; height: 14px; stroke: var(--text); fill: none; stroke-width: 2; }
+.editor-num { font-family: 'JetBrains Mono', monospace; font-size: 17px; font-weight: 600; }
 .editor-spacer { flex: 1; }
 .field-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 12px; margin-bottom: 16px; }
 .field label { display: block; font-family: 'JetBrains Mono', monospace; font-size: 10px; text-transform: uppercase; letter-spacing: 0.1em; color: var(--text-subtle); margin-bottom: 6px; }
@@ -275,28 +314,29 @@ main { flex: 1; padding: 26px 30px 60px; max-width: 1280px; min-width: 0; }
 }
 .rev-pill.active { background: var(--accent-glow); border-color: var(--accent); color: var(--accent); }
 .archived-banner {
-  background: rgba(255,184,77,0.08);
-  border: 1px solid rgba(255,184,77,0.3);
-  color: var(--warn);
+  background: var(--warn-soft);
+  border: 1px solid #fde68a;
+  color: #92400e;
   border-radius: 10px;
-  padding: 9px 14px;
+  padding: 10px 14px;
   font-size: 12.5px;
   margin-bottom: 16px;
 }
 .items-tbl input { padding: 7px 9px; font-size: 13px; }
 .items-tbl input.qty, .items-tbl input.price { text-align: right; font-family: 'JetBrains Mono', monospace; }
 .item-del {
-  width: 26px; height: 26px;
+  width: 28px; height: 28px;
   border-radius: 7px;
   color: var(--text-subtle);
   display: flex; align-items: center; justify-content: center;
-  font-size: 15px;
+  font-size: 16px;
+  transition: all 0.15s;
 }
-.item-del:hover { color: var(--danger); background: rgba(255,91,106,0.1); }
+.item-del:hover { color: var(--danger); background: var(--danger-soft); }
 .totals-box { margin-left: auto; width: 280px; max-width: 100%; margin-top: 14px; }
 .totals-line { display: flex; justify-content: space-between; padding: 5px 4px; font-size: 13px; color: var(--text-muted); }
 .totals-line.grand {
-  border-top: 1px solid var(--border-strong);
+  border-top: 2px solid var(--text);
   margin-top: 6px; padding-top: 10px;
   font-size: 17px; color: var(--text); font-weight: 600;
 }
@@ -309,40 +349,43 @@ main { flex: 1; padding: 26px 30px 60px; max-width: 1280px; min-width: 0; }
 .sched-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 10px; margin-top: 16px; }
 @media (max-width: 1000px) { .sched-grid { grid-template-columns: repeat(2, 1fr); } }
 @media (max-width: 560px) { .sched-grid { grid-template-columns: 1fr; } }
-.sched-day { background: var(--bg-card); border: 1px solid var(--border); border-radius: 13px; padding: 11px; min-height: 130px; display: flex; flex-direction: column; gap: 7px; }
-.sched-day.today { border-color: var(--accent); }
+.sched-day { background: var(--bg-elevated); border: 1px solid var(--border); border-radius: 12px; padding: 11px; min-height: 130px; display: flex; flex-direction: column; gap: 7px; box-shadow: var(--shadow-sm); }
+.sched-day.today { border-color: var(--accent); box-shadow: 0 0 0 1px var(--accent), var(--shadow-sm); }
 .sched-day-head { display: flex; justify-content: space-between; align-items: center; }
 .sched-day-name { font-family: 'JetBrains Mono', monospace; font-size: 10px; text-transform: uppercase; letter-spacing: 0.1em; color: var(--text-muted); }
 .sched-day.today .sched-day-name { color: var(--accent); }
-.sched-add { width: 22px; height: 22px; border-radius: 6px; background: var(--bg-elevated); color: var(--text-subtle); font-size: 14px; line-height: 1; display: flex; align-items: center; justify-content: center; }
-.sched-add:hover { color: var(--accent); }
+.sched-add { width: 24px; height: 24px; border-radius: 6px; background: var(--bg-card); color: var(--text-subtle); font-size: 14px; line-height: 1; display: flex; align-items: center; justify-content: center; transition: background 0.15s, color 0.15s; }
+.sched-add:hover { background: var(--accent-soft); color: var(--accent); }
 .shift {
-  border-radius: 9px;
-  padding: 8px 9px;
+  border-radius: 8px;
+  padding: 8px 10px;
   font-size: 12px;
   border-left: 3px solid var(--accent);
-  background: var(--bg-elevated);
+  background: var(--bg-card);
   cursor: pointer;
+  transition: background 0.15s;
 }
 .shift:hover { background: var(--bg-hover); }
 .shift-time { font-family: 'JetBrains Mono', monospace; font-size: 10.5px; color: var(--text-muted); }
-.shift-client { font-weight: 600; margin: 1px 0; }
-.shift-team { font-size: 10.5px; opacity: 0.85; }
+.shift-client { font-weight: 600; margin: 1px 0; color: var(--text); }
+.shift-team { font-size: 10.5px; opacity: 0.95; }
 .team-legend { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; }
 .team-tag {
   display: inline-flex; align-items: center; gap: 7px;
   padding: 5px 12px; border-radius: 99px;
-  background: var(--bg-card); border: 1px solid var(--border-strong);
+  background: var(--bg-elevated); border: 1px solid var(--border);
   font-size: 12px; cursor: pointer;
+  box-shadow: var(--shadow-sm);
 }
+.team-tag:hover { background: var(--bg-card); }
 .team-dot { width: 9px; height: 9px; border-radius: 50%; }
 
 /* ============ MODAL ============ */
 .modal-overlay {
   position: fixed; inset: 0;
-  background: rgba(0,0,0,0.72);
-  backdrop-filter: blur(8px);
-  -webkit-backdrop-filter: blur(8px);
+  background: rgba(31, 35, 41, 0.45);
+  backdrop-filter: blur(2px);
+  -webkit-backdrop-filter: blur(2px);
   display: none;
   align-items: center; justify-content: center;
   z-index: 500; padding: 20px;
@@ -350,12 +393,13 @@ main { flex: 1; padding: 26px 30px 60px; max-width: 1280px; min-width: 0; }
 }
 .modal-overlay.show { display: flex; }
 .modal {
-  background: var(--bg-card);
-  border: 1px solid var(--border-strong);
-  border-radius: 18px;
-  width: 100%; max-width: 480px;
+  background: var(--bg-elevated);
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  width: 100%; max-width: 500px;
   max-height: 88vh; overflow-y: auto;
   padding: 24px;
+  box-shadow: var(--shadow-lg);
 }
 .modal-title { font-family: 'Instrument Serif', serif; font-size: 23px; font-style: italic; margin-bottom: 18px; }
 .modal .field { margin-bottom: 13px; }
@@ -365,27 +409,45 @@ main { flex: 1; padding: 26px 30px 60px; max-width: 1280px; min-width: 0; }
 .toast {
   position: fixed; bottom: 26px; left: 50%;
   transform: translateX(-50%) translateY(80px);
-  background: var(--bg-elevated);
-  border: 1px solid var(--accent);
-  color: var(--accent);
-  border-radius: 12px;
-  padding: 11px 22px;
-  font-family: 'JetBrains Mono', monospace;
-  font-size: 12.5px;
+  background: var(--text);
+  border: 1px solid var(--text);
+  color: #ffffff;
+  border-radius: 10px;
+  padding: 11px 18px;
+  font-family: 'Geist', sans-serif;
+  font-size: 13px;
+  font-weight: 500;
   z-index: 900;
   transition: transform 0.25s;
   pointer-events: none;
+  box-shadow: var(--shadow-lg);
+  display: flex; align-items: center;
 }
 .toast.show { transform: translateX(-50%) translateY(0); }
+.toast.error { background: var(--danger); border-color: var(--danger); color: #ffffff; }
+.toast-btn {
+  margin-left: 14px;
+  padding: 4px 12px;
+  border-radius: 7px;
+  background: rgba(255,255,255,0.18);
+  color: #ffffff;
+  font-family: 'Geist', sans-serif;
+  font-weight: 600;
+  font-size: 12px;
+  border: 1px solid rgba(255,255,255,0.28);
+}
+.toast-btn:hover { background: rgba(255,255,255,0.28); }
 
 /* ============ FILTER TABS ============ */
 .filter-tabs { display: flex; gap: 7px; flex-wrap: wrap; }
 .filter-tab {
-  padding: 6px 14px; border-radius: 99px;
-  background: var(--bg-card); border: 1px solid var(--border-strong);
+  padding: 5px 12px; border-radius: 99px;
+  background: var(--bg-elevated); border: 1px solid var(--border);
   font-size: 12px; color: var(--text-muted);
+  transition: all 0.15s;
 }
-.filter-tab.active { background: var(--accent-glow); border-color: var(--accent); color: var(--accent); }
+.filter-tab:hover { color: var(--text); border-color: var(--border-strong); }
+.filter-tab.active { background: var(--text); border-color: var(--text); color: #ffffff; }
 
 /* ============ MOBILE ============ */
 @media (max-width: 760px) {
@@ -408,19 +470,19 @@ main { flex: 1; padding: 26px 30px 60px; max-width: 1280px; min-width: 0; }
 :focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; border-radius: 6px; }
 input:focus-visible, select:focus-visible, textarea:focus-visible { outline: none; }
 ::-webkit-scrollbar { width: 8px; height: 8px; }
-::-webkit-scrollbar-thumb { background: var(--border-strong); border-radius: 99px; }
-::-webkit-scrollbar-thumb:hover { background: var(--text-subtle); }
+::-webkit-scrollbar-thumb { background: #d1d5db; border-radius: 99px; }
+::-webkit-scrollbar-thumb:hover { background: #9ca3af; }
 ::-webkit-scrollbar-track { background: transparent; }
 .num, .totals-val, .kpi-value, .list-row-end, .deal-card-value { font-variant-numeric: tabular-nums; }
 .panel:has(.tbl) { overflow-x: auto; }
 kbd {
   font-family: 'JetBrains Mono', monospace;
   font-size: 10px;
-  background: var(--bg-elevated);
-  border: 1px solid var(--border-strong);
+  background: var(--bg-card);
+  border: 1px solid var(--border);
   border-bottom-width: 2px;
-  border-radius: 5px;
-  padding: 1px 6px;
+  border-radius: 4px;
+  padding: 1px 5px;
   color: var(--text-muted);
   white-space: nowrap;
 }
@@ -443,18 +505,7 @@ kbd {
   75% { transform: translateX(4px); }
 }
 
-.toast.error { border-color: var(--danger); color: var(--danger); }
 .toast.actionable { pointer-events: auto; }
-.toast-btn {
-  margin-left: 14px;
-  padding: 3px 12px;
-  border-radius: 8px;
-  background: var(--accent);
-  color: #06231f;
-  font-family: 'Geist', sans-serif;
-  font-weight: 600;
-  font-size: 12px;
-}
 .toast-btn:active { transform: scale(0.95); }
 
 .quick-actions { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 22px; }
@@ -465,9 +516,9 @@ kbd {
 /* ============ COMMAND PALETTE ============ */
 .palette-overlay {
   position: fixed; inset: 0;
-  background: rgba(0,0,0,0.72);
-  backdrop-filter: blur(8px);
-  -webkit-backdrop-filter: blur(8px);
+  background: rgba(31, 35, 41, 0.42);
+  backdrop-filter: blur(2px);
+  -webkit-backdrop-filter: blur(2px);
   display: none;
   justify-content: center;
   align-items: flex-start;
@@ -478,11 +529,11 @@ kbd {
 .palette-overlay.show { display: flex; }
 .palette {
   width: 100%; max-width: 560px;
-  background: var(--bg-card);
-  border: 1px solid var(--border-strong);
-  border-radius: 16px;
+  background: var(--bg-elevated);
+  border: 1px solid var(--border);
+  border-radius: 14px;
   overflow: hidden;
-  box-shadow: 0 24px 70px rgba(0,0,0,0.5);
+  box-shadow: var(--shadow-lg);
   animation: modalIn 0.18s ease-out;
 }
 .palette-input {
@@ -503,8 +554,9 @@ kbd {
   border-radius: 10px;
   cursor: pointer;
 }
-.palette-item.active { background: var(--accent-glow); }
+.palette-item.active { background: var(--accent-soft); }
 .palette-item.active .palette-label { color: var(--accent); }
+.palette-item:hover { background: var(--bg-card); }
 .palette-type {
   flex-shrink: 0;
   width: 76px;
@@ -583,7 +635,7 @@ kbd {
 
 <div class="app">
 <aside class="sidebar" aria-label="Navigation principale">
-  <div class="logo"><em>Lu</em>stre<span class="logo-version">v3.2</span></div>
+  <div class="logo"><em>Lu</em>stre<span class="logo-version">v3.3</span></div>
   <button class="nav-btn" onclick="openPalette()" aria-label="Recherche rapide">
     <svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
     <span style="flex:1;text-align:left">Recherche</span><kbd>Ctrl K</kbd>
@@ -599,6 +651,10 @@ kbd {
   <button class="nav-btn" data-view="quotes" onclick="showView('quotes')">
     <svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="8" y1="13" x2="16" y2="13"/><line x1="8" y1="17" x2="13" y2="17"/></svg>
     <span>Soumissions</span>
+  </button>
+  <button class="nav-btn" data-view="contracts" onclick="showView('contracts')">
+    <svg viewBox="0 0 24 24"><path d="M9 12l2 2 4-4"/><path d="M21 12c0 4.97-4.03 9-9 9s-9-4.03-9-9 4.03-9 9-9c2.5 0 4.78 1.02 6.41 2.67"/></svg>
+    <span>Contrats</span>
   </button>
   <button class="nav-btn" data-view="services" onclick="showView('services')">
     <svg viewBox="0 0 24 24"><path d="M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z"/><line x1="7" y1="7" x2="7.01" y2="7"/></svg>
@@ -699,6 +755,24 @@ kbd {
   <div id="quoteEditor" style="display:none;"></div>
 </section>
 
+<!-- ============ CONTRACTS ============ -->
+<section class="view" id="view-contracts">
+  <div id="contractsList">
+    <div class="view-header">
+      <div>
+        <div class="view-title">Contrats</div>
+        <div class="view-sub">Récurrence + équipe assignée — planifie automatiquement les quarts dans l'horaire</div>
+      </div>
+      <button class="btn primary" onclick="newContract()">
+        <svg viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+        Nouveau contrat
+      </button>
+    </div>
+    <div class="panel"><table class="tbl" id="contractsTable"></table></div>
+  </div>
+  <div id="contractEditor" style="display:none;"></div>
+</section>
+
 <!-- ============ SCHEDULE ============ -->
 <section class="view" id="view-schedule">
   <div class="view-header">
@@ -754,17 +828,20 @@ kbd {
 
 <!-- ============ CLIENTS ============ -->
 <section class="view" id="view-clients">
-  <div class="view-header">
-    <div>
-      <div class="view-title">Clients</div>
-      <div class="view-sub">Registre partagé — pipeline, soumissions, horaires, factures</div>
+  <div id="clientsList">
+    <div class="view-header">
+      <div>
+        <div class="view-title">Clients</div>
+        <div class="view-sub">Registre partagé — pipeline, soumissions, contrats, horaires, factures</div>
+      </div>
+      <button class="btn primary" onclick="openClientModal()">
+        <svg viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+        Nouveau client
+      </button>
     </div>
-    <button class="btn primary" onclick="openClientModal()">
-      <svg viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
-      Nouveau client
-    </button>
+    <div class="panel"><table class="tbl" id="clientsTable"></table></div>
   </div>
-  <div class="panel"><table class="tbl" id="clientsTable"></table></div>
+  <div id="clientDetail" style="display:none;"></div>
 </section>
 
 </main>
@@ -801,6 +878,20 @@ const STAGES = [
   ['lost', 'Perdu']
 ];
 const FREQS = ['Hebdomadaire', '2x/semaine', 'Aux 2 semaines', 'Mensuel', 'Ponctuel'];
+// Fréquences pour les soumissions / contrats (clé technique → libellé)
+const QUOTE_FREQ = [
+  ['ponctuelle', 'Ponctuelle (une seule fois)'],
+  ['hebdo',      'Hebdomadaire (1×/sem)'],
+  ['2x-sem',     '2× par semaine'],
+  ['3x-sem',     '3× par semaine'],
+  ['bi-mens',    'Aux 2 semaines'],
+  ['mensuelle',  'Mensuelle']
+];
+function freqLabel(key) { const p = QUOTE_FREQ.find(f => f[0] === key); return p ? p[1] : '—'; }
+// Combien de fois par semaine (utile pour l'estimation de quarts requis)
+function freqPerWeek(key) {
+  return { 'ponctuelle': 0, 'hebdo': 1, '2x-sem': 2, '3x-sem': 3, 'bi-mens': 0.5, 'mensuelle': 0.25 }[key] || 0;
+}
 const CLIENT_TYPES = ['Commercial', 'Résidentiel', 'Condo / Copropriété', 'Bureau', 'Industriel'];
 const UNITS = ['forfait', 'h', 'visite', 'mois', 'pi²'];
 const TEAM_COLORS = ['#45d6c4', '#a78bfa', '#5aa7ff', '#ff8fc7', '#ffb84d', '#5ee08a'];
@@ -832,6 +923,7 @@ const STATE = {
   teams: [],
   shifts: [],
   services: [],
+  contracts: [],
   seeded: false,
   servicesSeeded: false
 };
@@ -846,6 +938,9 @@ function load() {
     if (data) {
       const parsed = JSON.parse(data);
       parsed.settings = { ...STATE.settings, ...(parsed.settings || {}) };
+      // Backfill: anciens objets dépourvus des nouveaux champs
+      (parsed.quotes || []).forEach(q => (q.versions || []).forEach(v => { if (!v.frequency) v.frequency = 'hebdo'; }));
+      if (!Array.isArray(parsed.contracts)) parsed.contracts = [];
       Object.assign(STATE, parsed);
     }
   } catch(e) { console.error(e); }
@@ -998,13 +1093,13 @@ function seed() {
     { id: uid(), number: 'S-' + new Date().getFullYear() + '-001', clientId: c2.id, status: 'sent',
       sentAt: Date.now() - 9*864e5, createdAt: Date.now() - 10*864e5, currentRev: 1,
       versions: [
-        { rev: 1, date: addDaysISO(today, -10), validity: 30, items: q1items, notes: 'Fréquence hebdomadaire. Produits et équipement fournis.\nAssurance responsabilité 2 M$.' },
-        { rev: 2, date: addDaysISO(today, -6), validity: 30, items: q1items2, notes: 'Version révisée suite à la rencontre du syndic — vitres aux 2 mois plutôt que mensuel.' }
+        { rev: 1, date: addDaysISO(today, -10), validity: 30, frequency: 'hebdo', items: q1items, notes: 'Fréquence hebdomadaire. Produits et équipement fournis.\nAssurance responsabilité 2 M$.' },
+        { rev: 2, date: addDaysISO(today, -6), validity: 30, frequency: 'hebdo', items: q1items2, notes: 'Version révisée suite à la rencontre du syndic — vitres aux 2 mois plutôt que mensuel.' }
       ] },
     { id: uid(), number: 'S-' + new Date().getFullYear() + '-002', clientId: c3.id, status: 'draft',
       createdAt: Date.now() - 2*864e5, currentRev: 0,
       versions: [
-        { rev: 1, date: addDaysISO(today, -2), validity: 30, items: [
+        { rev: 1, date: addDaysISO(today, -2), validity: 30, frequency: '2x-sem', items: [
           { desc: 'Entretien de bureaux — 2 passages/semaine', qty: 8, unit: 'visite', price: 210 },
           { desc: 'Désinfection des surfaces de contact', qty: 8, unit: 'visite', price: 35 }
         ], notes: 'Passages en soirée après 18 h.' }
@@ -1056,6 +1151,7 @@ function showView(name) {
   if (name === 'dashboard') renderDashboard();
   if (name === 'pipeline') renderPipeline();
   if (name === 'quotes') { closeQuoteEditor(); renderQuotes(); }
+  if (name === 'contracts') { closeContractEditor(); renderContracts(); }
   if (name === 'schedule') renderSchedule();
   if (name === 'invoices') { closeInvoiceEditor(); renderInvoices(); }
   if (name === 'services') renderServices();
@@ -1284,7 +1380,7 @@ function createQuoteFromDeal(id) {
     createdAt: Date.now(),
     currentRev: 0,
     versions: [{
-      rev: 1, date: todayISO(), validity: STATE.settings.quoteValidity,
+      rev: 1, date: todayISO(), validity: STATE.settings.quoteValidity, frequency: 'hebdo',
       items: [{ desc: deal.title, qty: 1, unit: 'mois', price: deal.value || 0 }],
       notes: deal.notes || ''
     }]
@@ -1429,19 +1525,162 @@ function insertService(target, svcId) {
 }
 
 // ============ CLIENTS ============
+let OPEN_CLIENT_ID = null;
 function renderClients() {
-  const rows = STATE.clients.map(c => `
-    <tr class="clickable" onclick="openClientModal('${c.id}')">
+  closeClientDetail();
+  const rows = STATE.clients.map(c => {
+    const activeContracts = STATE.contracts.filter(x => x.clientId === c.id && x.status === 'active').length;
+    return `
+    <tr class="clickable" onclick="openClient('${c.id}')">
       <td><strong>${escapeHTML(c.name)}</strong><div class="list-row-sub">${escapeHTML(c.contact || '')}</div></td>
       <td><span class="badge">${escapeHTML(c.type || '')}</span></td>
       <td>${escapeHTML(c.phone || '')}<div class="list-row-sub">${escapeHTML(c.email || '')}</div></td>
       <td class="num"><span class="badge accent">${clientMargin(c)} %</span></td>
+      <td class="num">${activeContracts > 0 ? `<span class="badge success">${activeContracts} contrat${activeContracts > 1 ? 's' : ''}</span>` : '—'}</td>
       <td class="num">${STATE.invoices.filter(i => i.clientId === c.id).length} fact.</td>
-    </tr>`).join('');
+    </tr>`;
+  }).join('');
   document.getElementById('clientsTable').innerHTML = `
-    <tr><th>Client</th><th>Type</th><th>Contact</th><th style="text-align:right">Marge</th><th style="text-align:right">Historique</th></tr>
-    ${rows || '<tr><td colspan="5"><div class="empty-cta"><div class="empty-note">Aucun client pour l\'instant.</div><button class="btn sm primary" onclick="openClientModal()">Ajouter un client</button></div></td></tr>'}`;
+    <tr><th>Client</th><th>Type</th><th>Contact</th><th style="text-align:right">Marge</th><th style="text-align:right">Contrats</th><th style="text-align:right">Factures</th></tr>
+    ${rows || '<tr><td colspan="6"><div class="empty-cta"><div class="empty-note">Aucun client pour l\'instant.</div><button class="btn sm primary" onclick="openClientModal()">Ajouter un client</button></div></td></tr>'}`;
 }
+function openClient(id) { OPEN_CLIENT_ID = id; renderClientDetail(); }
+function closeClientDetail() {
+  OPEN_CLIENT_ID = null;
+  const d = document.getElementById('clientDetail');
+  if (d) d.style.display = 'none';
+  const l = document.getElementById('clientsList');
+  if (l) l.style.display = 'block';
+}
+function renderClientDetail() {
+  const c = clientById(OPEN_CLIENT_ID);
+  if (!c) return closeClientDetail();
+  document.getElementById('clientsList').style.display = 'none';
+  const d = document.getElementById('clientDetail');
+  d.style.display = 'block';
+
+  const cQuotes = STATE.quotes.filter(q => q.clientId === c.id).sort((a, b) => (b.createdAt || 0) - (a.createdAt || 0));
+  const cContracts = STATE.contracts.filter(x => x.clientId === c.id).sort((a, b) => (b.createdAt || 0) - (a.createdAt || 0));
+  const cInvoices = STATE.invoices.filter(i => i.clientId === c.id).sort((a, b) => (b.date || '').localeCompare(a.date || ''));
+  const cDeals = STATE.deals.filter(x => x.clientId === c.id && !['won', 'lost'].includes(x.stage));
+  const today = todayISO();
+  const upcomingShifts = STATE.shifts.filter(s => s.clientId === c.id && s.date >= today).sort((a, b) => a.date.localeCompare(b.date)).slice(0, 8);
+
+  const acceptedNoContract = cQuotes.find(q => q.status === 'accepted' && !STATE.contracts.some(x => x.quoteId === q.id));
+
+  d.innerHTML = `
+    <div class="editor-head">
+      <button class="editor-back" onclick="closeClientDetail();renderClients()" aria-label="Retour à la liste">
+        <svg viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"/></svg>
+      </button>
+      <div>
+        <div class="editor-num" style="font-family:'Instrument Serif',serif;font-size:26px;font-style:italic;font-weight:normal;">${escapeHTML(c.name)}</div>
+        <div class="view-sub">${escapeHTML(c.type || '')} · marge ${clientMargin(c)} %</div>
+      </div>
+      <div class="editor-spacer"></div>
+      <button class="btn sm" onclick="openClientModal('${c.id}')">✎ Modifier</button>
+    </div>
+
+    <div class="quick-actions">
+      <button class="btn primary sm" onclick="newQuoteForClient('${c.id}')">+ Soumission</button>
+      ${acceptedNoContract ? `<button class="btn sm" onclick="contractFromQuote('${acceptedNoContract.id}')">→ Convertir « ${acceptedNoContract.number} » en contrat</button>` : ''}
+      <button class="btn sm" onclick="newInvoiceForClient('${c.id}')">+ Facture</button>
+      <button class="btn sm" onclick="newDealForClient('${c.id}')">+ Opportunité</button>
+    </div>
+
+    <div class="dash-cols">
+      <div>
+        <div class="panel">
+          <div class="panel-title">Coordonnées</div>
+          <div style="display:grid;grid-template-columns:auto 1fr;gap:8px 14px;font-size:13.5px;">
+            ${c.contact ? `<span style="color:var(--text-subtle)">Contact</span><span>${escapeHTML(c.contact)}</span>` : ''}
+            ${c.phone ? `<span style="color:var(--text-subtle)">Téléphone</span><span>${escapeHTML(c.phone)}</span>` : ''}
+            ${c.email ? `<span style="color:var(--text-subtle)">Courriel</span><span>${escapeHTML(c.email)}</span>` : ''}
+            ${c.address ? `<span style="color:var(--text-subtle)">Adresse</span><span style="white-space:pre-line">${escapeHTML(c.address)}</span>` : ''}
+            ${c.notes ? `<span style="color:var(--text-subtle)">Notes</span><span style="white-space:pre-line">${escapeHTML(c.notes)}</span>` : ''}
+          </div>
+        </div>
+
+        <div class="panel">
+          <div class="panel-title">Soumissions (${cQuotes.length})</div>
+          ${cQuotes.length ? cQuotes.map(q => {
+            const v = q.versions[q.currentRev];
+            const [label, cls] = QUOTE_STATUS[q.status] || [q.status, ''];
+            return `<div class="list-row" onclick="openQuoteById('${q.id}')">
+              <div class="list-row-main">
+                <div class="list-row-title">${q.number} <span class="badge ${cls}" style="margin-left:6px;font-size:10px;padding:1px 7px;">${label}</span></div>
+                <div class="list-row-sub">${fmtDate(v.date)} · ${freqLabel(v.frequency || 'hebdo')}${q.versions.length > 1 ? ' · v' + v.rev : ''}</div>
+              </div>
+              <div class="list-row-end">${fmtMoney(calcTotals(v.items, STATE.settings).total)}</div>
+            </div>`;
+          }).join('') : '<div class="empty-note">Aucune soumission. <button class="btn sm" style="margin-left:6px;" onclick="newQuoteForClient(\'' + c.id + '\')">+ Créer</button></div>'}
+        </div>
+
+        <div class="panel">
+          <div class="panel-title">Factures (${cInvoices.length})</div>
+          ${cInvoices.length ? cInvoices.slice(0, 6).map(i => {
+            const late = invoiceIsOverdue(i);
+            const [label, cls] = late ? ['En retard', 'danger'] : (INV_STATUS[i.status] || [i.status, '']);
+            return `<div class="list-row" onclick="showView('invoices');openInvoice('${i.id}')">
+              <div class="list-row-main">
+                <div class="list-row-title">${i.number} <span class="badge ${cls}" style="margin-left:6px;font-size:10px;padding:1px 7px;">${label}</span></div>
+                <div class="list-row-sub">${fmtDate(i.date)} · échéance ${fmtDate(i.dueDate)}</div>
+              </div>
+              <div class="list-row-end">${fmtMoney(calcTotals(i.items, STATE.settings).total)}</div>
+            </div>`;
+          }).join('') : '<div class="empty-note">Aucune facture.</div>'}
+        </div>
+      </div>
+
+      <div>
+        <div class="panel">
+          <div class="panel-title">Contrats (${cContracts.length})</div>
+          ${cContracts.length ? cContracts.map(ct => {
+            const [label, cls] = CONTRACT_STATUS[ct.status] || [ct.status, ''];
+            return `<div class="list-row" onclick="openContractById('${ct.id}')">
+              <div class="list-row-main">
+                <div class="list-row-title">${ct.number} <span class="badge ${cls}" style="margin-left:6px;font-size:10px;padding:1px 7px;">${label}</span></div>
+                <div class="list-row-sub">${freqLabel(ct.frequency)} · ${fmtDate(ct.startDate)} → ${fmtDate(ct.endDate)}</div>
+              </div>
+              <div class="list-row-end">${contractOccurrenceCount(ct)} visites</div>
+            </div>`;
+          }).join('') : '<div class="empty-note">Aucun contrat actif. Convertis une soumission acceptée en contrat pour planifier les visites.</div>'}
+        </div>
+
+        <div class="panel">
+          <div class="panel-title">Quarts à venir (${upcomingShifts.length})</div>
+          ${upcomingShifts.length ? upcomingShifts.map(s => {
+            const team = STATE.teams.find(t => t.id === s.teamId);
+            return `<div class="list-row" onclick="showView('schedule')">
+              <span style="display:inline-block;width:8px;height:8px;border-radius:50%;background:${team ? team.color : '#ccc'};flex-shrink:0;"></span>
+              <div class="list-row-main">
+                <div class="list-row-title">${fmtDate(s.date)}</div>
+                <div class="list-row-sub">${team ? escapeHTML(team.name) : '—'}${s.contractId ? ' · contrat' : ''}</div>
+              </div>
+              <div class="list-row-end">${s.start}–${s.end}</div>
+            </div>`;
+          }).join('') : '<div class="empty-note">Aucun quart planifié.</div>'}
+        </div>
+
+        ${cDeals.length ? `<div class="panel">
+          <div class="panel-title">Pipeline actif (${cDeals.length})</div>
+          ${cDeals.map(dl => {
+            const stage = STAGES.find(s => s[0] === dl.stage);
+            return `<div class="list-row" onclick="showView('pipeline');openDealModal('${dl.id}')">
+              <div class="list-row-main">
+                <div class="list-row-title">${escapeHTML(dl.title)}</div>
+                <div class="list-row-sub">${stage ? stage[1] : dl.stage}</div>
+              </div>
+              <div class="list-row-end">${fmtMoney(dl.value)}/mois</div>
+            </div>`;
+          }).join('')}
+        </div>` : ''}
+      </div>
+    </div>`;
+}
+function newQuoteForClient(id) { showView('quotes'); newQuote(id); }
+function newInvoiceForClient(id) { showView('invoices'); newInvoice(id); }
+function newDealForClient(id) { showView('pipeline'); openDealModal(); setTimeout(() => { const sel = document.getElementById('dealClient'); if (sel) sel.value = id; }, 80); }
 function openClientModal(id) {
   const c = id ? clientById(id) : null;
   openModal(`
@@ -1527,7 +1766,7 @@ function newQuote(clientId) {
     status: 'draft',
     createdAt: Date.now(),
     currentRev: 0,
-    versions: [{ rev: 1, date: todayISO(), validity: STATE.settings.quoteValidity, items: [{ desc: '', qty: 1, unit: 'forfait', price: 0 }], notes: '' }]
+    versions: [{ rev: 1, date: todayISO(), validity: STATE.settings.quoteValidity, frequency: 'hebdo', items: [{ desc: '', qty: 1, unit: 'forfait', price: 0 }], notes: '' }]
   };
   STATE.quotes.push(q);
   save();
@@ -1582,6 +1821,10 @@ function renderQuoteEditor() {
       <div class="field-grid">
         <div class="field"><label>Client</label>
           <select onchange="updateQuoteField('clientId', this.value)" ${readonly ? 'disabled' : ''}>${clientOptions(q.clientId)}</select></div>
+        <div class="field"><label>Fréquence du service</label>
+          <select onchange="updateRevField('frequency', this.value)" ${readonly ? 'disabled' : ''}>
+            ${QUOTE_FREQ.map(([k, l]) => `<option value="${k}" ${(v.frequency || 'hebdo') === k ? 'selected' : ''}>${l}</option>`).join('')}
+          </select></div>
         <div class="field"><label>Date</label>
           <input type="date" value="${v.date}" onchange="updateRevField('date', this.value)" ${readonly ? 'disabled' : ''}></div>
         <div class="field"><label>Validité (jours)</label>
@@ -1619,9 +1862,19 @@ function renderQuoteEditor() {
         <textarea onchange="updateRevField('notes', this.value)" ${readonly ? 'disabled' : ''}>${escapeHTML(v.notes || '')}</textarea></div>
     </div>
 
-    ${q.status === 'accepted' ? `<button class="btn primary" onclick="invoiceFromQuote('${q.id}')">→ Générer la facture</button>` : ''}
+    ${(() => {
+      const existing = STATE.contracts.find(c => c.quoteId === q.id);
+      const actions = [];
+      if (q.status === 'accepted') {
+        if (existing) actions.push(`<button class="btn" onclick="openContractById('${existing.id}')">Voir le contrat ${existing.number} →</button>`);
+        else actions.push(`<button class="btn primary" onclick="contractFromQuote('${q.id}')">→ Convertir en contrat</button>`);
+        actions.push(`<button class="btn" onclick="invoiceFromQuote('${q.id}')">→ Générer une facture</button>`);
+      }
+      return actions.length ? '<div style="display:flex;gap:10px;flex-wrap:wrap;">' + actions.join('') + '</div>' : '';
+    })()}
   `;
 }
+function openContractById(id) { showView('contracts'); openContract(id); }
 function curQuote() { return STATE.quotes.find(x => x.id === OPEN_QUOTE_ID); }
 function curRev() { const q = curQuote(); return q.versions[q.currentRev]; }
 function updateQuoteField(field, value) { curQuote()[field] = value; save(); renderQuoteEditor(); }
@@ -1647,6 +1900,7 @@ function newQuoteVersion() {
     rev: last.rev + 1,
     date: todayISO(),
     validity: last.validity,
+    frequency: last.frequency || 'hebdo',
     items: JSON.parse(JSON.stringify(last.items)),
     notes: last.notes
   });
@@ -1992,6 +2246,282 @@ function deleteTeam(id) {
     fn: () => { STATE.teams.splice(idx, 0, t); save(); renderSchedule(); } } });
 }
 
+// ============ CONTRATS ============
+const CONTRACT_STATUS = {
+  draft:  ['Brouillon', ''],
+  active: ['Actif', 'success'],
+  paused: ['En pause', 'warn'],
+  ended:  ['Terminé', '']
+};
+const WEEKDAYS = [['lundi','Lun'], ['mardi','Mar'], ['mercredi','Mer'], ['jeudi','Jeu'], ['vendredi','Ven'], ['samedi','Sam'], ['dimanche','Dim']];
+const WEEKDAY_INDEX = { lundi:1, mardi:2, mercredi:3, jeudi:4, vendredi:5, samedi:6, dimanche:0 };
+
+// Convertit jj-mm-aaaa-iso → Date locale au début de journée
+function dateFromISO(iso) {
+  const [y, m, d] = iso.split('-').map(Number);
+  return new Date(y, m-1, d);
+}
+function diffDaysISO(a, b) {
+  return Math.round((dateFromISO(b) - dateFromISO(a)) / 86400000);
+}
+// Génère les occurrences (date ISO) entre start et end, selon une fréquence + jours
+function generateOccurrences(start, end, frequency, days) {
+  if (!start || !end || end < start || !days || !days.length) return [];
+  const out = [];
+  const s = dateFromISO(start), e = dateFromISO(end);
+  const wantedDow = new Set(days.map(d => WEEKDAY_INDEX[d]));
+  const cur = new Date(s);
+  // Période en jours selon la fréquence (entre 2 visites du MÊME jour de la semaine)
+  // Hebdo/2x/3x = 7j ; bi-mens = 14j ; mensuelle = 28j ; ponctuelle = 1× chaque jour de la liste
+  const periodDays = ({ 'hebdo':7, '2x-sem':7, '3x-sem':7, 'bi-mens':14, 'mensuelle':28, 'ponctuelle':null })[frequency];
+  if (frequency === 'ponctuelle') {
+    while (cur <= e) {
+      if (wantedDow.has(cur.getDay())) { out.push(isoFrom(cur)); break; }
+      cur.setDate(cur.getDate() + 1);
+    }
+    return out;
+  }
+  // Trouve le premier jour valide à partir de start, par jour de semaine
+  const firstByDow = {}; // dow -> Date du premier match
+  const tmp = new Date(s);
+  while (Object.keys(firstByDow).length < wantedDow.size && tmp <= e) {
+    if (wantedDow.has(tmp.getDay()) && firstByDow[tmp.getDay()] == null) {
+      firstByDow[tmp.getDay()] = new Date(tmp);
+    }
+    tmp.setDate(tmp.getDate() + 1);
+  }
+  // Pour chaque dow, on génère les occurrences à intervalle periodDays
+  Object.values(firstByDow).forEach(d0 => {
+    const c = new Date(d0);
+    while (c <= e) { out.push(isoFrom(c)); c.setDate(c.getDate() + periodDays); }
+  });
+  return out.sort();
+}
+function contractOccurrenceCount(c) {
+  return generateOccurrences(c.startDate, c.endDate, c.frequency, c.days || []).length;
+}
+// Régénère les quarts d'un contrat : remplace seulement les futurs (date > aujourd'hui)
+function regenerateContractShifts(contractId) {
+  const c = STATE.contracts.find(x => x.id === contractId);
+  if (!c) return { kept: 0, added: 0, removed: 0 };
+  const today = todayISO();
+  const before = STATE.shifts.length;
+  STATE.shifts = STATE.shifts.filter(s => !(s.contractId === contractId && s.date > today));
+  const removed = before - STATE.shifts.length;
+  const dates = generateOccurrences(c.startDate, c.endDate, c.frequency, c.days || []);
+  let added = 0;
+  dates.forEach(date => {
+    if (date <= today) return; // jamais générer dans le passé
+    STATE.shifts.push({
+      id: uid(), date,
+      start: c.startTime, end: c.endTime,
+      teamId: c.teamId, clientId: c.clientId,
+      contractId: c.id, notes: c.notes || ''
+    });
+    added++;
+  });
+  return { kept: STATE.shifts.filter(s => s.contractId === contractId && s.date <= today).length, added, removed };
+}
+function activateContract(id) {
+  const c = STATE.contracts.find(x => x.id === id);
+  if (!c) return;
+  if (!c.teamId || !c.days || !c.days.length || !c.startDate || !c.endDate) {
+    showToast('Complète : équipe, jours, date début et date fin', { variant: 'error' });
+    return;
+  }
+  c.status = 'active';
+  const r = regenerateContractShifts(id);
+  save(); renderContractEditor();
+  showToast(r.added + ' quart' + (r.added > 1 ? 's' : '') + ' planifié' + (r.added > 1 ? 's' : ''));
+}
+function pauseContract() {
+  const c = curContract(); if (!c) return;
+  c.status = 'paused';
+  // Supprime les quarts futurs liés
+  const today = todayISO();
+  const removed = STATE.shifts.filter(s => s.contractId === c.id && s.date > today).length;
+  STATE.shifts = STATE.shifts.filter(s => !(s.contractId === c.id && s.date > today));
+  save(); renderContractEditor();
+  showToast('Contrat en pause · ' + removed + ' quart' + (removed > 1 ? 's' : '') + ' futur' + (removed > 1 ? 's' : '') + ' retiré' + (removed > 1 ? 's' : ''));
+}
+function endContract() {
+  const c = curContract(); if (!c) return;
+  c.status = 'ended';
+  const today = todayISO();
+  STATE.shifts = STATE.shifts.filter(s => !(s.contractId === c.id && s.date > today));
+  save(); renderContractEditor();
+  showToast('Contrat terminé');
+}
+function contractFromQuote(quoteId) {
+  const q = STATE.quotes.find(x => x.id === quoteId);
+  if (!q) return;
+  const v = q.versions[q.currentRev];
+  const num = nextNumber('C', STATE.contracts);
+  const startDate = todayISO();
+  const endDate = addDaysISO(startDate, 365); // 1 an par défaut, modifiable
+  const c = {
+    id: uid(), number: num, clientId: q.clientId, quoteId: q.id, quoteRev: v.rev,
+    title: 'Contrat — ' + clientName(q.clientId),
+    frequency: v.frequency || 'hebdo',
+    days: [],          // à compléter
+    startTime: '08:00',
+    endTime: '11:00',
+    teamId: STATE.teams[0] ? STATE.teams[0].id : '',
+    startDate, endDate,
+    notes: '',
+    status: 'draft',
+    createdAt: Date.now()
+  };
+  STATE.contracts.push(c);
+  save();
+  showView('contracts');
+  openContract(c.id);
+  showToast('Contrat ' + num + ' créé · complète les jours et l\'équipe puis Active-le');
+}
+
+let OPEN_CONTRACT_ID = null;
+function curContract() { return STATE.contracts.find(x => x.id === OPEN_CONTRACT_ID); }
+function openContract(id) { OPEN_CONTRACT_ID = id; renderContractEditor(); }
+function closeContractEditor() {
+  OPEN_CONTRACT_ID = null;
+  document.getElementById('contractEditor').style.display = 'none';
+  document.getElementById('contractsList').style.display = 'block';
+}
+function newContract() {
+  if (!STATE.clients.length) { showToast('Crée d\'abord un client'); openClientModal(); return; }
+  const c = {
+    id: uid(), number: nextNumber('C', STATE.contracts),
+    clientId: STATE.clients[0].id,
+    title: 'Nouveau contrat',
+    frequency: 'hebdo',
+    days: ['lundi'],
+    startTime: '08:00', endTime: '11:00',
+    teamId: STATE.teams[0] ? STATE.teams[0].id : '',
+    startDate: todayISO(), endDate: addDaysISO(todayISO(), 365),
+    notes: '', status: 'draft', createdAt: Date.now()
+  };
+  STATE.contracts.push(c);
+  save();
+  openContract(c.id);
+}
+function updateContractField(field, value) {
+  const c = curContract(); if (!c) return;
+  c[field] = value;
+  save(); renderContractEditor();
+}
+function toggleContractDay(day) {
+  const c = curContract(); if (!c) return;
+  c.days = c.days || [];
+  const i = c.days.indexOf(day);
+  if (i >= 0) c.days.splice(i, 1); else c.days.push(day);
+  save(); renderContractEditor();
+}
+function deleteContract() {
+  const c = curContract(); if (!c) return;
+  const idx = STATE.contracts.findIndex(x => x.id === c.id);
+  // retire aussi les quarts futurs associés
+  const today = todayISO();
+  const removed = STATE.shifts.filter(s => s.contractId === c.id && s.date > today);
+  STATE.shifts = STATE.shifts.filter(s => !(s.contractId === c.id && s.date > today));
+  const [ct] = STATE.contracts.splice(idx, 1);
+  save(); closeContractEditor(); renderContracts();
+  showToast('Contrat ' + ct.number + ' supprimé', { action: { label: 'Annuler',
+    fn: () => { STATE.contracts.splice(idx, 0, ct); removed.forEach(s => STATE.shifts.push(s)); save(); renderContracts(); } } });
+}
+
+function renderContracts() {
+  const sorted = [...STATE.contracts].sort((a, b) => (b.createdAt || 0) - (a.createdAt || 0));
+  const rows = sorted.map(c => {
+    const occ = contractOccurrenceCount(c);
+    const [label, cls] = CONTRACT_STATUS[c.status] || [c.status, ''];
+    return `<tr class="clickable" onclick="openContract('${c.id}')">
+      <td><strong>${c.number}</strong></td>
+      <td>${escapeHTML(clientName(c.clientId))}</td>
+      <td><span class="badge">${freqLabel(c.frequency)}</span></td>
+      <td>${fmtDate(c.startDate)} → ${fmtDate(c.endDate)}</td>
+      <td><span class="badge ${cls}">${label}</span></td>
+      <td class="num">${occ} visites</td>
+    </tr>`;
+  }).join('');
+  document.getElementById('contractsTable').innerHTML = `
+    <tr><th>N°</th><th>Client</th><th>Fréquence</th><th>Période</th><th>Statut</th><th style="text-align:right">Volume</th></tr>
+    ${rows || '<tr><td colspan="6"><div class="empty-cta"><div class="empty-note">Aucun contrat. Convertis une soumission acceptée en contrat depuis l\'éditeur de soumission.</div><button class="btn sm primary" onclick="newContract()">+ Contrat manuel</button></div></td></tr>'}`;
+}
+
+function renderContractEditor() {
+  const c = curContract();
+  if (!c) return closeContractEditor();
+  const occ = generateOccurrences(c.startDate, c.endDate, c.frequency, c.days || []);
+  const futureCount = occ.filter(d => d > todayISO()).length;
+  const [statusLabel, statusCls] = CONTRACT_STATUS[c.status] || [c.status, ''];
+
+  document.getElementById('contractsList').style.display = 'none';
+  const ed = document.getElementById('contractEditor');
+  ed.style.display = 'block';
+  ed.innerHTML = `
+    <div class="editor-head">
+      <button class="editor-back" onclick="closeContractEditor();renderContracts()" aria-label="Retour à la liste">
+        <svg viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"/></svg>
+      </button>
+      <span class="editor-num">${c.number}</span>
+      <span class="badge ${statusCls}">${statusLabel}</span>
+      ${c.quoteId ? `<button class="btn sm ghost" onclick="openQuoteById('${c.quoteId}')">Voir la soumission liée →</button>` : ''}
+      <div class="editor-spacer"></div>
+      ${c.status === 'active'
+        ? `<button class="btn sm" onclick="pauseContract()">⏸ Mettre en pause</button>
+           <button class="btn sm" onclick="endContract()">Terminer</button>`
+        : `<button class="btn sm primary" onclick="activateContract('${c.id}')">▶ Activer (planifier les quarts)</button>`}
+      <button class="btn sm danger" onclick="deleteContract()">Supprimer</button>
+    </div>
+
+    <div class="panel">
+      <div class="field-grid">
+        <div class="field"><label>Titre</label>
+          <input value="${escapeHTML(c.title)}" onchange="updateContractField('title', this.value)"></div>
+        <div class="field"><label>Client</label>
+          <select onchange="updateContractField('clientId', this.value)">${clientOptions(c.clientId)}</select></div>
+        <div class="field"><label>Fréquence</label>
+          <select onchange="updateContractField('frequency', this.value)">
+            ${QUOTE_FREQ.map(([k, l]) => `<option value="${k}" ${c.frequency === k ? 'selected' : ''}>${l}</option>`).join('')}
+          </select></div>
+        <div class="field"><label>Équipe assignée</label>
+          <select onchange="updateContractField('teamId', this.value)">
+            ${STATE.teams.map(t => `<option value="${t.id}" ${c.teamId === t.id ? 'selected' : ''}>${escapeHTML(t.name)}</option>`).join('')}
+          </select></div>
+        <div class="field"><label>Heure début</label>
+          <input type="time" value="${c.startTime}" onchange="updateContractField('startTime', this.value)"></div>
+        <div class="field"><label>Heure fin</label>
+          <input type="time" value="${c.endTime}" onchange="updateContractField('endTime', this.value)"></div>
+        <div class="field"><label>Début du contrat</label>
+          <input type="date" value="${c.startDate}" onchange="updateContractField('startDate', this.value)"></div>
+        <div class="field"><label>Fin du contrat</label>
+          <input type="date" value="${c.endDate}" onchange="updateContractField('endDate', this.value)"></div>
+      </div>
+
+      <div class="field"><label>Jours de visite</label>
+        <div style="display:flex;gap:6px;flex-wrap:wrap;">
+          ${WEEKDAYS.map(([k, l]) => `
+            <button class="filter-tab ${(c.days || []).includes(k) ? 'active' : ''}" onclick="toggleContractDay('${k}')">${l}</button>`).join('')}
+        </div></div>
+
+      <div class="field"><label>Notes pour l'équipe (apparaissent sur chaque quart)</label>
+        <textarea onchange="updateContractField('notes', this.value)">${escapeHTML(c.notes || '')}</textarea></div>
+
+      <div style="display:flex;gap:14px;align-items:center;margin-top:4px;">
+        <span class="badge accent">${occ.length} visites au total</span>
+        <span class="badge">${futureCount} à venir</span>
+        ${c.status === 'active'
+          ? '<span class="kpi-hint">Modifier puis Activer pour replanifier les quarts futurs (les quarts passés restent intacts).</span>'
+          : ''}
+        ${c.status === 'active' ? `<button class="btn sm" style="margin-left:auto" onclick="activateContract('${c.id}')">↻ Replanifier</button>` : ''}
+      </div>
+    </div>`;
+}
+function openQuoteById(quoteId) {
+  showView('quotes');
+  openQuote(quoteId);
+}
+
 // ============ SETTINGS ============
 function openSettings() {
   const s = STATE.settings;
@@ -2077,11 +2607,15 @@ function printDoc(kind, doc, rev) {
     </div>
     <div class="doc-rule"></div>
     <div class="doc-parties">
-      <div>
+      <div style="flex:1">
         <div class="doc-party-label">${isQuote ? 'Préparée pour' : 'Facturée à'}</div>
         <div class="doc-party-name">${client ? escapeHTML(client.name) : '—'}</div>
         <div class="doc-party-info">${client ? escapeHTML([client.contact, client.address, client.phone, client.email].filter(Boolean).join('\n')) : ''}</div>
       </div>
+      ${isQuote ? `<div>
+        <div class="doc-party-label">Fréquence du service</div>
+        <div class="doc-party-name">${escapeHTML(freqLabel(rev.frequency || 'hebdo'))}</div>
+      </div>` : ''}
     </div>
     <table class="doc-items">
       <tr><th>Description</th><th class="num">Qté</th><th class="num">Unité</th><th class="num">Prix unit.</th><th class="num">Montant</th></tr>
@@ -2128,11 +2662,13 @@ function paletteSources() {
     { type: 'Action', label: 'Nouvelle opportunité', run: () => { showView('pipeline'); openDealModal(); } },
     { type: 'Action', label: 'Nouveau client', run: () => { showView('clients'); openClientModal(); } },
     { type: 'Action', label: 'Nouveau service', run: () => { showView('services'); openServiceModal(); } },
+    { type: 'Action', label: 'Nouveau contrat', run: () => { showView('contracts'); newContract(); } },
     { type: 'Action', label: 'Nouveau quart de travail', run: () => { showView('schedule'); openShiftModal(null, todayISO()); } },
     { type: 'Action', label: 'Réglages de l\'entreprise', run: () => openSettings() },
     { type: 'Vue', label: 'Tableau de bord', run: () => showView('dashboard') },
     { type: 'Vue', label: 'Pipeline de vente', run: () => showView('pipeline') },
     { type: 'Vue', label: 'Soumissions', run: () => showView('quotes') },
+    { type: 'Vue', label: 'Contrats', run: () => showView('contracts') },
     { type: 'Vue', label: 'Services et tarifs', run: () => showView('services') },
     { type: 'Vue', label: 'Horaires des équipes', run: () => showView('schedule') },
     { type: 'Vue', label: 'Factures', run: () => showView('invoices') },
@@ -2159,6 +2695,11 @@ function paletteSources() {
   STATE.services.forEach(svc => src.push({
     type: 'Service', label: svc.name, sub: fmtMoney(servicePrice(svc)) + ' /' + svc.unit,
     run: () => { showView('services'); openServiceModal(svc.id); }
+  }));
+  STATE.contracts.forEach(c => src.push({
+    type: 'Contrat', label: c.number + ' — ' + clientName(c.clientId),
+    sub: freqLabel(c.frequency),
+    run: () => { showView('contracts'); openContract(c.id); }
   }));
   return src;
 }

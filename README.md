@@ -1,4 +1,4 @@
-# Lustre — Gestion d'entretien ménager (v3.2)
+# Lustre — Gestion d'entretien ménager (v3.3)
 
 Application web monofichier (`index.html`) pour gérer une entreprise d'entretien ménager.
 Conçue pour un usage par le gestionnaire uniquement — aucun compte utilisateur,
@@ -11,7 +11,8 @@ toutes les données sont stockées localement dans le navigateur (localStorage).
 - **Services & tarifs** — catalogue de services avec prix calculés automatiquement à partir
   des salaires du comité paritaire (entretien léger/lourd) + charges sociales + marge.
   Ajout d'un service à une soumission ou facture en un clic, au prix de la marge du client.
-- **Soumissions** — éditeur de lignes, taxes TPS/TVQ, **versions multiples**, export PDF élégant
+- **Soumissions** — éditeur de lignes, taxes TPS/TVQ, **versions multiples** (v1 conservée), champ **fréquence** affiché sur le PDF, export PDF élégant
+- **Contrats** — convertir une soumission acceptée en contrat (jours de la semaine, équipe, heure, dates) et **activer** : les quarts sont planifiés dans l'horaire automatiquement jusqu'à la date de fin. Modifier puis activer remplace uniquement les quarts futurs non complétés
 - **Horaires** — vue semaine, équipes colorées, quarts assignés aux clients, duplication à la semaine suivante
 - **Factures** — génération depuis une soumission acceptée, suivi payée/impayée/en retard (pas de comptabilité)
 - **Clients** — registre partagé entre tous les modules
