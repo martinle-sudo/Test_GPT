@@ -5,7 +5,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <meta name="theme-color" content="#0b0f12">
-<title>Lustre — Gestion d'entretien ménager v3.0</title>
+<title>Lustre — Gestion d'entretien ménager v3.1</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=JetBrains+Mono:wght@400;500;600&family=Geist:wght@300;400;500;600;700&display=swap" rel="stylesheet">
@@ -461,7 +461,7 @@ main { flex: 1; padding: 26px 30px 60px; max-width: 1280px; min-width: 0; }
 
 <div class="app">
 <aside class="sidebar">
-  <div class="logo"><em>Lu</em>stre<span class="logo-version">v3.0</span></div>
+  <div class="logo"><em>Lu</em>stre<span class="logo-version">v3.1</span></div>
   <button class="nav-btn active" data-view="dashboard" onclick="showView('dashboard')">
     <svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="9" rx="1"/><rect x="14" y="3" width="7" height="5" rx="1"/><rect x="14" y="12" width="7" height="9" rx="1"/><rect x="3" y="16" width="7" height="5" rx="1"/></svg>
     <span>Tableau de bord</span>
@@ -473,6 +473,10 @@ main { flex: 1; padding: 26px 30px 60px; max-width: 1280px; min-width: 0; }
   <button class="nav-btn" data-view="quotes" onclick="showView('quotes')">
     <svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="8" y1="13" x2="16" y2="13"/><line x1="8" y1="17" x2="13" y2="17"/></svg>
     <span>Soumissions</span>
+  </button>
+  <button class="nav-btn" data-view="services" onclick="showView('services')">
+    <svg viewBox="0 0 24 24"><path d="M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z"/><line x1="7" y1="7" x2="7.01" y2="7"/></svg>
+    <span>Services &amp; tarifs</span>
   </button>
   <button class="nav-btn" data-view="schedule" onclick="showView('schedule')">
     <svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
@@ -599,6 +603,22 @@ main { flex: 1; padding: 26px 30px 60px; max-width: 1280px; min-width: 0; }
   <div id="invoiceEditor" style="display:none;"></div>
 </section>
 
+<!-- ============ SERVICES ============ -->
+<section class="view" id="view-services">
+  <div class="view-header">
+    <div>
+      <div class="view-title">Services &amp; tarifs</div>
+      <div class="view-sub">Prix calculés à partir des salaires du comité paritaire — à ajouter à la demande dans une soumission</div>
+    </div>
+    <button class="btn primary" onclick="openServiceModal()">
+      <svg viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+      Nouveau service
+    </button>
+  </div>
+  <div class="panel" id="svcBasis"></div>
+  <div class="panel"><table class="tbl" id="servicesTable"></table></div>
+</section>
+
 <!-- ============ CLIENTS ============ -->
 <section class="view" id="view-clients">
   <div class="view-header">
@@ -638,6 +658,8 @@ const FREQS = ['Hebdomadaire', '2x/semaine', 'Aux 2 semaines', 'Mensuel', 'Ponct
 const CLIENT_TYPES = ['Commercial', 'Résidentiel', 'Condo / Copropriété', 'Bureau', 'Industriel'];
 const UNITS = ['forfait', 'h', 'visite', 'mois', 'pi²'];
 const TEAM_COLORS = ['#45d6c4', '#a78bfa', '#5aa7ff', '#ff8fc7', '#ffb84d', '#5ee08a'];
+const SERVICE_CATS = ['Entretien régulier', 'Désinfection', 'Vitres', 'Planchers', 'Grand ménage', 'Après-construction', 'Extras'];
+const LABOR_TYPES = [['leger', 'Entretien léger'], ['lourd', 'Entretien lourd']];
 
 const STATE = {
   settings: {
@@ -650,7 +672,12 @@ const STATE = {
     tps: 5,
     tvq: 9.975,
     quoteValidity: 30,
-    invoiceTerms: 30
+    invoiceTerms: 30,
+    // Base de calcul des prix — salaires du comité paritaire (modifiables)
+    tauxLeger: 21.50,
+    tauxLourd: 23.50,
+    chargesSociales: 28,   // % de charges sur le salaire (CNESST, RRQ, vacances, fériés…)
+    margeDefaut: 40        // % de marge (markup) par défaut sur le coût
   },
   clients: [],
   deals: [],
@@ -658,7 +685,9 @@ const STATE = {
   invoices: [],
   teams: [],
   shifts: [],
-  seeded: false
+  services: [],
+  seeded: false,
+  servicesSeeded: false
 };
 
 function save() {
@@ -720,6 +749,40 @@ function calcTotals(items, settings) {
   const tvq = sub * (settings.tvq / 100);
   return { sub, tps, tvq, total: sub + tps + tvq };
 }
+
+// ============ TARIFICATION ============
+// Coût horaire chargé = salaire comité paritaire + charges sociales/avantages
+function loadedHourly(type) {
+  const s = STATE.settings;
+  const wage = type === 'lourd' ? s.tauxLourd : s.tauxLeger;
+  return parseNum(wage) * (1 + parseNum(s.chargesSociales) / 100);
+}
+// Coût de revient d'un service (main-d'œuvre chargée + matériel) par unité
+function serviceCost(svc) {
+  return parseNum(svc.laborHours) * loadedHourly(svc.laborType) + parseNum(svc.materialCost);
+}
+// Marge effective d'un service (override propre au service, sinon défaut global)
+function effectiveMargin(svc) {
+  return (svc.margin === '' || svc.margin == null) ? parseNum(STATE.settings.margeDefaut) : parseNum(svc.margin);
+}
+// Arrondi : 2 décimales au pi², au dollar près sinon
+function roundPrice(unit, v) {
+  return unit === 'pi²' ? Math.round(v * 100) / 100 : Math.round(v);
+}
+// Prix de vente suggéré = coût × (1 + marge%)
+function servicePrice(svc, marginPct) {
+  const m = (marginPct == null) ? effectiveMargin(svc) : parseNum(marginPct);
+  return roundPrice(svc.unit, serviceCost(svc) * (1 + m / 100));
+}
+// Profit réel exprimé en % du prix de vente
+function profitOnPrice(cost, price) {
+  return price > 0 ? (price - cost) / price * 100 : 0;
+}
+// Marge appliquée à un client (override client, sinon défaut global)
+function clientMargin(client) {
+  if (client && client.margin != null && client.margin !== '') return parseNum(client.margin);
+  return parseNum(STATE.settings.margeDefaut);
+}
 function showToast(msg) {
   const t = document.getElementById('toast');
   t.textContent = msg;
@@ -732,10 +795,10 @@ function showToast(msg) {
 function seed() {
   if (STATE.seeded || STATE.clients.length) return;
   const today = todayISO();
-  const c1 = { id: uid(), name: 'Clinique Dentaire Sourire', contact: 'Julie Tremblay', phone: '514 555-2231', email: 'admin@sourire.ca', address: '880 boul. Saint-Laurent\nMontréal (Québec)', type: 'Commercial', notes: '' };
-  const c2 = { id: uid(), name: 'Condos Le Riverain', contact: 'Marc Bélanger (syndic)', phone: '450 555-8740', email: 'syndic@riverain.ca', address: '12 rue des Berges\nLongueuil (Québec)', type: 'Condo / Copropriété', notes: 'Aires communes, 3 étages' };
-  const c3 = { id: uid(), name: 'Bureaux TechNord', contact: 'Sarah Nguyen', phone: '514 555-9012', email: 's.nguyen@technord.io', address: '400 av. Viger O., suite 300\nMontréal (Québec)', type: 'Bureau', notes: '' };
-  const c4 = { id: uid(), name: 'Résidence Fam. Gagnon', contact: 'Pierre Gagnon', phone: '438 555-1188', email: 'p.gagnon@gmail.com', address: '25 rue des Érables\nBrossard (Québec)', type: 'Résidentiel', notes: 'Clés sous le pot, chien gentil' };
+  const c1 = { id: uid(), name: 'Clinique Dentaire Sourire', contact: 'Julie Tremblay', phone: '514 555-2231', email: 'admin@sourire.ca', address: '880 boul. Saint-Laurent\nMontréal (Québec)', type: 'Commercial', margin: 45, notes: '' };
+  const c2 = { id: uid(), name: 'Condos Le Riverain', contact: 'Marc Bélanger (syndic)', phone: '450 555-8740', email: 'syndic@riverain.ca', address: '12 rue des Berges\nLongueuil (Québec)', type: 'Condo / Copropriété', margin: 35, notes: 'Aires communes, 3 étages' };
+  const c3 = { id: uid(), name: 'Bureaux TechNord', contact: 'Sarah Nguyen', phone: '514 555-9012', email: 's.nguyen@technord.io', address: '400 av. Viger O., suite 300\nMontréal (Québec)', type: 'Bureau', margin: 40, notes: '' };
+  const c4 = { id: uid(), name: 'Résidence Fam. Gagnon', contact: 'Pierre Gagnon', phone: '438 555-1188', email: 'p.gagnon@gmail.com', address: '25 rue des Érables\nBrossard (Québec)', type: 'Résidentiel', margin: 50, notes: 'Clés sous le pot, chien gentil' };
   STATE.clients = [c1, c2, c3, c4];
 
   STATE.deals = [
@@ -798,6 +861,29 @@ function seed() {
   save();
 }
 
+// Catalogue de services par défaut — prix calculés à partir des salaires
+// du comité paritaire (entretien léger/lourd) + charges + marge.
+function seedServices() {
+  if (STATE.servicesSeeded || (STATE.services && STATE.services.length)) return;
+  const S = (name, category, unit, laborType, laborHours, materialCost) =>
+    ({ id: uid(), name, category, unit, laborType, laborHours, materialCost, margin: '' });
+  STATE.services = [
+    S('Entretien léger de bureau', 'Entretien régulier', 'h', 'leger', 1, 2),
+    S('Entretien général commercial (visite ~2 h)', 'Entretien régulier', 'visite', 'leger', 2, 5),
+    S('Entretien résidentiel (visite ~3 h)', 'Entretien régulier', 'visite', 'leger', 3, 6),
+    S('Forfait mensuel — petit bureau (8 h/mois)', 'Entretien régulier', 'mois', 'leger', 8, 20),
+    S('Désinfection des surfaces de contact', 'Désinfection', 'visite', 'leger', 0.5, 4),
+    S('Lavage de vitres intérieures', 'Vitres', 'h', 'leger', 1, 3),
+    S('Lavage de vitres — forfait petit commerce', 'Vitres', 'forfait', 'leger', 2.5, 8),
+    S('Décapage et cirage de plancher', 'Planchers', 'pi²', 'lourd', 0.02, 0.10),
+    S('Shampooing de tapis', 'Planchers', 'pi²', 'lourd', 0.01, 0.05),
+    S('Grand ménage saisonnier', 'Grand ménage', 'h', 'lourd', 1, 5),
+    S('Nettoyage après construction', 'Après-construction', 'h', 'lourd', 1, 6)
+  ];
+  STATE.servicesSeeded = true;
+  save();
+}
+
 // ============ NAVIGATION ============
 function showView(name) {
   document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
@@ -809,6 +895,7 @@ function showView(name) {
   if (name === 'quotes') { closeQuoteEditor(); renderQuotes(); }
   if (name === 'schedule') renderSchedule();
   if (name === 'invoices') { closeInvoiceEditor(); renderInvoices(); }
+  if (name === 'services') renderServices();
   if (name === 'clients') renderClients();
 }
 
@@ -1038,6 +1125,133 @@ function createQuoteFromDeal(id) {
   showToast('Soumission créée depuis l\'opportunité');
 }
 
+// ============ SERVICES & TARIFS ============
+function renderServices() {
+  const s = STATE.settings;
+  const cl = loadedHourly('leger'), cd = loadedHourly('lourd');
+  document.getElementById('svcBasis').innerHTML = `
+    <div class="panel-title">Base de calcul — salaires du comité paritaire + charges</div>
+    <div class="kpi-grid" style="margin-bottom:6px;">
+      <div class="kpi"><div class="kpi-label">Coût horaire chargé — léger</div>
+        <div class="kpi-value accent">${fmtMoney(cl)}</div>
+        <div class="kpi-hint">${fmtMoney(s.tauxLeger)}/h + ${s.chargesSociales} % de charges</div></div>
+      <div class="kpi"><div class="kpi-label">Coût horaire chargé — lourd</div>
+        <div class="kpi-value accent">${fmtMoney(cd)}</div>
+        <div class="kpi-hint">${fmtMoney(s.tauxLourd)}/h + ${s.chargesSociales} % de charges</div></div>
+      <div class="kpi"><div class="kpi-label">Marge par défaut</div>
+        <div class="kpi-value">${s.margeDefaut} %</div>
+        <div class="kpi-hint">markup sur le coût · ajustable par client</div></div>
+    </div>
+    <button class="btn sm" onclick="openSettings()">Modifier la base de prix</button>`;
+
+  const rows = STATE.services.map(svc => {
+    const cost = serviceCost(svc);
+    const m = effectiveMargin(svc);
+    const price = servicePrice(svc);
+    const type = svc.laborType === 'lourd' ? 'lourd' : 'léger';
+    return `<tr class="clickable" onclick="openServiceModal('${svc.id}')">
+      <td><strong>${escapeHTML(svc.name)}</strong><div class="list-row-sub">${escapeHTML(svc.category)}</div></td>
+      <td>${svc.laborHours} h <span class="list-row-sub">(${type})</span>${parseNum(svc.materialCost) ? `<div class="list-row-sub">+ ${fmtMoney(svc.materialCost)} matériel</div>` : ''}</td>
+      <td class="num">${fmtMoney(cost)}</td>
+      <td class="num">${m} %</td>
+      <td class="num"><strong>${fmtMoney(price)}</strong> /${escapeHTML(svc.unit)}<div class="list-row-sub">profit ${profitOnPrice(cost, price).toFixed(0)} %</div></td>
+    </tr>`;
+  }).join('');
+  document.getElementById('servicesTable').innerHTML = `
+    <tr><th>Service</th><th>Main-d'œuvre</th><th class="num">Coût</th><th class="num">Marge</th><th class="num">Prix suggéré</th></tr>
+    ${rows || '<tr><td colspan="5"><div class="empty-note">Aucun service au catalogue.</div></td></tr>'}`;
+}
+function openServiceModal(id) {
+  const svc = id ? STATE.services.find(x => x.id === id) : null;
+  openModal(`
+    <div class="modal-title">${svc ? 'Modifier le service' : 'Nouveau service'}</div>
+    <div class="field"><label>Nom du service</label><input id="svcName" value="${svc ? escapeHTML(svc.name) : ''}" oninput="svcPreview()" placeholder="Ex: Entretien général commercial"></div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
+      <div class="field"><label>Catégorie</label><select id="svcCat">${SERVICE_CATS.map(c => `<option ${svc && svc.category === c ? 'selected' : ''}>${c}</option>`).join('')}</select></div>
+      <div class="field"><label>Unité de facturation</label><select id="svcUnit" onchange="svcPreview()">${UNITS.map(u => `<option ${svc && svc.unit === u ? 'selected' : (!svc && u === 'visite' ? 'selected' : '')}>${u}</option>`).join('')}</select></div>
+      <div class="field"><label>Type de main-d'œuvre</label><select id="svcLaborType" onchange="svcPreview()">${LABOR_TYPES.map(([k, l]) => `<option value="${k}" ${svc && svc.laborType === k ? 'selected' : ''}>${l}</option>`).join('')}</select></div>
+      <div class="field"><label>Heures par unité</label><input id="svcHours" inputmode="decimal" value="${svc ? svc.laborHours : '1'}" oninput="svcPreview()"></div>
+      <div class="field"><label>Coût matériel / unité ($)</label><input id="svcMaterial" inputmode="decimal" value="${svc ? svc.materialCost : '0'}" oninput="svcPreview()"></div>
+      <div class="field"><label>Marge (%) — vide = défaut (${STATE.settings.margeDefaut} %)</label><input id="svcMargin" inputmode="decimal" value="${svc && svc.margin !== '' && svc.margin != null ? svc.margin : ''}" placeholder="${STATE.settings.margeDefaut}" oninput="svcPreview()"></div>
+    </div>
+    <div class="archived-banner" id="svcPreview" style="background:var(--accent-glow);border-color:var(--accent-dim);color:var(--text);"></div>
+    <div class="modal-actions">
+      ${svc ? `<button class="btn danger" onclick="deleteService('${svc.id}')">Supprimer</button>` : ''}
+      <button class="btn ghost" onclick="closeModal()">Annuler</button>
+      <button class="btn primary" onclick="saveService('${svc ? svc.id : ''}')">Enregistrer</button>
+    </div>`);
+  svcPreview();
+}
+function svcPreview() {
+  const g = x => document.getElementById(x).value;
+  const draft = {
+    unit: g('svcUnit'), laborType: g('svcLaborType'),
+    laborHours: parseNum(g('svcHours')), materialCost: parseNum(g('svcMaterial')), margin: g('svcMargin')
+  };
+  const cost = serviceCost(draft);
+  const m = g('svcMargin').trim() === '' ? parseNum(STATE.settings.margeDefaut) : parseNum(g('svcMargin'));
+  const price = servicePrice(draft, m);
+  document.getElementById('svcPreview').innerHTML =
+    `Coût de revient <strong>${fmtMoney(cost)}</strong> · marge ${m} % → prix suggéré <strong style="color:var(--accent)">${fmtMoney(price)} / ${draft.unit}</strong> · profit réel ${profitOnPrice(cost, price).toFixed(0)} %`;
+}
+function saveService(id) {
+  const g = x => document.getElementById(x).value;
+  const marginRaw = g('svcMargin').trim();
+  const data = {
+    name: g('svcName').trim() || 'Service sans nom',
+    category: g('svcCat'),
+    unit: g('svcUnit'),
+    laborType: g('svcLaborType'),
+    laborHours: parseNum(g('svcHours')),
+    materialCost: parseNum(g('svcMaterial')),
+    margin: marginRaw === '' ? '' : parseNum(marginRaw)
+  };
+  if (id) Object.assign(STATE.services.find(x => x.id === id), data);
+  else STATE.services.push({ id: uid(), ...data });
+  save(); closeModal(); renderServices(); showToast('Service enregistré');
+}
+function deleteService(id) {
+  STATE.services = STATE.services.filter(x => x.id !== id);
+  save(); closeModal(); renderServices();
+}
+// Sélecteur de service pour insérer une ligne dans une soumission/facture
+function openServicePicker(target) {
+  const doc = target === 'quote' ? curQuote() : curInv();
+  if (!doc) return;
+  if (!STATE.services.length) { showToast('Aucun service au catalogue'); showView('services'); return; }
+  const client = clientById(doc.clientId);
+  const margin = clientMargin(client);
+  const rows = STATE.services.map(svc => {
+    const price = servicePrice(svc, margin);
+    return `<div class="list-row" onclick="insertService('${target}','${svc.id}')">
+      <div class="list-row-main">
+        <div class="list-row-title">${escapeHTML(svc.name)}</div>
+        <div class="list-row-sub">${escapeHTML(svc.category)}</div>
+      </div>
+      <div class="list-row-end">${fmtMoney(price)} /${escapeHTML(svc.unit)}</div>
+    </div>`;
+  }).join('');
+  openModal(`
+    <div class="modal-title">Ajouter un service</div>
+    <div class="view-sub" style="margin-bottom:12px;">Prix calculé avec la marge du client${client ? ' « ' + escapeHTML(client.name) + ' »' : ''} : <strong style="color:var(--accent)">${margin} %</strong></div>
+    ${rows}
+    <div class="modal-actions"><button class="btn ghost" onclick="closeModal()">Fermer</button></div>`);
+}
+function insertService(target, svcId) {
+  const svc = STATE.services.find(x => x.id === svcId);
+  if (!svc) return;
+  const doc = target === 'quote' ? curQuote() : curInv();
+  const client = clientById(doc.clientId);
+  const price = servicePrice(svc, clientMargin(client));
+  const items = target === 'quote' ? curRev().items : doc.items;
+  const line = { desc: svc.name, qty: 1, unit: svc.unit, price };
+  const firstBlank = items.length === 1 && !items[0].desc && !parseNum(items[0].price);
+  if (firstBlank) items[0] = line; else items.push(line);
+  save(); closeModal();
+  if (target === 'quote') renderQuoteEditor(); else renderInvoiceEditor();
+  showToast('Service ajouté · ' + fmtMoney(price));
+}
+
 // ============ CLIENTS ============
 function renderClients() {
   const rows = STATE.clients.map(c => `
@@ -1045,11 +1259,12 @@ function renderClients() {
       <td><strong>${escapeHTML(c.name)}</strong><div class="list-row-sub">${escapeHTML(c.contact || '')}</div></td>
       <td><span class="badge">${escapeHTML(c.type || '')}</span></td>
       <td>${escapeHTML(c.phone || '')}<div class="list-row-sub">${escapeHTML(c.email || '')}</div></td>
+      <td class="num"><span class="badge accent">${clientMargin(c)} %</span></td>
       <td class="num">${STATE.invoices.filter(i => i.clientId === c.id).length} fact.</td>
     </tr>`).join('');
   document.getElementById('clientsTable').innerHTML = `
-    <tr><th>Client</th><th>Type</th><th>Contact</th><th style="text-align:right">Historique</th></tr>
-    ${rows || '<tr><td colspan="4"><div class="empty-note">Aucun client.</div></td></tr>'}`;
+    <tr><th>Client</th><th>Type</th><th>Contact</th><th style="text-align:right">Marge</th><th style="text-align:right">Historique</th></tr>
+    ${rows || '<tr><td colspan="5"><div class="empty-note">Aucun client.</div></td></tr>'}`;
 }
 function openClientModal(id) {
   const c = id ? clientById(id) : null;
@@ -1057,7 +1272,10 @@ function openClientModal(id) {
     <div class="modal-title">${c ? 'Modifier le client' : 'Nouveau client'}</div>
     <div class="field"><label>Nom (entreprise ou particulier)</label><input id="cName" value="${c ? escapeHTML(c.name) : ''}"></div>
     <div class="field"><label>Personne contact</label><input id="cContact" value="${c ? escapeHTML(c.contact || '') : ''}"></div>
-    <div class="field"><label>Type</label><select id="cType">${CLIENT_TYPES.map(t => `<option ${c && c.type === t ? 'selected' : ''}>${t}</option>`).join('')}</select></div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
+      <div class="field"><label>Type</label><select id="cType">${CLIENT_TYPES.map(t => `<option ${c && c.type === t ? 'selected' : ''}>${t}</option>`).join('')}</select></div>
+      <div class="field"><label>Marge appliquée (%) — vide = défaut (${STATE.settings.margeDefaut} %)</label><input id="cMargin" inputmode="decimal" value="${c && c.margin !== '' && c.margin != null ? c.margin : ''}" placeholder="${STATE.settings.margeDefaut}"></div>
+    </div>
     <div class="field"><label>Téléphone</label><input id="cPhone" value="${c ? escapeHTML(c.phone || '') : ''}"></div>
     <div class="field"><label>Courriel</label><input id="cEmail" value="${c ? escapeHTML(c.email || '') : ''}"></div>
     <div class="field"><label>Adresse</label><textarea id="cAddress">${c ? escapeHTML(c.address || '') : ''}</textarea></div>
@@ -1070,10 +1288,12 @@ function openClientModal(id) {
 }
 function saveClient(id) {
   const get = x => document.getElementById(x).value;
+  const marginRaw = get('cMargin').trim();
   const data = {
     name: get('cName').trim() || 'Sans nom',
     contact: get('cContact').trim(),
     type: get('cType'),
+    margin: marginRaw === '' ? null : parseNum(marginRaw),
     phone: get('cPhone').trim(),
     email: get('cEmail').trim(),
     address: get('cAddress'),
@@ -1207,7 +1427,10 @@ function renderQuoteEditor() {
             <td>${readonly ? '' : `<button class="item-del" onclick="removeItem(${i})">×</button>`}</td>
           </tr>`).join('')}
       </table>
-      ${readonly ? '' : '<button class="btn sm ghost" style="margin-top:10px" onclick="addItem()">+ Ajouter une ligne</button>'}
+      ${readonly ? '' : `<div style="display:flex;gap:8px;margin-top:10px;flex-wrap:wrap;">
+        <button class="btn sm" onclick="openServicePicker('quote')">+ Service du catalogue</button>
+        <button class="btn sm ghost" onclick="addItem()">+ Ligne vide</button>
+      </div>`}
 
       <div class="totals-box">
         <div class="totals-line"><span>Sous-total</span><span class="totals-val">${fmtMoney(t.sub)}</span></div>
@@ -1394,7 +1617,10 @@ function renderInvoiceEditor() {
             <td><button class="item-del" onclick="removeInvItem(${i})">×</button></td>
           </tr>`).join('')}
       </table>
-      <button class="btn sm ghost" style="margin-top:10px" onclick="addInvItem()">+ Ajouter une ligne</button>
+      <div style="display:flex;gap:8px;margin-top:10px;flex-wrap:wrap;">
+        <button class="btn sm" onclick="openServicePicker('invoice')">+ Service du catalogue</button>
+        <button class="btn sm ghost" onclick="addInvItem()">+ Ligne vide</button>
+      </div>
 
       <div class="totals-box">
         <div class="totals-line"><span>Sous-total</span><span class="totals-val">${fmtMoney(t.sub)}</span></div>
@@ -1586,6 +1812,13 @@ function openSettings() {
       <div class="field"><label>Validité soumission (jours)</label><input id="stValidity" inputmode="numeric" value="${s.quoteValidity}"></div>
       <div class="field"><label>Terme facture (jours)</label><input id="stTerms" inputmode="numeric" value="${s.invoiceTerms}"></div>
     </div>
+    <div class="panel-title" style="margin:18px 0 10px;">Base de prix — salaires du comité paritaire</div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
+      <div class="field"><label>Taux horaire — entretien léger ($)</label><input id="stTauxLeger" inputmode="decimal" value="${s.tauxLeger}"></div>
+      <div class="field"><label>Taux horaire — entretien lourd ($)</label><input id="stTauxLourd" inputmode="decimal" value="${s.tauxLourd}"></div>
+      <div class="field"><label>Charges sociales / avantages (%)</label><input id="stCharges" inputmode="decimal" value="${s.chargesSociales}"></div>
+      <div class="field"><label>Marge par défaut (%)</label><input id="stMarge" inputmode="decimal" value="${s.margeDefaut}"></div>
+    </div>
     <div class="modal-actions">
       <button class="btn danger" onclick="resetAllData()">Réinitialiser les données</button>
       <button class="btn ghost" onclick="closeModal()">Annuler</button>
@@ -1604,7 +1837,11 @@ function saveSettings() {
     tps: parseNum(get('stTps')),
     tvq: parseNum(get('stTvq')),
     quoteValidity: parseNum(get('stValidity')) || 30,
-    invoiceTerms: parseNum(get('stTerms')) || 30
+    invoiceTerms: parseNum(get('stTerms')) || 30,
+    tauxLeger: parseNum(get('stTauxLeger')),
+    tauxLourd: parseNum(get('stTauxLourd')),
+    chargesSociales: parseNum(get('stCharges')),
+    margeDefaut: parseNum(get('stMarge'))
   });
   save(); closeModal(); renderDashboard(); showToast('Réglages enregistrés');
 }
@@ -1684,6 +1921,7 @@ function printDoc(kind, doc, rev) {
 // ============ INIT ============
 load();
 seed();
+seedServices();   // garantit le catalogue par défaut, même pour les données v3.0 existantes
 renderDashboard();
 </script>
 </body>
