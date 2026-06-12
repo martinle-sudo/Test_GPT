@@ -5,7 +5,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <meta name="theme-color" content="#0b0f12">
-<title>Lustre — Gestion d'entretien ménager v3.4</title>
+<title>Lustre — Gestion d'entretien ménager v3.5</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=JetBrains+Mono:wght@400;500;600&family=Geist:wght@300;400;500;600;700&display=swap" rel="stylesheet">
@@ -267,6 +267,7 @@ main { flex: 1; padding: 28px 36px 60px; max-width: 1340px; min-width: 0; }
 .deal-card-foot { display: flex; justify-content: space-between; align-items: center; }
 .deal-card-value { font-family: 'JetBrains Mono', monospace; font-size: 12px; color: var(--accent); font-weight: 600; }
 .deal-card-freq { font-size: 10.5px; color: var(--text-subtle); }
+.deal-card-lost { font-size: 10.5px; color: var(--danger); margin-top: 7px; padding-top: 7px; border-top: 1px dashed var(--border); font-style: italic; }
 
 /* ============ TABLES ============ */
 .tbl { width: 100%; border-collapse: collapse; }
@@ -637,15 +638,25 @@ kbd {
 
 /* --- Contrat (PDF) --- */
 .contract-doc { line-height: 1.55; }
-.contract-h1 { font-family: 'Instrument Serif', serif; font-size: 24px; font-style: italic; letter-spacing: -0.01em; color: #15191c; margin: 18px 0 16px; text-align: center; font-weight: normal; }
-.contract-h2 { font-family: 'Geist', sans-serif; font-size: 13px; font-weight: 600; color: #15191c; margin: 16px 0 6px; text-transform: uppercase; letter-spacing: 0.06em; }
-.contract-p { font-size: 11px; color: #2c343a; margin: 0 0 9px; text-align: justify; }
+.contract-h1 { font-family: 'Instrument Serif', serif; font-size: 26px; font-style: italic; letter-spacing: -0.01em; color: #15191c; margin: 0 0 18px; text-align: center; font-weight: normal; }
+.contract-h2 { font-family: 'Geist', sans-serif; font-size: 12.5px; font-weight: 600; color: #15191c; margin: 14px 0 5px; text-transform: uppercase; letter-spacing: 0.06em; }
+.contract-p { font-size: 11px; color: #2c343a; margin: 0 0 8px; text-align: justify; }
 .contract-p strong { color: #15191c; }
 .contract-p em { color: #4a5560; }
 .contract-pagebreak { page-break-before: always; height: 0; }
+.contract-letter { min-height: 92vh; display: flex; flex-direction: column; }
+.contract-letter .contract-p { text-align: left; font-size: 12px; line-height: 1.65; margin-bottom: 12px; }
+.contract-cover { min-height: 92vh; display: flex; flex-direction: column; }
+.contract-toc { font-size: 12.5px; color: #2c343a; padding-left: 22px; line-height: 1.9; }
+.contract-toc ul { padding-left: 22px; font-size: 11.5px; color: #4a5560; line-height: 1.7; }
+.contract-list { padding-left: 22px; font-size: 11.5px; color: #2c343a; line-height: 1.8; }
+.contract-list li { margin-bottom: 5px; }
+.contract-refs { display: grid; grid-template-columns: 1fr 1fr; gap: 14px 24px; margin-top: 14px; }
+.contract-ref { padding: 12px 14px; border: 1px solid #edf0f2; border-radius: 8px; font-size: 11px; line-height: 1.5; color: #2c343a; }
 @media print {
-  .contract-h2, .doc-sign { page-break-inside: avoid; }
+  .contract-h2, .doc-sign, .contract-ref { page-break-inside: avoid; }
   .contract-p { orphans: 3; widows: 3; }
+  .contract-letter, .contract-cover { min-height: auto; }
 }
 </style>
 </head>
@@ -659,7 +670,7 @@ kbd {
       <path d="M5 27 L 22 10 M 12 21 L 18 17 M 16 17 L 20 13" stroke="#ffffff" stroke-opacity="0.55" stroke-width="1.2" stroke-linecap="round" fill="none"/>
     </svg>
     <span><em>Lu</em>stre</span>
-    <span class="logo-version">v3.4</span>
+    <span class="logo-version">v3.5</span>
   </div>
   <button class="nav-btn" onclick="openPalette()" aria-label="Recherche rapide">
     <svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
@@ -754,10 +765,21 @@ kbd {
       <div class="view-title">Pipeline de vente</div>
       <div class="view-sub">Glisse les cartes d'une étape à l'autre</div>
     </div>
-    <button class="btn primary" onclick="openDealModal()">
-      <svg viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
-      Nouvelle opportunité
-    </button>
+    <div style="display:flex;gap:10px;align-items:center;">
+      <label style="font-size:12px;color:var(--text-muted);white-space:nowrap;">Trier&nbsp;par</label>
+      <select id="pipelineSort" onchange="setPipelineSort(this.value)" style="width:auto;min-width:170px;padding:6px 10px;font-size:12.5px;">
+        <option value="value-desc">Valeur (haute → basse)</option>
+        <option value="value-asc">Valeur (basse → haute)</option>
+        <option value="recent">Récemment ajoutées</option>
+        <option value="oldest">Plus anciennes</option>
+        <option value="client">Client (A → Z)</option>
+        <option value="title">Titre (A → Z)</option>
+      </select>
+      <button class="btn primary" onclick="openDealModal()">
+        <svg viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+        Nouvelle opportunité
+      </button>
+    </div>
   </div>
   <div class="kanban" id="kanban"></div>
 </section>
@@ -942,12 +964,24 @@ const STATE = {
     margeDefaut: 40,       // % de marge (markup) par défaut sur le coût
     // Clauses contractuelles par défaut (modifiables)
     signerName: '',
-    signerTitle: 'Présidence',
+    signerTitle: 'Directeur, développement des affaires',
+    signerCell: '',
+    signerEmail: '',
     contractNoticeDays: 60,
     contractNonSolMonths: 12,
-    contractInsuranceAmount: 2000000,
-    contractIndexationPct: 3,
-    contractJudicialDistrict: 'Montréal'
+    contractInsuranceAmount: 5000000,
+    contractDishonestyAmount: 25000,
+    insurancePolicy: '',
+    cssNumber: '',
+    comiteParitaireNum: '',
+    extraWorkHourlyRate: 35,
+    extraWorkMinHours: 3,
+    extraWorkPaymentDays: 45,
+    slogan: 'Travaillez dans un environnement sain.',
+    website: '',
+    referencesText: '',
+    inclusionsText: 'Tous les produits de nettoyage, papiers hygiéniques, papiers à main, savon à main, sacs à ordures.',
+    exclusionsText: 'Tubes fluorescents et transformateurs.'
   },
   cloud: { clientId: '', connected: false, email: '', fileId: '', lastSyncAt: 0 },
   updatedAt: 0,
@@ -1103,7 +1137,8 @@ function seed() {
     { id: uid(), clientId: c3.id, title: 'Entretien bureaux 3x/sem', value: 2400, freq: '2x/semaine', stage: 'nego', notes: 'Veut commencer le mois prochain', createdAt: Date.now() - 12*864e5 },
     { id: uid(), clientId: c2.id, title: 'Aires communes + vitres', value: 1850, freq: 'Hebdomadaire', stage: 'quote', notes: '', createdAt: Date.now() - 9*864e5, sentAt: Date.now() - 9*864e5 },
     { id: uid(), clientId: c4.id, title: 'Grand ménage printemps', value: 650, freq: 'Ponctuel', stage: 'contact', notes: 'Rappeler jeudi', createdAt: Date.now() - 3*864e5 },
-    { id: uid(), clientId: c1.id, title: 'Désinfection hebdo clinique', value: 1200, freq: 'Hebdomadaire', stage: 'won', notes: '', createdAt: Date.now() - 30*864e5 }
+    { id: uid(), clientId: c1.id, title: 'Désinfection hebdo clinique', value: 1200, freq: 'Hebdomadaire', stage: 'won', notes: '', createdAt: Date.now() - 30*864e5 },
+    { id: uid(), clientId: c4.id, title: 'Entretien copropriété 12 logements', value: 1450, freq: '2x/semaine', stage: 'lost', notes: '', createdAt: Date.now() - 25*864e5, lostAt: Date.now() - 14*864e5, lostReason: 'Prix trop élevé — Concurrent à 1100$/mois, refus poli par courriel.' }
   ];
 
   const t1 = { id: uid(), name: 'Équipe A', color: TEAM_COLORS[0], members: 'Maria, Josée' };
@@ -1303,10 +1338,29 @@ function renderDashboard() {
 
 // ============ PIPELINE ============
 let DRAG_DEAL_ID = null;
+const PIPELINE_SORTS = {
+  'value-desc': (a, b) => (b.value || 0) - (a.value || 0),
+  'value-asc':  (a, b) => (a.value || 0) - (b.value || 0),
+  'recent':     (a, b) => (b.createdAt || 0) - (a.createdAt || 0),
+  'oldest':     (a, b) => (a.createdAt || 0) - (b.createdAt || 0),
+  'client':     (a, b) => clientName(a.clientId).localeCompare(clientName(b.clientId), 'fr'),
+  'title':      (a, b) => String(a.title || '').localeCompare(String(b.title || ''), 'fr')
+};
+function setPipelineSort(key) {
+  if (!PIPELINE_SORTS[key]) return;
+  STATE.pipelineSort = key;
+  save({ skipBump: true });
+  renderPipeline();
+}
 function renderPipeline() {
+  const sortKey = STATE.pipelineSort && PIPELINE_SORTS[STATE.pipelineSort] ? STATE.pipelineSort : 'recent';
+  const sortFn = PIPELINE_SORTS[sortKey];
+  const sortSel = document.getElementById('pipelineSort');
+  if (sortSel) sortSel.value = sortKey;
+
   const kb = document.getElementById('kanban');
   kb.innerHTML = STAGES.map(([key, label]) => {
-    const deals = STATE.deals.filter(d => d.stage === key);
+    const deals = STATE.deals.filter(d => d.stage === key).slice().sort(sortFn);
     const sum = deals.reduce((s, d) => s + (d.value || 0), 0);
     return `<div class="kanban-col" data-stage="${key}"
                  ondragover="dealDragOver(event)" ondragleave="dealDragLeave(event)" ondrop="dealDrop(event,'${key}')">
@@ -1325,6 +1379,7 @@ function renderPipeline() {
               <span class="deal-card-value">${fmtMoney(d.value)}/mois</span>
               <span class="deal-card-freq">${escapeHTML(d.freq || '')}</span>
             </div>
+            ${d.stage === 'lost' && d.lostReason ? `<div class="deal-card-lost" title="${escapeHTML(d.lostReason)}">✕ ${escapeHTML(d.lostReason.split('\n')[0].slice(0, 60))}${d.lostReason.length > 60 ? '…' : ''}</div>` : ''}
           </div>`).join('')}
       </div>
     </div>`;
@@ -1348,14 +1403,74 @@ function dealDragLeave(e) {
 }
 function dealDrop(e, stage) {
   e.preventDefault();
+  document.querySelectorAll('.kanban-col.drag-over').forEach(el => el.classList.remove('drag-over'));
   const id = DRAG_DEAL_ID || e.dataTransfer.getData('text/plain');
   const deal = STATE.deals.find(d => d.id === id);
   if (!deal) return;
+  if (stage === deal.stage) return;
+  applyDealStage(deal, stage);
+}
+function applyDealStage(deal, stage) {
+  if (stage === 'lost') {
+    askLostReason(deal, (reason) => {
+      deal.stage = 'lost';
+      deal.lostReason = reason;
+      deal.lostAt = Date.now();
+      save(); renderPipeline();
+      showToast('Opportunité marquée perdue · raison enregistrée');
+    });
+    return;
+  }
+  // Sortie de "lost" → on efface la raison (la perte n'est plus actuelle)
+  if (deal.stage === 'lost' && stage !== 'lost') {
+    delete deal.lostReason;
+    delete deal.lostAt;
+  }
   if (stage === 'quote' && deal.stage !== 'quote') deal.sentAt = Date.now();
   deal.stage = stage;
-  save();
-  renderPipeline();
+  save(); renderPipeline();
   if (stage === 'won') showToast('🎉 Affaire gagnée — pense à créer la facture');
+}
+const LOST_REASONS = [
+  'Prix trop élevé',
+  'Concurrent retenu',
+  'Pas de réponse / silence radio',
+  'Budget reporté',
+  'Besoin annulé',
+  'Mauvais timing',
+  'Autre'
+];
+function askLostReason(deal, onSubmit) {
+  const id = deal.id;
+  openModal(`
+    <div class="modal-title">Marquer comme perdue</div>
+    <div class="kpi-hint" style="margin:-4px 0 14px;">Indique pourquoi cette opportunité est perdue. Ces données te serviront à analyser le pipeline et améliorer ton offre.</div>
+    <div class="field"><label>Raison principale <span style="color:var(--danger)">*</span></label>
+      <select id="lostReasonCat" onchange="document.getElementById('lostReasonText').focus()">
+        <option value="">— Choisir —</option>
+        ${LOST_REASONS.map(r => `<option value="${escapeHTML(r)}">${escapeHTML(r)}</option>`).join('')}
+      </select>
+    </div>
+    <div class="field"><label>Détails (optionnel mais recommandé)</label>
+      <textarea id="lostReasonText" rows="3" placeholder="Concurrent à 1100$/mois, refus polite par courriel du 12 juin…"></textarea>
+    </div>
+    <div class="modal-actions">
+      <button class="btn ghost" onclick="closeModal()">Annuler</button>
+      <button class="btn danger" onclick="confirmLostReason('${id}')">Confirmer la perte</button>
+    </div>
+  `);
+  LOST_DEAL_CALLBACK = onSubmit;
+  setTimeout(() => { const el = document.getElementById('lostReasonCat'); if (el) el.focus(); }, 60);
+}
+let LOST_DEAL_CALLBACK = null;
+function confirmLostReason(dealId) {
+  const cat = document.getElementById('lostReasonCat').value;
+  const txt = document.getElementById('lostReasonText').value.trim();
+  if (!cat) { showToast('Choisis une raison principale', { variant: 'error' }); return; }
+  const reason = txt ? cat + ' — ' + txt : cat;
+  const cb = LOST_DEAL_CALLBACK; LOST_DEAL_CALLBACK = null;
+  closeModal();
+  if (cb) cb(reason);
 }
 
 function clientOptions(selectedId) {
@@ -1372,6 +1487,11 @@ function openDealModal(id) {
     <div class="field"><label>Valeur mensuelle estimée ($)</label><input id="dealValue" inputmode="decimal" value="${deal ? deal.value : ''}" placeholder="1200"></div>
     <div class="field"><label>Fréquence</label><select id="dealFreq">${FREQS.map(f => `<option ${deal && deal.freq === f ? 'selected' : ''}>${f}</option>`).join('')}</select></div>
     <div class="field"><label>Étape</label><select id="dealStage">${STAGES.map(([k,l]) => `<option value="${k}" ${deal && deal.stage === k ? 'selected' : ''}>${l}</option>`).join('')}</select></div>
+    ${deal && deal.stage === 'lost' && deal.lostReason ? `
+      <div class="field"><label>Raison de la perte</label>
+        <textarea id="dealLostShown" rows="2" disabled style="opacity:0.85;">${escapeHTML(deal.lostReason)}</textarea>
+        <div class="kpi-hint">Pour modifier la raison, change l'étape puis remets-la sur Perdu.</div>
+      </div>` : ''}
     <div class="field"><label>Notes</label><textarea id="dealNotes">${deal ? escapeHTML(deal.notes || '') : ''}</textarea></div>
     <div class="modal-actions">
       ${deal ? `<button class="btn danger" onclick="deleteDeal('${deal.id}')">Supprimer</button>
@@ -1391,14 +1511,42 @@ function saveDeal(id) {
     stage: get('dealStage'),
     notes: get('dealNotes')
   };
-  if (id) {
-    const deal = STATE.deals.find(d => d.id === id);
-    if (deal.stage !== 'quote' && data.stage === 'quote') deal.sentAt = Date.now();
-    Object.assign(deal, data);
-  } else {
-    STATE.deals.push({ id: uid(), createdAt: Date.now(), ...data });
+  const persistNew = () => {
+    if (id) {
+      const deal = STATE.deals.find(d => d.id === id);
+      // Sortir manuellement de "lost" → on retire la raison
+      if (deal.stage === 'lost' && data.stage !== 'lost') {
+        delete deal.lostReason; delete deal.lostAt;
+      }
+      if (deal.stage !== 'quote' && data.stage === 'quote') deal.sentAt = Date.now();
+      Object.assign(deal, data);
+    } else {
+      STATE.deals.push({ id: uid(), createdAt: Date.now(), ...data });
+    }
+    save(); closeModal(); renderPipeline(); showToast('Opportunité enregistrée');
+  };
+  // Si on passe à "perdu" → demander la raison avant de sauvegarder
+  const existing = id ? STATE.deals.find(d => d.id === id) : null;
+  const transitionToLost = data.stage === 'lost' && (!existing || existing.stage !== 'lost');
+  if (transitionToLost) {
+    closeModal();
+    const stub = existing || { id: 'new', stage: '' };
+    askLostReason(stub, (reason) => {
+      // Réouvre la modale invisible pour persister — on injecte la raison directement
+      data.lostReason = reason;
+      data.lostAt = Date.now();
+      if (id) {
+        const deal = STATE.deals.find(d => d.id === id);
+        Object.assign(deal, data);
+      } else {
+        STATE.deals.push({ id: uid(), createdAt: Date.now(), ...data });
+      }
+      save(); renderPipeline();
+      showToast('Opportunité perdue · raison enregistrée');
+    });
+    return;
   }
-  save(); closeModal(); renderPipeline(); showToast('Opportunité enregistrée');
+  persistNew();
 }
 function deleteDeal(id) {
   const idx = STATE.deals.findIndex(d => d.id === id);
@@ -2587,15 +2735,36 @@ function openSettings() {
       <div class="field"><label>Charges sociales / avantages (%)</label><input id="stCharges" inputmode="decimal" value="${s.chargesSociales}"></div>
       <div class="field"><label>Marge par défaut (%)</label><input id="stMarge" inputmode="decimal" value="${s.margeDefaut}"></div>
     </div>
-    <div class="panel-title" style="margin:18px 0 10px;">Clauses contractuelles par défaut</div>
+    <div class="panel-title" style="margin:18px 0 10px;">Offre de services — signataire et coordonnées</div>
     <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
       <div class="field"><label>Signataire (nom)</label><input id="stSignerName" value="${escapeHTML(s.signerName || '')}"></div>
       <div class="field"><label>Signataire (titre)</label><input id="stSignerTitle" value="${escapeHTML(s.signerTitle || '')}"></div>
+      <div class="field"><label>Signataire — cellulaire</label><input id="stSignerCell" value="${escapeHTML(s.signerCell || '')}"></div>
+      <div class="field"><label>Signataire — courriel</label><input id="stSignerEmail" value="${escapeHTML(s.signerEmail || '')}"></div>
+      <div class="field"><label>Slogan / accroche</label><input id="stSlogan" value="${escapeHTML(s.slogan || '')}"></div>
+      <div class="field"><label>Site web</label><input id="stWebsite" value="${escapeHTML(s.website || '')}"></div>
+    </div>
+
+    <div class="panel-title" style="margin:18px 0 10px;">Spécifications générales du contrat</div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
+      <div class="field"><label>Assurance responsabilité civile ($)</label><input id="stIns" inputmode="numeric" value="${s.contractInsuranceAmount}"></div>
+      <div class="field"><label>Couverture malhonnêteté ($)</label><input id="stDisAmt" inputmode="numeric" value="${s.contractDishonestyAmount}"></div>
+      <div class="field"><label>Police d'assurance (n°)</label><input id="stInsPol" value="${escapeHTML(s.insurancePolicy || '')}"></div>
+      <div class="field"><label>N° CNESST / CSST</label><input id="stCss" value="${escapeHTML(s.cssNumber || '')}"></div>
+      <div class="field"><label>N° Comité paritaire</label><input id="stComite" value="${escapeHTML(s.comiteParitaireNum || '')}"></div>
       <div class="field"><label>Préavis de résiliation (jours)</label><input id="stNotice" inputmode="numeric" value="${s.contractNoticeDays}"></div>
       <div class="field"><label>Non-sollicitation (mois)</label><input id="stNonSol" inputmode="numeric" value="${s.contractNonSolMonths}"></div>
-      <div class="field"><label>Assurance responsabilité ($)</label><input id="stIns" inputmode="numeric" value="${s.contractInsuranceAmount}"></div>
-      <div class="field"><label>Indexation annuelle (%)</label><input id="stIdx" inputmode="decimal" value="${s.contractIndexationPct}"></div>
-      <div class="field"><label>District judiciaire</label><input id="stDistrict" value="${escapeHTML(s.contractJudicialDistrict || '')}"></div>
+      <div class="field"><label>Taux horaire travaux sup. ($)</label><input id="stExtraRate" inputmode="decimal" value="${s.extraWorkHourlyRate}"></div>
+      <div class="field"><label>Minimum facturable (heures)</label><input id="stExtraMin" inputmode="numeric" value="${s.extraWorkMinHours}"></div>
+      <div class="field"><label>Délai paiement travaux sup. (jours)</label><input id="stExtraDays" inputmode="numeric" value="${s.extraWorkPaymentDays}"></div>
+    </div>
+    <div class="field"><label>Inclus dans le forfait</label>
+      <textarea id="stIncl" rows="2">${escapeHTML(s.inclusionsText || '')}</textarea></div>
+    <div class="field"><label>Exclus du forfait</label>
+      <textarea id="stExcl" rows="2">${escapeHTML(s.exclusionsText || '')}</textarea></div>
+    <div class="field"><label>Liste de références clients (apparaît en page 9 de l'offre)</label>
+      <textarea id="stRefs" rows="6" placeholder="STANTEC Experts-conseils&#10;M. Untel&#10;1200, Boul. St-Martin Ouest, Laval&#10;(514) 281-1010&#10;&#10;Excel-Médical Inc.&#10;...">${escapeHTML(s.referencesText || '')}</textarea>
+      <div class="kpi-hint">Une référence par bloc, séparées par une ligne vide.</div>
     </div>
     <div class="panel-title" style="margin:18px 0 10px;">Stockage cloud (Google Drive)</div>
     <div id="cloudStatus">${cloudStatusHTML()}</div>
@@ -2629,11 +2798,23 @@ function saveSettings() {
     margeDefaut: parseNum(get('stMarge')),
     signerName: get('stSignerName').trim(),
     signerTitle: get('stSignerTitle').trim(),
+    signerCell: get('stSignerCell').trim(),
+    signerEmail: get('stSignerEmail').trim(),
+    slogan: get('stSlogan').trim(),
+    website: get('stWebsite').trim(),
     contractNoticeDays: parseNum(get('stNotice')) || 60,
     contractNonSolMonths: parseNum(get('stNonSol')) || 12,
-    contractInsuranceAmount: parseNum(get('stIns')) || 2000000,
-    contractIndexationPct: parseNum(get('stIdx')) || 3,
-    contractJudicialDistrict: get('stDistrict').trim() || 'Montréal'
+    contractInsuranceAmount: parseNum(get('stIns')) || 5000000,
+    contractDishonestyAmount: parseNum(get('stDisAmt')) || 25000,
+    insurancePolicy: get('stInsPol').trim(),
+    cssNumber: get('stCss').trim(),
+    comiteParitaireNum: get('stComite').trim(),
+    extraWorkHourlyRate: parseNum(get('stExtraRate')) || 35,
+    extraWorkMinHours: parseNum(get('stExtraMin')) || 3,
+    extraWorkPaymentDays: parseNum(get('stExtraDays')) || 45,
+    inclusionsText: get('stIncl').trim(),
+    exclusionsText: get('stExcl').trim(),
+    referencesText: get('stRefs')
   });
   save(); closeModal(); renderDashboard(); showToast('Réglages enregistrés');
 }
@@ -3026,129 +3207,218 @@ function printContract(contractId) {
   const v = q ? q.versions[Math.min(c.quoteRev != null ? c.quoteRev - 1 : q.currentRev, q.versions.length - 1)] : null;
   const items = v ? v.items.filter(it => it.desc || parseNum(it.price)) : [];
   const t = v ? calcTotals(items, s) : { sub: 0, tps: 0, tvq: 0, total: 0 };
-  const team = STATE.teams.find(x => x.id === c.teamId);
-  const daysLabel = (c.days || []).map(d => WEEKDAYS.find(w => w[0] === d) || [d, d]).map(w => w[1]).join(', ') || '—';
+  const daysLabel = (c.days || []).map(d => WEEKDAYS.find(w => w[0] === d) || [d, d]).map(w => w[1]).join(' · ') || '—';
   const today = new Date().toLocaleDateString('fr-CA', { day: 'numeric', month: 'long', year: 'numeric' });
-  const taxIds = [s.tpsNum ? 'TPS : ' + s.tpsNum : '', s.tvqNum ? 'TVQ : ' + s.tvqNum : ''].filter(Boolean).join(' · ');
-
-  // Reconnaître si le total représente le coût d'une visite ou d'un mois (heuristique simple)
-  const visitsPerMonth = freqPerWeek(c.frequency) * 4.33;
-  const monthly = v ? (
-    (c.frequency === 'mensuelle' || items.every(it => /mois|mensuel/i.test(it.unit))) ? t.sub :
-    (c.frequency === 'ponctuelle') ? t.sub :
-    t.sub * visitsPerMonth / (visitsPerMonth || 1) // déjà mensuel si items en /mois ; sinon par visite × visites/mois
-  ) : 0;
+  const taxIds = [s.tpsNum ? 'TPS/TVH : ' + s.tpsNum : '', s.tvqNum ? 'TVQ : ' + s.tvqNum : ''].filter(Boolean);
+  const ref = q ? 'Soumission : ' + q.number + (v ? ' v' + v.rev : '') : ('Contrat : ' + c.number);
+  const itemsLookMonthly = items.length > 0 && items.every(it => /mois|mensuel/i.test(it.unit));
+  const cityFromAddr = (() => {
+    if (!client.address) return '';
+    const lines = client.address.split('\n').map(l => l.trim()).filter(Boolean);
+    return lines[lines.length - 1] || '';
+  })();
+  const salutation = client.contact ? (/^(M\.|Mme|Madame|Monsieur)/i.test(client.contact) ? client.contact : 'Madame, Monsieur ' + client.contact) : 'Madame, Monsieur';
+  const refsParsed = (s.referencesText || '').trim().split(/\n\s*\n/).map(b => b.trim()).filter(Boolean);
+  const itemDescsLower = items.map(it => (it.desc || '').toLowerCase());
+  const onDemand = (STATE.services || []).filter(svc => !itemDescsLower.some(d => d.includes((svc.name || '').toLowerCase().slice(0, 10))));
 
   document.getElementById('printArea').innerHTML = `
   <div class="doc contract-doc">
-    <div class="doc-top">
-      <div class="doc-brand">
+
+    <!-- PAGE 1 — LETTRE DE PRÉSENTATION -->
+    <div class="contract-letter">
+      <div style="display:flex;justify-content:flex-end;align-items:center;gap:10px;margin-bottom:50px;">
         ${pdfLeafSVG()}
-        <div>
-          <div class="doc-company-name">${escapeHTML(s.company)}</div>
-          <div class="doc-company-info">${escapeHTML(s.address)}\n${escapeHTML(s.phone)} · ${escapeHTML(s.email)}</div>
-        </div>
+        <div style="font-family:'Instrument Serif',serif;font-size:18px;font-style:italic;color:#15191c;">${escapeHTML(s.company)}</div>
       </div>
-      <div class="doc-kind">
-        <div class="doc-kind-label">Entente de services</div>
-        <div class="doc-kind-num">${c.number}</div>
-        <div class="doc-kind-meta">Date : ${today}<br>${q ? 'Réf. soumission : ' + q.number + (v ? ' v' + v.rev : '') : ''}</div>
+      <div style="text-align:right;font-size:11px;color:#5a6770;margin-bottom:40px;">Le ${today}</div>
+
+      <div style="margin-bottom:30px;font-size:12px;line-height:1.5;">
+        ${client.contact ? '<div>' + escapeHTML(client.contact) + '</div>' : ''}
+        <div style="font-weight:600;text-transform:uppercase;">${escapeHTML(client.name)}</div>
+        ${client.address ? '<div style="white-space:pre-line;">' + escapeHTML(client.address) + '</div>' : ''}
       </div>
+
+      <p class="contract-p" style="margin-bottom:20px;"><strong>Objet :</strong> Offre de services pour l'entretien ménager${client.address ? ' des espaces situés au ' + escapeHTML(client.address.split('\n')[0]) : ''}</p>
+
+      <p class="contract-p">${escapeHTML(salutation)},</p>
+
+      <p class="contract-p">Suite à votre demande, il nous fait plaisir de vous présenter notre offre pour les services d'entretien ménager${cityFromAddr ? ' à ' + escapeHTML(cityFromAddr) : ''}.</p>
+
+      <p class="contract-p">Nous tenons à vous remercier tout particulièrement de votre confiance et de l'attention dont vous nous faites preuve, et espérons vous compter parmi notre clientèle satisfaite dans un avenir rapproché. Nous tenons également à vous souligner que notre mission est d'offrir des services de qualité en gardant toujours comme priorité la satisfaction du client.</p>
+
+      <p class="contract-p"><strong>${escapeHTML(s.company)}</strong> vous offre un calibre de personnel qualifié ainsi qu'une supervision sérieuse${s.signerName ? ' effectuée par ' + escapeHTML(s.signerName) : ''}, qui compte plusieurs années d'expérience dans le domaine. De plus, ${escapeHTML(s.company)} utilise de l'équipement moderne et des produits de haute qualité.</p>
+
+      <p class="contract-p">Espérant le tout à votre entière satisfaction, n'hésitez pas à communiquer avec nous pour de plus amples informations.</p>
+
+      <p class="contract-p">Je vous prie d'agréer, ${client.contact && /^Mme|Madame/i.test(client.contact) ? 'Madame' : (client.contact && /^M\.|Monsieur/i.test(client.contact) ? 'Monsieur' : 'Madame, Monsieur')}, l'expression de nos salutations distinguées et l'assurance de notre dévouement.</p>
+
+      <div style="margin-top:60px;">
+        <div style="font-weight:600;font-size:13px;">${escapeHTML(s.signerName || '_________________________')}</div>
+        <div style="font-size:11px;color:#5a6770;">${escapeHTML(s.signerTitle || '')}<br>${escapeHTML(s.company)}</div>
+        ${(s.signerCell || s.signerEmail || s.phone) ? `<div style="font-size:10.5px;color:#5a6770;margin-top:10px;">${s.signerCell ? 'Cellulaire : ' + escapeHTML(s.signerCell) + '<br>' : ''}${s.phone ? 'Bureau : ' + escapeHTML(s.phone) + '<br>' : ''}${s.signerEmail || s.email ? 'Courriel : ' + escapeHTML(s.signerEmail || s.email) : ''}</div>` : ''}
+      </div>
+
+      <div style="margin-top:40px;font-size:11px;color:#5a6770;">Pièce jointe : Offre de services</div>
     </div>
 
-    <div class="doc-rule"></div>
+    <div class="contract-pagebreak"></div>
 
-    <h1 class="contract-h1">ENTENTE DE SERVICES D'ENTRETIEN MÉNAGER</h1>
-
-    <p class="contract-p"><strong>ENTRE :</strong> <strong>${escapeHTML(s.company)}</strong>, ayant son siège au ${escapeHTML(s.address.replace(/\n/g, ', '))}, représentée par ${escapeHTML(s.signerName || '_______________________')}, ${escapeHTML(s.signerTitle || 'représentant autorisé')}, ci-après désignée le « <strong>Prestataire</strong> ».</p>
-
-    <p class="contract-p"><strong>ET :</strong> <strong>${escapeHTML(client.name)}</strong>${client.address ? ', situé au ' + escapeHTML(client.address.replace(/\n/g, ', ')) : ''}${client.contact ? ', représenté par ' + escapeHTML(client.contact) : ''}, ci-après désigné le « <strong>Client</strong> ».</p>
-
-    <p class="contract-p"><strong>LES PARTIES CONVIENNENT DE CE QUI SUIT :</strong></p>
-
-    <h2 class="contract-h2">1. Objet de l'entente</h2>
-    <p class="contract-p">Le Prestataire s'engage à fournir au Client les services d'entretien ménager décrits à l'Annexe A de la présente entente, conformément aux normes professionnelles de l'industrie.</p>
-
-    <h2 class="contract-h2">2. Lieu d'exécution</h2>
-    <p class="contract-p">Les services seront rendus à l'adresse suivante : <strong>${escapeHTML(client.address || '_______________________')}</strong>.</p>
-
-    <h2 class="contract-h2">3. Durée et reconduction</h2>
-    <p class="contract-p">La présente entente prend effet le <strong>${fmtDate(c.startDate)}</strong> et se termine le <strong>${fmtDate(c.endDate)}</strong>. Elle est automatiquement reconduite pour des périodes successives de douze (12) mois, à moins qu'une des parties ne transmette à l'autre, par écrit, un avis de non-reconduction au moins <strong>${s.contractNoticeDays} jours</strong> avant la date d'échéance.</p>
-
-    <h2 class="contract-h2">4. Fréquence et horaire</h2>
-    <p class="contract-p">Les services seront rendus selon la fréquence <strong>${escapeHTML(freqLabel(c.frequency))}</strong>, les <strong>${daysLabel}</strong>, entre <strong>${c.startTime}</strong> et <strong>${c.endTime}</strong>. ${team ? 'L\'équipe désignée est <strong>' + escapeHTML(team.name) + '</strong>. ' : ''}Toute modification ponctuelle de l'horaire doit être convenue par écrit (courriel suffit) au moins quarante-huit (48) heures à l'avance.</p>
-
-    <h2 class="contract-h2">5. Prix et modalités de paiement</h2>
-    <p class="contract-p">En contrepartie des services, le Client s'engage à payer au Prestataire les montants détaillés à l'Annexe A, plus les taxes applicables (TPS et TVQ).</p>
-    <p class="contract-p">Les factures sont émises mensuellement et payables dans un délai de <strong>${s.invoiceTerms} jours</strong> suivant la date d'émission. Tout solde non payé à l'échéance porte intérêt au taux de <strong>1,5 % par mois</strong> (18 % par an), calculé quotidiennement à compter de la date d'échéance.</p>
-
-    <h2 class="contract-h2">6. Indexation annuelle</h2>
-    <p class="contract-p">Le prix sera ajusté à chaque date anniversaire de l'entente selon un taux d'indexation de <strong>${s.contractIndexationPct} %</strong>, ou selon la variation annuelle de l'Indice des prix à la consommation (IPC) publié par Statistique Canada pour la province de Québec — le plus élevé des deux. Le Prestataire transmettra au Client un avis écrit au moins trente (30) jours avant l'entrée en vigueur du nouveau prix.</p>
-
-    <h2 class="contract-h2">7. Produits et équipements</h2>
-    <p class="contract-p">Sauf indication contraire à l'Annexe A, le Prestataire fournit l'ensemble des produits d'entretien, des équipements et des outils nécessaires à l'exécution des services. Les produits utilisés respectent les normes de santé, de sécurité et d'environnement applicables au Québec.</p>
-
-    <h2 class="contract-h2">8. Accès aux lieux</h2>
-    <p class="contract-p">Le Client s'engage à fournir au Prestataire un accès sécuritaire et continu aux lieux pendant les heures de service convenues. Toute clé, carte d'accès ou code d'alarme remis au Prestataire demeure la propriété exclusive du Client et lui sera restitué à la fin de l'entente. Le Prestataire s'engage à conserver ces moyens d'accès de manière confidentielle et sécuritaire, et à ne pas les divulguer à des tiers.</p>
-
-    <h2 class="contract-h2">9. Confidentialité</h2>
-    <p class="contract-p">Le Prestataire et ses employés s'engagent à respecter la confidentialité de toute information dont ils pourraient avoir connaissance dans le cadre de la prestation des services, y compris pendant et après la fin de la présente entente.</p>
-
-    <h2 class="contract-h2">10. Assurance et responsabilité civile</h2>
-    <p class="contract-p">Le Prestataire maintient en vigueur, pendant toute la durée de l'entente, une police d'assurance responsabilité civile générale d'un montant minimum de <strong>${moneyWords(s.contractInsuranceAmount)}</strong>. Une attestation d'assurance peut être fournie au Client sur simple demande écrite.</p>
-    <p class="contract-p">Le Prestataire est responsable des dommages directement causés par la faute ou la négligence de ses employés dans l'exécution des services, sous réserve qu'un avis écrit lui soit transmis dans les <strong>quarante-huit (48) heures</strong> suivant la découverte du dommage par le Client, accompagné de photographies et de toute pièce justificative pertinente.</p>
-
-    <h2 class="contract-h2">11. Vérification des antécédents</h2>
-    <p class="contract-p">Tous les employés du Prestataire affectés à l'exécution de la présente entente ont fait l'objet d'une vérification d'antécédents judiciaires. Le Prestataire atteste qu'aucun employé ayant un dossier criminel non réhabilité en lien avec un emploi de confiance n'est affecté aux lieux du Client.</p>
-
-    <h2 class="contract-h2">12. Suspension temporaire</h2>
-    <p class="contract-p">L'une ou l'autre des parties peut suspendre temporairement la prestation des services pour une période n'excédant pas trente (30) jours, moyennant un préavis écrit de sept (7) jours. Aucun montant n'est facturé pour les visites non effectuées pendant la période de suspension.</p>
-
-    <h2 class="contract-h2">13. Résiliation</h2>
-    <p class="contract-p">Chacune des parties peut résilier la présente entente, sans motif, moyennant un préavis écrit de <strong>${s.contractNoticeDays} jours</strong>. En cas de manquement grave par l'autre partie (notamment : défaut de paiement de plus de trente (30) jours après mise en demeure, manquement répété aux obligations de l'entente, faillite ou insolvabilité), la résiliation peut prendre effet immédiatement après l'envoi d'un avis écrit demeuré sans suite pendant dix (10) jours.</p>
-
-    <h2 class="contract-h2">14. Non-sollicitation des employés</h2>
-    <p class="contract-p">Pendant toute la durée de l'entente et pour une période de <strong>${s.contractNonSolMonths} mois</strong> suivant sa résiliation, le Client s'engage à ne pas embaucher, directement ou indirectement (notamment via un tiers, une agence ou une société liée), aucun employé du Prestataire ayant été affecté à l'exécution des services au cours des douze (12) derniers mois précédant la résiliation.</p>
-    <p class="contract-p">Les parties reconnaissent que cette clause est essentielle à la protection des investissements du Prestataire en formation et en recrutement. En cas de violation, le Client s'engage à verser au Prestataire, à titre de dommages-intérêts liquidés, une somme équivalente à <strong>six (6) mois</strong> de rémunération brute de l'employé concerné, payable dans les trente (30) jours suivant la mise en demeure.</p>
-
-    <h2 class="contract-h2">15. Force majeure</h2>
-    <p class="contract-p">Aucune partie ne pourra être tenue responsable d'un retard ou d'un défaut d'exécution causé par un cas de force majeure, tel que défini à l'article 1470 du <em>Code civil du Québec</em> (notamment : catastrophes naturelles, pandémies, ordonnances gouvernementales, conflits de travail généralisés, pannes d'infrastructures essentielles).</p>
-
-    <h2 class="contract-h2">16. Avis</h2>
-    <p class="contract-p">Tout avis prévu à la présente entente doit être transmis par écrit, par courriel avec accusé de réception ou par courrier recommandé, aux adresses indiquées en en-tête. Un avis transmis par courriel est réputé reçu le jour ouvrable suivant son envoi.</p>
-
-    <h2 class="contract-h2">17. Entente complète et modification</h2>
-    <p class="contract-p">La présente entente, incluant son Annexe A, constitue l'intégralité de l'accord entre les parties et remplace toute entente verbale ou écrite antérieure portant sur le même objet. Toute modification doit faire l'objet d'un écrit signé par les deux parties.</p>
-
-    <h2 class="contract-h2">18. Divisibilité</h2>
-    <p class="contract-p">Si une disposition de la présente entente est jugée invalide ou inapplicable par un tribunal compétent, les autres dispositions conservent leur plein effet.</p>
-
-    <h2 class="contract-h2">19. Loi applicable et juridiction</h2>
-    <p class="contract-p">La présente entente est régie et interprétée conformément aux lois en vigueur dans la province de Québec et aux lois fédérales du Canada qui y sont applicables. Tout litige relèvera de la compétence exclusive des tribunaux du district judiciaire de <strong>${escapeHTML(s.contractJudicialDistrict)}</strong>.</p>
-
-    <p class="contract-p" style="margin-top:24px;"><strong>EN FOI DE QUOI</strong>, les parties ont signé la présente entente en deux (2) exemplaires originaux.</p>
-
-    <div class="doc-sign" style="margin-top:30px;">
-      <div class="doc-sign-block">
-        <div class="doc-sign-line"></div>
-        <div class="doc-sign-label">Pour le Prestataire — ${escapeHTML(s.signerName || '_______________________')}<br>${escapeHTML(s.signerTitle || '')}<br>Date : _______________________</div>
+    <!-- PAGE 2 — COUVERTURE -->
+    <div class="contract-cover">
+      <div style="text-align:center;margin-top:80px;">
+        ${pdfLeafSVG().replace('width="36" height="36"', 'width="80" height="80"')}
       </div>
-      <div class="doc-sign-block">
-        <div class="doc-sign-line"></div>
-        <div class="doc-sign-label">Pour le Client — ${escapeHTML(client.contact || '_______________________')}<br>${escapeHTML(client.name)}<br>Date : _______________________</div>
+      <div style="text-align:center;margin-top:24px;">
+        <div style="font-family:'Instrument Serif',serif;font-size:56px;font-style:italic;letter-spacing:-0.02em;color:#15191c;line-height:1;">${escapeHTML(s.company)}</div>
+        ${s.slogan ? '<div style="font-size:14px;color:#5a6770;margin-top:14px;font-style:italic;">' + escapeHTML(s.slogan) + '</div>' : ''}
+      </div>
+      <div style="margin-top:100px;padding:28px;border:1.5px solid #2c3a45;border-radius:12px;">
+        <div style="font-size:11px;letter-spacing:0.14em;text-transform:uppercase;color:#8b979f;margin-bottom:14px;">Préparée pour</div>
+        <div style="font-weight:700;font-size:20px;letter-spacing:0.02em;text-transform:uppercase;">${escapeHTML(client.name)}</div>
+        ${client.address ? '<div style="white-space:pre-line;font-size:12.5px;color:#3d4850;margin-top:6px;">' + escapeHTML(client.address) + '</div>' : ''}
+        ${client.contact ? '<div style="margin-top:16px;font-size:12.5px;color:#3d4850;"><strong>Attention :</strong> ' + escapeHTML(client.contact) + '</div>' : ''}
+        <div style="margin-top:24px;border-top:1px solid #edf0f2;padding-top:14px;font-family:'JetBrains Mono',monospace;font-size:12px;">${ref}</div>
+        <div style="font-size:11px;color:#5a6770;margin-top:4px;">Date : ${today}</div>
+      </div>
+      <div style="margin-top:80px;text-align:center;font-size:11px;color:#5a6770;line-height:1.6;">
+        ${escapeHTML(s.address.replace(/\n/g, ' · '))}<br>
+        ${escapeHTML(s.phone || '')}${s.email ? ' · ' + escapeHTML(s.email) : ''}${s.website ? '<br>' + escapeHTML(s.website) : ''}
       </div>
     </div>
 
     <div class="contract-pagebreak"></div>
 
-    <h1 class="contract-h1" style="margin-top:0;">ANNEXE A — Description et tarification des services</h1>
+    <!-- PAGE 3 — TABLE DES MATIÈRES -->
+    <h1 class="contract-h1">Table des matières</h1>
+    <ul class="contract-toc">
+      <li>Calendrier des tâches</li>
+      <li>Spécifications générales
+        <ul>
+          <li>Service offert</li>
+          <li>Surface de nettoyage</li>
+          <li>Condition présente de l'édifice</li>
+          <li>Travaux supplémentaires / appels de services</li>
+          <li>Assurances</li>
+          <li>CNESST</li>
+          <li>Comité paritaire</li>
+          <li>Taxes de vente</li>
+          <li>Supervision</li>
+          <li>Confidentialité</li>
+          <li>Équipement</li>
+          <li>Uniformes</li>
+          <li>Durée, reconduction et non-sollicitation</li>
+        </ul>
+      </li>
+      <li>Services sur demande (non inclus)</li>
+      <li>Références</li>
+      <li>Bordereau de prix</li>
+    </ul>
 
-    <p class="contract-p"><strong>Client :</strong> ${escapeHTML(client.name)} · <strong>Lieu :</strong> ${escapeHTML(client.address || '—')}</p>
-    <p class="contract-p"><strong>Fréquence :</strong> ${escapeHTML(freqLabel(c.frequency))} · <strong>Jours :</strong> ${daysLabel} · <strong>Plage horaire :</strong> ${c.startTime} à ${c.endTime}${team ? ' · <strong>Équipe :</strong> ' + escapeHTML(team.name) : ''}</p>
+    <div class="contract-pagebreak"></div>
+
+    <!-- PAGE 4 — CALENDRIER DES TÂCHES -->
+    <h1 class="contract-h1">Calendrier des tâches</h1>
+    <p class="contract-p"><strong>Fréquence du service :</strong> ${escapeHTML(freqLabel(c.frequency))}${daysLabel !== '—' ? ' — les <strong>' + escapeHTML(daysLabel) + '</strong>' : ''}${c.startTime ? ', entre <strong>' + c.startTime + '</strong> et <strong>' + c.endTime + '</strong>' : ''}.</p>
 
     ${items.length ? `
-      <table class="doc-items" style="margin-top:14px;">
-        <tr><th>Description du service</th><th class="num">Qté</th><th class="num">Unité</th><th class="num">Prix unitaire</th><th class="num">Montant</th></tr>
+      <table class="doc-items" style="margin-top:16px;">
+        <tr><th>Description de la tâche</th><th class="num">Quantité</th><th class="num">Unité / fréquence</th></tr>
+        ${items.map(it => `
+          <tr>
+            <td><div class="doc-item-desc">${escapeHTML(it.desc)}</div></td>
+            <td class="num">${it.qty}</td>
+            <td class="num">${escapeHTML(it.unit)}</td>
+          </tr>`).join('')}
+      </table>` : '<p class="contract-p"><em>Aucune tâche détaillée dans la soumission liée. Compléter avant signature.</em></p>'}
+
+    ${c.notes ? `
+      <div class="doc-notes" style="margin-top:18px;">
+        <div class="doc-notes-label">Notes complémentaires</div>
+        <div class="doc-notes-body">${escapeHTML(c.notes)}</div>
+      </div>` : ''}
+
+    <div class="contract-pagebreak"></div>
+
+    <!-- PAGE 5 — SPÉCIFICATIONS GÉNÉRALES -->
+    <h1 class="contract-h1">Spécifications générales</h1>
+
+    <h2 class="contract-h2">Service offert</h2>
+    <p class="contract-p">${escapeHTML(s.company)} ne sera pas tenu responsable d'un service non rendu à terme, dont les causes seraient hors de son contrôle telles que : panne d'électricité, feu, inondation, verglas, tempête de neige (35 cm et +), grève, ligne de piquetage, actes de Dieu ou toutes autres actions causées par le personnel ou la clientèle de nos clients.</p>
+
+    <h2 class="contract-h2">Surface de nettoyage</h2>
+    <p class="contract-p">Tout changement à la fréquence des travaux ou à la superficie à nettoyer occasionnera un ajustement des heures de travail qui sera établi suite à une entente entre les deux parties.</p>
+
+    <h2 class="contract-h2">Condition présente de l'édifice</h2>
+    <p class="contract-p">${escapeHTML(s.company)} n'est pas et ne sera pas tenu responsable de l'état présent des lieux tel que : mobilier endommagé, tapis tachés, plancher égratigné, murs endommagés, etc.</p>
+
+    <h2 class="contract-h2">Travaux supplémentaires / Appels de services / Services d'urgence</h2>
+    <p class="contract-p">Tout travail supplémentaire effectué par ${escapeHTML(s.company)} sera facturé au taux horaire de <strong>${fmtMoneyLong(s.extraWorkHourlyRate)}/h</strong> dès la terminaison desdits travaux ; la somme due sera exigible dans les <strong>${s.extraWorkPaymentDays} jours</strong> suivants. À ce taux horaire, il faut ajouter les taxes applicables. Un appel de service ou un service d'urgence qui occasionne un déplacement non prévu occasionnera une charge minimum de <strong>${s.extraWorkMinHours} heures</strong>.</p>
+
+    <h2 class="contract-h2">Assurances</h2>
+    <p class="contract-p">${escapeHTML(s.company)} détient une assurance au montant de <strong>${fmtMoneyLong(s.contractInsuranceAmount)}</strong> incluant la responsabilité publique et les dommages à la propriété.</p>
+    <p class="contract-p">La couverture d'assurance contre la malhonnêteté des employés vous assure contre toute responsabilité pour les dommages faits ou causés par nos employés jusqu'à concurrence de <strong>${fmtMoneyLong(s.contractDishonestyAmount)}</strong>${s.insurancePolicy ? '. Police d\'assurance n° <strong>' + escapeHTML(s.insurancePolicy) + '</strong>' : ''}.</p>
+
+    <h2 class="contract-h2">CNESST</h2>
+    <p class="contract-p">Tous les employés de ${escapeHTML(s.company)} possèdent la couverture de la CNESST${s.cssNumber ? ' sous le numéro <strong>' + escapeHTML(s.cssNumber) + '</strong>' : ''}.</p>
+
+    <h2 class="contract-h2">Comité paritaire de l'entretien des édifices publics</h2>
+    <p class="contract-p">${s.comiteParitaireNum ? escapeHTML(s.company) + ' est membre du Comité paritaire sous le numéro <strong>' + escapeHTML(s.comiteParitaireNum) + '</strong>.' : escapeHTML(s.company) + ' est membre du Comité paritaire de l\'entretien des édifices publics.'}</p>
+
+    <h2 class="contract-h2">Taxes de vente</h2>
+    <p class="contract-p">${taxIds.length ? taxIds.map(x => 'N° ' + escapeHTML(x)).join('<br>') : 'Les numéros de taxes seront fournis sur la première facture.'}</p>
+
+    <h2 class="contract-h2">Supervision</h2>
+    <p class="contract-p">Des inspections régulières de contrôle de qualité seront effectuées par des superviseurs compétents.</p>
+
+    <h2 class="contract-h2">Confidentialité</h2>
+    <p class="contract-p">${escapeHTML(s.company)} fait signer à tous ses employés un engagement de discrétion absolue sur toutes les informations concernant le fonctionnement et les activités de ${escapeHTML(s.company)} d'une part, et de notre clientèle d'autre part.</p>
+
+    <h2 class="contract-h2">Équipement</h2>
+    <p class="contract-p">${escapeHTML(s.company)} fournit tous les produits nettoyants, les sacs à déchets, le papier hygiénique, le papier à main, le savon à main, les pastilles d'urinoir ainsi que tous les équipements nécessaires à l'exécution de notre mandat.</p>
+    ${s.exclusionsText ? '<p class="contract-p"><strong>Le client fournit :</strong> ' + escapeHTML(s.exclusionsText) + '</p>' : ''}
+
+    <h2 class="contract-h2">Uniformes</h2>
+    <p class="contract-p">Tous les employés de ${escapeHTML(s.company)} sont identifiés à l'aide d'uniformes propres et soignés arborant le logo de l'entreprise.</p>
+
+    <h2 class="contract-h2">Durée, reconduction et non-sollicitation</h2>
+    <p class="contract-p">La présente offre prend effet le <strong>${fmtDate(c.startDate)}</strong> et se termine le <strong>${fmtDate(c.endDate)}</strong>. Elle est automatiquement reconduite pour des périodes successives de douze (12) mois, à moins qu'une partie ne transmette à l'autre un avis écrit de non-reconduction au moins <strong>${s.contractNoticeDays} jours</strong> avant l'échéance. Pendant la durée du contrat et pour <strong>${s.contractNonSolMonths} mois</strong> suivant sa fin, le Client s'engage à ne pas embaucher directement les employés affectés à son site, à défaut de quoi des dommages-intérêts liquidés équivalents à six (6) mois de salaire de l'employé concerné seront exigibles.</p>
+
+    <div class="contract-pagebreak"></div>
+
+    <!-- PAGE 6 — SERVICES SUR DEMANDE -->
+    <h1 class="contract-h1">Services sur demande (non inclus)</h1>
+    <p class="contract-p">Les services suivants ne sont pas inclus dans le forfait mensuel et peuvent être ajoutés sur demande ponctuelle :</p>
+
+    ${onDemand.length ? `
+      <ul class="contract-list">
+        ${onDemand.slice(0, 14).map(svc => `<li><strong>${escapeHTML(svc.name)}</strong>${svc.unit ? ' — ' + fmtMoney(servicePrice(svc)) + ' / ' + escapeHTML(svc.unit) : ''}${svc.description ? '<div style="font-size:10.5px;color:#5a6770;margin-top:2px;">' + escapeHTML(svc.description) + '</div>' : ''}</li>`).join('')}
+      </ul>` : `
+      <ul class="contract-list">
+        <li><strong>Décapage et cirage des planchers</strong> — sur devis</li>
+        <li><strong>Lavage de chaises par extraction</strong> — sur devis</li>
+        <li><strong>Nettoyage des appareils d'éclairage</strong> — sur devis</li>
+        <li><strong>Grand ménage saisonnier</strong> — sur devis</li>
+        <li><strong>Désinfection ponctuelle (après incident)</strong> — sur devis</li>
+      </ul>`}
+
+    <div class="contract-pagebreak"></div>
+
+    <!-- PAGE 7 — RÉFÉRENCES -->
+    <h1 class="contract-h1">Références</h1>
+    ${refsParsed.length ? `
+      <div class="contract-refs">
+        ${refsParsed.map(block => '<div class="contract-ref">' + escapeHTML(block).replace(/\n/g, '<br>') + '</div>').join('')}
+      </div>` : '<p class="contract-p"><em>Liste de références fournie sur demande.</em></p>'}
+
+    <div class="contract-pagebreak"></div>
+
+    <!-- PAGE 8 — BORDEREAU DE PRIX -->
+    <h1 class="contract-h1">Bordereau de prix</h1>
+
+    ${items.length ? `
+      <table class="doc-items" style="margin-top:16px;">
+        <tr><th>Description</th><th class="num">Qté</th><th class="num">Unité</th><th class="num">Prix unitaire</th><th class="num">Montant</th></tr>
         ${items.map(it => `
           <tr>
             <td><div class="doc-item-desc">${escapeHTML(it.desc)}</div></td>
@@ -3162,16 +3432,33 @@ function printContract(contractId) {
         <div class="doc-totals-line"><span>Sous-total</span><span class="v">${fmtMoney(t.sub)}</span></div>
         <div class="doc-totals-line"><span>TPS (${s.tps} %)</span><span class="v">${fmtMoney(t.tps)}</span></div>
         <div class="doc-totals-line"><span>TVQ (${s.tvq} %)</span><span class="v">${fmtMoney(t.tvq)}</span></div>
-        <div class="doc-totals-line grand"><span>Total par période de facturation</span><span class="v">${fmtMoney(t.total)}</span></div>
-      </div>` : '<p class="contract-p"><em>Aucune ligne de service détaillée. Référer à la soumission liée ou compléter avant signature.</em></p>'}
+        <div class="doc-totals-line grand"><span>Total ${itemsLookMonthly || c.frequency === 'mensuelle' ? 'mensuel' : 'par période'}</span><span class="v">${fmtMoney(t.total)}</span></div>
+      </div>` : '<p class="contract-p"><em>Aucune ligne de tarification. Compléter avant signature.</em></p>'}
 
-    ${c.notes ? `
-      <div class="doc-notes" style="margin-top:18px;">
-        <div class="doc-notes-label">Notes complémentaires</div>
-        <div class="doc-notes-body">${escapeHTML(c.notes)}</div>
-      </div>` : ''}
+    <div class="doc-notes" style="margin-top:24px;">
+      <div class="doc-notes-label">Notes</div>
+      <div class="doc-notes-body">
+        <ul style="margin:0;padding-left:18px;">
+          <li>Cette tarification mensuelle est basée sur un contrat annuel.</li>
+          <li>À ces montants il faut ajouter les taxes applicables.</li>
+          ${s.inclusionsText ? '<li><strong>Inclus :</strong> ' + escapeHTML(s.inclusionsText) + '</li>' : ''}
+          ${s.exclusionsText ? '<li><strong>Exclus :</strong> ' + escapeHTML(s.exclusionsText) + '</li>' : ''}
+        </ul>
+      </div>
+    </div>
 
-    <div class="doc-foot" style="margin-top:24px;">${escapeHTML(s.company)}${taxIds ? ' · ' + taxIds : ''} — Entente ${c.number}, signée par les parties.</div>
+    <div class="doc-sign" style="margin-top:40px;">
+      <div class="doc-sign-block">
+        <div class="doc-sign-line"></div>
+        <div class="doc-sign-label">Pour le prestataire — ${escapeHTML(s.signerName || '_______________________')}<br>${escapeHTML(s.signerTitle || '')}<br>Date : _______________________</div>
+      </div>
+      <div class="doc-sign-block">
+        <div class="doc-sign-line"></div>
+        <div class="doc-sign-label">Pour le client — ${escapeHTML(client.contact || '_______________________')}<br>${escapeHTML(client.name)}<br>Date : _______________________</div>
+      </div>
+    </div>
+
+    <div class="doc-foot" style="margin-top:36px;">${escapeHTML(s.company)}${taxIds.length ? ' · ' + taxIds.join(' · ') : ''} — Offre de services ${c.number}</div>
   </div>`;
 
   window.print();
