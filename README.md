@@ -1,4 +1,4 @@
-# Lustre — Gestion d'entretien ménager (v3.7)
+# Lustre — Gestion d'entretien ménager (v3.8)
 
 Application web monofichier (`index.html`) pour gérer une entreprise d'entretien ménager.
 Conçue pour un usage par le gestionnaire uniquement — aucun compte utilisateur,
