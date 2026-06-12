@@ -5,10 +5,11 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <meta name="theme-color" content="#0b0f12">
-<title>Lustre — Gestion d'entretien ménager v3.3</title>
+<title>Lustre — Gestion d'entretien ménager v3.4</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=JetBrains+Mono:wght@400;500;600&family=Geist:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<script src="https://accounts.google.com/gsi/client" async defer></script>
 <style>
 :root {
   --bg: #ffffff;
@@ -91,16 +92,19 @@ textarea { resize: vertical; min-height: 70px; }
   letter-spacing: -0.02em;
   padding: 4px 10px 18px;
   display: flex;
-  align-items: baseline;
+  align-items: center;
   gap: 8px;
   color: var(--text);
 }
+.logo-leaf { width: 22px; height: 22px; flex-shrink: 0; transform: rotate(-8deg); }
 .logo em { color: var(--accent); font-style: italic; }
 .logo-version {
   font-family: 'JetBrains Mono', monospace;
   font-size: 10px;
   color: var(--text-subtle);
   font-style: normal;
+  align-self: flex-end;
+  padding-bottom: 6px;
 }
 .nav-btn {
   display: flex;
@@ -593,6 +597,7 @@ kbd {
   font-size: 13px; line-height: 1.55;
 }
 .doc-top { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 38px; }
+.doc-brand { display: flex; gap: 12px; align-items: center; }
 .doc-company-name { font-family: 'Instrument Serif', serif; font-size: 27px; font-style: italic; letter-spacing: -0.02em; }
 .doc-company-info { font-size: 11px; color: #5a6770; margin-top: 6px; white-space: pre-line; }
 .doc-kind { text-align: right; }
@@ -629,13 +634,33 @@ kbd {
 .doc-sign-line { border-bottom: 1.5px solid #15191c; height: 38px; margin-bottom: 6px; }
 .doc-sign-label { font-size: 10.5px; color: #8b979f; }
 .doc-foot { margin-top: 44px; text-align: center; font-size: 10px; color: #aeb8be; font-family: 'JetBrains Mono', monospace; }
+
+/* --- Contrat (PDF) --- */
+.contract-doc { line-height: 1.55; }
+.contract-h1 { font-family: 'Instrument Serif', serif; font-size: 24px; font-style: italic; letter-spacing: -0.01em; color: #15191c; margin: 18px 0 16px; text-align: center; font-weight: normal; }
+.contract-h2 { font-family: 'Geist', sans-serif; font-size: 13px; font-weight: 600; color: #15191c; margin: 16px 0 6px; text-transform: uppercase; letter-spacing: 0.06em; }
+.contract-p { font-size: 11px; color: #2c343a; margin: 0 0 9px; text-align: justify; }
+.contract-p strong { color: #15191c; }
+.contract-p em { color: #4a5560; }
+.contract-pagebreak { page-break-before: always; height: 0; }
+@media print {
+  .contract-h2, .doc-sign { page-break-inside: avoid; }
+  .contract-p { orphans: 3; widows: 3; }
+}
 </style>
 </head>
 <body>
 
 <div class="app">
 <aside class="sidebar" aria-label="Navigation principale">
-  <div class="logo"><em>Lu</em>stre<span class="logo-version">v3.3</span></div>
+  <div class="logo">
+    <svg class="logo-leaf" viewBox="0 0 32 32" aria-hidden="true">
+      <path d="M5 27 C 5 14, 14 5, 27 5 C 27 18, 18 27, 5 27 Z" fill="var(--accent)"/>
+      <path d="M5 27 L 22 10 M 12 21 L 18 17 M 16 17 L 20 13" stroke="#ffffff" stroke-opacity="0.55" stroke-width="1.2" stroke-linecap="round" fill="none"/>
+    </svg>
+    <span><em>Lu</em>stre</span>
+    <span class="logo-version">v3.4</span>
+  </div>
   <button class="nav-btn" onclick="openPalette()" aria-label="Recherche rapide">
     <svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
     <span style="flex:1;text-align:left">Recherche</span><kbd>Ctrl K</kbd>
@@ -914,8 +939,18 @@ const STATE = {
     tauxLeger: 21.50,
     tauxLourd: 23.50,
     chargesSociales: 28,   // % de charges sur le salaire (CNESST, RRQ, vacances, fériés…)
-    margeDefaut: 40        // % de marge (markup) par défaut sur le coût
+    margeDefaut: 40,       // % de marge (markup) par défaut sur le coût
+    // Clauses contractuelles par défaut (modifiables)
+    signerName: '',
+    signerTitle: 'Présidence',
+    contractNoticeDays: 60,
+    contractNonSolMonths: 12,
+    contractInsuranceAmount: 2000000,
+    contractIndexationPct: 3,
+    contractJudicialDistrict: 'Montréal'
   },
+  cloud: { clientId: '', connected: false, email: '', fileId: '', lastSyncAt: 0 },
+  updatedAt: 0,
   clients: [],
   deals: [],
   quotes: [],
@@ -928,9 +963,12 @@ const STATE = {
   servicesSeeded: false
 };
 
-function save() {
+function save(opts) {
+  opts = opts || {};
+  if (!opts.skipBump) STATE.updatedAt = Date.now();
   try { localStorage.setItem('lustre_v3', JSON.stringify(STATE)); }
   catch(e) { console.error(e); }
+  if (!opts.skipPush && typeof schedulePush === 'function') schedulePush();
 }
 function load() {
   try {
@@ -941,6 +979,8 @@ function load() {
       // Backfill: anciens objets dépourvus des nouveaux champs
       (parsed.quotes || []).forEach(q => (q.versions || []).forEach(v => { if (!v.frequency) v.frequency = 'hebdo'; }));
       if (!Array.isArray(parsed.contracts)) parsed.contracts = [];
+      if (!parsed.cloud) parsed.cloud = { clientId: '', connected: false, email: '', fileId: '', lastSyncAt: 0 };
+      if (!parsed.updatedAt) parsed.updatedAt = Date.now();
       Object.assign(STATE, parsed);
     }
   } catch(e) { console.error(e); }
@@ -2467,6 +2507,7 @@ function renderContractEditor() {
       <span class="badge ${statusCls}">${statusLabel}</span>
       ${c.quoteId ? `<button class="btn sm ghost" onclick="openQuoteById('${c.quoteId}')">Voir la soumission liée →</button>` : ''}
       <div class="editor-spacer"></div>
+      <button class="btn sm" onclick="printContract('${c.id}')">↧ Exporter en PDF</button>
       ${c.status === 'active'
         ? `<button class="btn sm" onclick="pauseContract()">⏸ Mettre en pause</button>
            <button class="btn sm" onclick="endContract()">Terminer</button>`
@@ -2546,6 +2587,23 @@ function openSettings() {
       <div class="field"><label>Charges sociales / avantages (%)</label><input id="stCharges" inputmode="decimal" value="${s.chargesSociales}"></div>
       <div class="field"><label>Marge par défaut (%)</label><input id="stMarge" inputmode="decimal" value="${s.margeDefaut}"></div>
     </div>
+    <div class="panel-title" style="margin:18px 0 10px;">Clauses contractuelles par défaut</div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
+      <div class="field"><label>Signataire (nom)</label><input id="stSignerName" value="${escapeHTML(s.signerName || '')}"></div>
+      <div class="field"><label>Signataire (titre)</label><input id="stSignerTitle" value="${escapeHTML(s.signerTitle || '')}"></div>
+      <div class="field"><label>Préavis de résiliation (jours)</label><input id="stNotice" inputmode="numeric" value="${s.contractNoticeDays}"></div>
+      <div class="field"><label>Non-sollicitation (mois)</label><input id="stNonSol" inputmode="numeric" value="${s.contractNonSolMonths}"></div>
+      <div class="field"><label>Assurance responsabilité ($)</label><input id="stIns" inputmode="numeric" value="${s.contractInsuranceAmount}"></div>
+      <div class="field"><label>Indexation annuelle (%)</label><input id="stIdx" inputmode="decimal" value="${s.contractIndexationPct}"></div>
+      <div class="field"><label>District judiciaire</label><input id="stDistrict" value="${escapeHTML(s.contractJudicialDistrict || '')}"></div>
+    </div>
+    <div class="panel-title" style="margin:18px 0 10px;">Stockage cloud (Google Drive)</div>
+    <div id="cloudStatus">${cloudStatusHTML()}</div>
+    <div class="panel-title" style="margin:18px 0 10px;">Sauvegarde locale</div>
+    <div style="display:flex;gap:8px;flex-wrap:wrap;">
+      <button class="btn sm" onclick="exportData()">↓ Exporter en JSON</button>
+      <button class="btn sm" onclick="importData()">↑ Importer un fichier JSON</button>
+    </div>
     <div class="modal-actions">
       <button class="btn danger" onclick="resetAllData()">Réinitialiser les données</button>
       <button class="btn ghost" onclick="closeModal()">Annuler</button>
@@ -2568,7 +2626,14 @@ function saveSettings() {
     tauxLeger: parseNum(get('stTauxLeger')),
     tauxLourd: parseNum(get('stTauxLourd')),
     chargesSociales: parseNum(get('stCharges')),
-    margeDefaut: parseNum(get('stMarge'))
+    margeDefaut: parseNum(get('stMarge')),
+    signerName: get('stSignerName').trim(),
+    signerTitle: get('stSignerTitle').trim(),
+    contractNoticeDays: parseNum(get('stNotice')) || 60,
+    contractNonSolMonths: parseNum(get('stNonSol')) || 12,
+    contractInsuranceAmount: parseNum(get('stIns')) || 2000000,
+    contractIndexationPct: parseNum(get('stIdx')) || 3,
+    contractJudicialDistrict: get('stDistrict').trim() || 'Montréal'
   });
   save(); closeModal(); renderDashboard(); showToast('Réglages enregistrés');
 }
@@ -2578,7 +2643,297 @@ function resetAllData() {
   location.reload();
 }
 
+// ============ GOOGLE DRIVE SYNC ============
+const CLOUD = { token: null, tokenExpiry: 0, tokenClient: null, syncing: false, syncTimer: null, pendingResolve: null };
+const CLOUD_SCOPES = 'https://www.googleapis.com/auth/drive.appdata https://www.googleapis.com/auth/userinfo.email';
+const CLOUD_FILE_NAME = 'lustre-state.json';
+
+function cloudReady() {
+  return typeof google !== 'undefined' && google.accounts && google.accounts.oauth2;
+}
+
+function initTokenClient() {
+  if (!cloudReady() || !STATE.cloud.clientId) return false;
+  CLOUD.tokenClient = google.accounts.oauth2.initTokenClient({
+    client_id: STATE.cloud.clientId,
+    scope: CLOUD_SCOPES,
+    callback: (resp) => {
+      const r = CLOUD.pendingResolve; CLOUD.pendingResolve = null;
+      if (resp.error || !resp.access_token) {
+        if (r) r(null);
+        if (resp.error && resp.error !== 'access_denied') showToast('Erreur Google : ' + resp.error, { variant: 'error' });
+        return;
+      }
+      CLOUD.token = resp.access_token;
+      CLOUD.tokenExpiry = Date.now() + (Number(resp.expires_in || 3600) - 60) * 1000;
+      if (r) r(CLOUD.token);
+    }
+  });
+  return true;
+}
+
+function requestToken(silent) {
+  return new Promise((resolve) => {
+    if (!initTokenClient()) return resolve(null);
+    CLOUD.pendingResolve = resolve;
+    try { CLOUD.tokenClient.requestAccessToken({ prompt: silent ? '' : 'consent' }); }
+    catch(e) { CLOUD.pendingResolve = null; resolve(null); }
+  });
+}
+
+async function getToken(silent) {
+  if (CLOUD.token && Date.now() < CLOUD.tokenExpiry) return CLOUD.token;
+  return await requestToken(silent !== false);
+}
+
+async function driveFetch(url, opts) {
+  const t = await getToken(true);
+  if (!t) throw new Error('Non authentifié');
+  opts = opts || {};
+  opts.headers = Object.assign({}, opts.headers || {}, { Authorization: 'Bearer ' + t });
+  const r = await fetch(url, opts);
+  if (r.status === 401) {
+    CLOUD.token = null; CLOUD.tokenExpiry = 0;
+    const t2 = await getToken(true);
+    if (!t2) throw new Error('Session Google expirée');
+    opts.headers.Authorization = 'Bearer ' + t2;
+    return fetch(url, opts);
+  }
+  if (!r.ok) throw new Error('Drive ' + r.status);
+  return r;
+}
+
+async function fetchUserEmail() {
+  try {
+    const r = await driveFetch('https://www.googleapis.com/oauth2/v2/userinfo');
+    const d = await r.json();
+    STATE.cloud.email = d.email || '';
+    save({ skipPush: true, skipBump: true });
+  } catch(e) { console.warn('userinfo failed', e); }
+}
+
+async function findDriveFile() {
+  if (STATE.cloud.fileId) {
+    try {
+      const r = await driveFetch(`https://www.googleapis.com/drive/v3/files/${STATE.cloud.fileId}?fields=id,modifiedTime`);
+      return await r.json();
+    } catch(e) { STATE.cloud.fileId = ''; }
+  }
+  const q = encodeURIComponent("name='" + CLOUD_FILE_NAME + "'");
+  const r = await driveFetch(`https://www.googleapis.com/drive/v3/files?spaces=appDataFolder&q=${q}&fields=files(id,modifiedTime)`);
+  const d = await r.json();
+  return (d.files && d.files[0]) || null;
+}
+
+async function downloadDriveFile(fileId) {
+  const r = await driveFetch(`https://www.googleapis.com/drive/v3/files/${fileId}?alt=media`);
+  return await r.json();
+}
+
+async function uploadDriveFile(payload, fileId) {
+  if (!fileId) {
+    const r = await driveFetch('https://www.googleapis.com/drive/v3/files', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ name: CLOUD_FILE_NAME, parents: ['appDataFolder'] })
+    });
+    const d = await r.json();
+    fileId = d.id;
+  }
+  await driveFetch(`https://www.googleapis.com/upload/drive/v3/files/${fileId}?uploadType=media`, {
+    method: 'PATCH',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(payload)
+  });
+  return fileId;
+}
+
+function buildCloudPayload() {
+  const p = { ...STATE };
+  delete p.cloud;
+  return p;
+}
+
+async function cloudPull() {
+  if (!STATE.cloud.connected) return;
+  CLOUD.syncing = true; renderCloudStatus();
+  try {
+    const file = await findDriveFile();
+    if (!file) { await cloudPush(); return; }
+    STATE.cloud.fileId = file.id;
+    const remote = await downloadDriveFile(file.id);
+    const remoteTs = Number(remote.updatedAt || 0);
+    const localTs = Number(STATE.updatedAt || 0);
+    if (remoteTs > localTs + 500) {
+      const keep = { cloud: STATE.cloud };
+      Object.keys(STATE).forEach(k => delete STATE[k]);
+      Object.assign(STATE, remote, keep);
+      STATE.cloud.lastSyncAt = Date.now();
+      save({ skipPush: true, skipBump: true });
+      const cur = document.querySelector('.view.active');
+      if (cur) showView(cur.id.replace('view-', ''));
+      showToast('Données récupérées depuis Google Drive');
+    } else if (localTs > remoteTs + 500) {
+      await cloudPush();
+    } else {
+      STATE.cloud.lastSyncAt = Date.now();
+      save({ skipPush: true, skipBump: true });
+    }
+  } catch (e) {
+    showToast('Synchronisation échouée : ' + e.message, { variant: 'error' });
+  } finally {
+    CLOUD.syncing = false; renderCloudStatus();
+  }
+}
+
+async function cloudPush() {
+  if (!STATE.cloud.connected) return;
+  CLOUD.syncing = true; renderCloudStatus();
+  try {
+    const fileId = await uploadDriveFile(buildCloudPayload(), STATE.cloud.fileId);
+    STATE.cloud.fileId = fileId;
+    STATE.cloud.lastSyncAt = Date.now();
+    save({ skipPush: true, skipBump: true });
+  } catch (e) {
+    console.error('Sync push failed', e);
+  } finally {
+    CLOUD.syncing = false; renderCloudStatus();
+  }
+}
+
+function schedulePush() {
+  if (!STATE.cloud || !STATE.cloud.connected) return;
+  clearTimeout(CLOUD.syncTimer);
+  CLOUD.syncTimer = setTimeout(() => cloudPush(), 2500);
+}
+
+async function connectGoogleDrive() {
+  const input = document.getElementById('stCloudClient');
+  if (input) STATE.cloud.clientId = input.value.trim();
+  if (!STATE.cloud.clientId) { showToast('Colle d\'abord ton OAuth Client ID Google', { variant: 'error' }); return; }
+  save({ skipPush: true, skipBump: true });
+  if (!cloudReady()) { showToast('Le script Google n\'est pas encore chargé — réessaie dans 2 sec', { variant: 'error' }); return; }
+  const t = await requestToken(false);
+  if (!t) { showToast('Connexion annulée', { variant: 'error' }); return; }
+  STATE.cloud.connected = true;
+  save({ skipPush: true, skipBump: true });
+  await fetchUserEmail();
+  await cloudPull();
+  renderCloudStatus();
+  showToast('Connecté à Google Drive');
+}
+
+function disconnectGoogleDrive() {
+  if (!confirm('Déconnecter Google Drive ? Tes données locales restent intactes, mais la synchronisation s\'arrête.')) return;
+  STATE.cloud.connected = false;
+  STATE.cloud.email = '';
+  STATE.cloud.fileId = '';
+  STATE.cloud.lastSyncAt = 0;
+  CLOUD.token = null; CLOUD.tokenExpiry = 0;
+  save({ skipPush: true, skipBump: true });
+  renderCloudStatus();
+  showToast('Déconnecté de Google Drive');
+}
+
+function renderCloudStatus() {
+  const el = document.getElementById('cloudStatus');
+  if (el) el.innerHTML = cloudStatusHTML();
+}
+
+function cloudStatusHTML() {
+  const c = STATE.cloud || {};
+  if (!c.connected) {
+    return `
+      <div class="field"><label>OAuth Client ID Google</label>
+        <input id="stCloudClient" placeholder="123456789-xxxxxxxxxx.apps.googleusercontent.com" value="${escapeHTML(c.clientId || '')}">
+      </div>
+      <div class="kpi-hint" style="margin-bottom:10px;">
+        Crée un projet sur <strong>console.cloud.google.com</strong> → API Drive activée → identifiants OAuth 2.0 (type « Application Web »).
+        Ajoute <code>https://martinle-sudo.github.io</code> aux origines JavaScript autorisées, puis colle le Client ID ci-dessus.
+      </div>
+      <div style="display:flex;gap:8px;flex-wrap:wrap;">
+        <button class="btn primary sm" onclick="connectGoogleDrive()">Se connecter à Google Drive</button>
+      </div>`;
+  }
+  const last = c.lastSyncAt ? new Date(c.lastSyncAt).toLocaleString('fr-CA') : '—';
+  return `
+    <div style="display:flex;align-items:center;gap:10px;padding:8px 0;">
+      <span class="badge success">${CLOUD.syncing ? '⟳ Synchronisation…' : '✓ Connecté'}</span>
+      <div style="font-size:13px;">${escapeHTML(c.email || 'compte Google')}</div>
+    </div>
+    <div class="kpi-hint" style="margin-bottom:10px;">Dernière synchro : ${last}</div>
+    <div style="display:flex;gap:8px;flex-wrap:wrap;">
+      <button class="btn sm" onclick="cloudPull()">↻ Synchroniser maintenant</button>
+      <button class="btn sm danger" onclick="disconnectGoogleDrive()">Déconnecter</button>
+    </div>`;
+}
+
+// Auto-connect au chargement si déjà configuré
+function bootCloud() {
+  if (!STATE.cloud || !STATE.cloud.clientId || !STATE.cloud.connected) return;
+  const tryConnect = (attempts) => {
+    if (cloudReady()) {
+      initTokenClient();
+      requestToken(true).then(t => { if (t) cloudPull(); });
+    } else if (attempts > 0) {
+      setTimeout(() => tryConnect(attempts - 1), 500);
+    }
+  };
+  tryConnect(20);
+}
+
+// ============ JSON IMPORT / EXPORT ============
+function exportData() {
+  const payload = { ...STATE };
+  delete payload.cloud;
+  payload.exportedAt = new Date().toISOString();
+  payload.appVersion = '3.4';
+  const blob = new Blob([JSON.stringify(payload, null, 2)], { type: 'application/json' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = 'lustre-backup-' + todayISO() + '.json';
+  document.body.appendChild(a); a.click(); a.remove();
+  setTimeout(() => URL.revokeObjectURL(url), 1000);
+  showToast('Sauvegarde JSON téléchargée');
+}
+function importData() {
+  const input = document.createElement('input');
+  input.type = 'file';
+  input.accept = '.json,application/json';
+  input.onchange = async () => {
+    const file = input.files && input.files[0];
+    if (!file) return;
+    try {
+      const text = await file.text();
+      const parsed = JSON.parse(text);
+      if (!parsed || typeof parsed !== 'object' || !Array.isArray(parsed.clients)) {
+        throw new Error('Le fichier ne ressemble pas à un export Lustre.');
+      }
+      const counts = ['clients','quotes','invoices','contracts','deals','services','shifts','teams']
+        .map(k => (parsed[k] || []).length + ' ' + k).join(', ');
+      if (!confirm('Importer et REMPLACER les données actuelles ?\n\nContenu détecté : ' + counts + '\n\nCette action est irréversible (les données locales actuelles seront écrasées).')) return;
+      const keep = { cloud: STATE.cloud }; // garde la config cloud locale
+      Object.keys(STATE).forEach(k => delete STATE[k]);
+      Object.assign(STATE, parsed, keep);
+      save();
+      showToast('Import réussi · ' + counts);
+      setTimeout(() => location.reload(), 800);
+    } catch (err) {
+      showToast('Erreur d\'import : ' + err.message, { variant: 'error' });
+    }
+  };
+  input.click();
+}
+
 // ============ PDF / PRINT ============
+function pdfLeafSVG() {
+  return `<svg viewBox="0 0 32 32" width="36" height="36" style="flex-shrink:0;transform:rotate(-8deg);">
+    <path d="M5 27 C 5 14, 14 5, 27 5 C 27 18, 18 27, 5 27 Z" fill="#0d9488"/>
+    <path d="M5 27 L 22 10 M 12 21 L 18 17 M 16 17 L 20 13" stroke="#ffffff" stroke-opacity="0.55" stroke-width="1.2" stroke-linecap="round" fill="none"/>
+  </svg>`;
+}
+
 function printDoc(kind, doc, rev) {
   const s = STATE.settings;
   const client = clientById(doc.clientId);
@@ -2595,9 +2950,12 @@ function printDoc(kind, doc, rev) {
   document.getElementById('printArea').innerHTML = `
   <div class="doc">
     <div class="doc-top">
-      <div>
-        <div class="doc-company-name">${escapeHTML(s.company)}</div>
-        <div class="doc-company-info">${escapeHTML(s.address)}\n${escapeHTML(s.phone)} · ${escapeHTML(s.email)}</div>
+      <div class="doc-brand">
+        ${pdfLeafSVG()}
+        <div>
+          <div class="doc-company-name">${escapeHTML(s.company)}</div>
+          <div class="doc-company-info">${escapeHTML(s.address)}\n${escapeHTML(s.phone)} · ${escapeHTML(s.email)}</div>
+        </div>
       </div>
       <div class="doc-kind">
         <div class="doc-kind-label">${isQuote ? 'Soumission' : 'Facture'}</div>
@@ -2646,6 +3004,176 @@ function printDoc(kind, doc, rev) {
       </div>` : ''}
     <div class="doc-foot">${escapeHTML(s.company)}${taxIds ? ' · ' + taxIds : ''} — ${isQuote ? 'Merci de votre confiance.' : 'Merci de votre paiement.'}</div>
   </div>`;
+  window.print();
+}
+
+function fmtMoneyLong(n) {
+  return Number(n || 0).toLocaleString('fr-CA', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) + ' $';
+}
+function moneyWords(n) {
+  // Petit helper : retourne un montant en mots simple pour ressembler à un contrat formel
+  // (Pas une conversion complète — on garde aussi le chiffre entre parenthèses)
+  return fmtMoneyLong(n);
+}
+
+function printContract(contractId) {
+  const c = STATE.contracts.find(x => x.id === contractId);
+  if (!c) return;
+  const s = STATE.settings;
+  const client = clientById(c.clientId);
+  if (!client) { showToast('Client introuvable', { variant: 'error' }); return; }
+  const q = c.quoteId ? STATE.quotes.find(x => x.id === c.quoteId) : null;
+  const v = q ? q.versions[Math.min(c.quoteRev != null ? c.quoteRev - 1 : q.currentRev, q.versions.length - 1)] : null;
+  const items = v ? v.items.filter(it => it.desc || parseNum(it.price)) : [];
+  const t = v ? calcTotals(items, s) : { sub: 0, tps: 0, tvq: 0, total: 0 };
+  const team = STATE.teams.find(x => x.id === c.teamId);
+  const daysLabel = (c.days || []).map(d => WEEKDAYS.find(w => w[0] === d) || [d, d]).map(w => w[1]).join(', ') || '—';
+  const today = new Date().toLocaleDateString('fr-CA', { day: 'numeric', month: 'long', year: 'numeric' });
+  const taxIds = [s.tpsNum ? 'TPS : ' + s.tpsNum : '', s.tvqNum ? 'TVQ : ' + s.tvqNum : ''].filter(Boolean).join(' · ');
+
+  // Reconnaître si le total représente le coût d'une visite ou d'un mois (heuristique simple)
+  const visitsPerMonth = freqPerWeek(c.frequency) * 4.33;
+  const monthly = v ? (
+    (c.frequency === 'mensuelle' || items.every(it => /mois|mensuel/i.test(it.unit))) ? t.sub :
+    (c.frequency === 'ponctuelle') ? t.sub :
+    t.sub * visitsPerMonth / (visitsPerMonth || 1) // déjà mensuel si items en /mois ; sinon par visite × visites/mois
+  ) : 0;
+
+  document.getElementById('printArea').innerHTML = `
+  <div class="doc contract-doc">
+    <div class="doc-top">
+      <div class="doc-brand">
+        ${pdfLeafSVG()}
+        <div>
+          <div class="doc-company-name">${escapeHTML(s.company)}</div>
+          <div class="doc-company-info">${escapeHTML(s.address)}\n${escapeHTML(s.phone)} · ${escapeHTML(s.email)}</div>
+        </div>
+      </div>
+      <div class="doc-kind">
+        <div class="doc-kind-label">Entente de services</div>
+        <div class="doc-kind-num">${c.number}</div>
+        <div class="doc-kind-meta">Date : ${today}<br>${q ? 'Réf. soumission : ' + q.number + (v ? ' v' + v.rev : '') : ''}</div>
+      </div>
+    </div>
+
+    <div class="doc-rule"></div>
+
+    <h1 class="contract-h1">ENTENTE DE SERVICES D'ENTRETIEN MÉNAGER</h1>
+
+    <p class="contract-p"><strong>ENTRE :</strong> <strong>${escapeHTML(s.company)}</strong>, ayant son siège au ${escapeHTML(s.address.replace(/\n/g, ', '))}, représentée par ${escapeHTML(s.signerName || '_______________________')}, ${escapeHTML(s.signerTitle || 'représentant autorisé')}, ci-après désignée le « <strong>Prestataire</strong> ».</p>
+
+    <p class="contract-p"><strong>ET :</strong> <strong>${escapeHTML(client.name)}</strong>${client.address ? ', situé au ' + escapeHTML(client.address.replace(/\n/g, ', ')) : ''}${client.contact ? ', représenté par ' + escapeHTML(client.contact) : ''}, ci-après désigné le « <strong>Client</strong> ».</p>
+
+    <p class="contract-p"><strong>LES PARTIES CONVIENNENT DE CE QUI SUIT :</strong></p>
+
+    <h2 class="contract-h2">1. Objet de l'entente</h2>
+    <p class="contract-p">Le Prestataire s'engage à fournir au Client les services d'entretien ménager décrits à l'Annexe A de la présente entente, conformément aux normes professionnelles de l'industrie.</p>
+
+    <h2 class="contract-h2">2. Lieu d'exécution</h2>
+    <p class="contract-p">Les services seront rendus à l'adresse suivante : <strong>${escapeHTML(client.address || '_______________________')}</strong>.</p>
+
+    <h2 class="contract-h2">3. Durée et reconduction</h2>
+    <p class="contract-p">La présente entente prend effet le <strong>${fmtDate(c.startDate)}</strong> et se termine le <strong>${fmtDate(c.endDate)}</strong>. Elle est automatiquement reconduite pour des périodes successives de douze (12) mois, à moins qu'une des parties ne transmette à l'autre, par écrit, un avis de non-reconduction au moins <strong>${s.contractNoticeDays} jours</strong> avant la date d'échéance.</p>
+
+    <h2 class="contract-h2">4. Fréquence et horaire</h2>
+    <p class="contract-p">Les services seront rendus selon la fréquence <strong>${escapeHTML(freqLabel(c.frequency))}</strong>, les <strong>${daysLabel}</strong>, entre <strong>${c.startTime}</strong> et <strong>${c.endTime}</strong>. ${team ? 'L\'équipe désignée est <strong>' + escapeHTML(team.name) + '</strong>. ' : ''}Toute modification ponctuelle de l'horaire doit être convenue par écrit (courriel suffit) au moins quarante-huit (48) heures à l'avance.</p>
+
+    <h2 class="contract-h2">5. Prix et modalités de paiement</h2>
+    <p class="contract-p">En contrepartie des services, le Client s'engage à payer au Prestataire les montants détaillés à l'Annexe A, plus les taxes applicables (TPS et TVQ).</p>
+    <p class="contract-p">Les factures sont émises mensuellement et payables dans un délai de <strong>${s.invoiceTerms} jours</strong> suivant la date d'émission. Tout solde non payé à l'échéance porte intérêt au taux de <strong>1,5 % par mois</strong> (18 % par an), calculé quotidiennement à compter de la date d'échéance.</p>
+
+    <h2 class="contract-h2">6. Indexation annuelle</h2>
+    <p class="contract-p">Le prix sera ajusté à chaque date anniversaire de l'entente selon un taux d'indexation de <strong>${s.contractIndexationPct} %</strong>, ou selon la variation annuelle de l'Indice des prix à la consommation (IPC) publié par Statistique Canada pour la province de Québec — le plus élevé des deux. Le Prestataire transmettra au Client un avis écrit au moins trente (30) jours avant l'entrée en vigueur du nouveau prix.</p>
+
+    <h2 class="contract-h2">7. Produits et équipements</h2>
+    <p class="contract-p">Sauf indication contraire à l'Annexe A, le Prestataire fournit l'ensemble des produits d'entretien, des équipements et des outils nécessaires à l'exécution des services. Les produits utilisés respectent les normes de santé, de sécurité et d'environnement applicables au Québec.</p>
+
+    <h2 class="contract-h2">8. Accès aux lieux</h2>
+    <p class="contract-p">Le Client s'engage à fournir au Prestataire un accès sécuritaire et continu aux lieux pendant les heures de service convenues. Toute clé, carte d'accès ou code d'alarme remis au Prestataire demeure la propriété exclusive du Client et lui sera restitué à la fin de l'entente. Le Prestataire s'engage à conserver ces moyens d'accès de manière confidentielle et sécuritaire, et à ne pas les divulguer à des tiers.</p>
+
+    <h2 class="contract-h2">9. Confidentialité</h2>
+    <p class="contract-p">Le Prestataire et ses employés s'engagent à respecter la confidentialité de toute information dont ils pourraient avoir connaissance dans le cadre de la prestation des services, y compris pendant et après la fin de la présente entente.</p>
+
+    <h2 class="contract-h2">10. Assurance et responsabilité civile</h2>
+    <p class="contract-p">Le Prestataire maintient en vigueur, pendant toute la durée de l'entente, une police d'assurance responsabilité civile générale d'un montant minimum de <strong>${moneyWords(s.contractInsuranceAmount)}</strong>. Une attestation d'assurance peut être fournie au Client sur simple demande écrite.</p>
+    <p class="contract-p">Le Prestataire est responsable des dommages directement causés par la faute ou la négligence de ses employés dans l'exécution des services, sous réserve qu'un avis écrit lui soit transmis dans les <strong>quarante-huit (48) heures</strong> suivant la découverte du dommage par le Client, accompagné de photographies et de toute pièce justificative pertinente.</p>
+
+    <h2 class="contract-h2">11. Vérification des antécédents</h2>
+    <p class="contract-p">Tous les employés du Prestataire affectés à l'exécution de la présente entente ont fait l'objet d'une vérification d'antécédents judiciaires. Le Prestataire atteste qu'aucun employé ayant un dossier criminel non réhabilité en lien avec un emploi de confiance n'est affecté aux lieux du Client.</p>
+
+    <h2 class="contract-h2">12. Suspension temporaire</h2>
+    <p class="contract-p">L'une ou l'autre des parties peut suspendre temporairement la prestation des services pour une période n'excédant pas trente (30) jours, moyennant un préavis écrit de sept (7) jours. Aucun montant n'est facturé pour les visites non effectuées pendant la période de suspension.</p>
+
+    <h2 class="contract-h2">13. Résiliation</h2>
+    <p class="contract-p">Chacune des parties peut résilier la présente entente, sans motif, moyennant un préavis écrit de <strong>${s.contractNoticeDays} jours</strong>. En cas de manquement grave par l'autre partie (notamment : défaut de paiement de plus de trente (30) jours après mise en demeure, manquement répété aux obligations de l'entente, faillite ou insolvabilité), la résiliation peut prendre effet immédiatement après l'envoi d'un avis écrit demeuré sans suite pendant dix (10) jours.</p>
+
+    <h2 class="contract-h2">14. Non-sollicitation des employés</h2>
+    <p class="contract-p">Pendant toute la durée de l'entente et pour une période de <strong>${s.contractNonSolMonths} mois</strong> suivant sa résiliation, le Client s'engage à ne pas embaucher, directement ou indirectement (notamment via un tiers, une agence ou une société liée), aucun employé du Prestataire ayant été affecté à l'exécution des services au cours des douze (12) derniers mois précédant la résiliation.</p>
+    <p class="contract-p">Les parties reconnaissent que cette clause est essentielle à la protection des investissements du Prestataire en formation et en recrutement. En cas de violation, le Client s'engage à verser au Prestataire, à titre de dommages-intérêts liquidés, une somme équivalente à <strong>six (6) mois</strong> de rémunération brute de l'employé concerné, payable dans les trente (30) jours suivant la mise en demeure.</p>
+
+    <h2 class="contract-h2">15. Force majeure</h2>
+    <p class="contract-p">Aucune partie ne pourra être tenue responsable d'un retard ou d'un défaut d'exécution causé par un cas de force majeure, tel que défini à l'article 1470 du <em>Code civil du Québec</em> (notamment : catastrophes naturelles, pandémies, ordonnances gouvernementales, conflits de travail généralisés, pannes d'infrastructures essentielles).</p>
+
+    <h2 class="contract-h2">16. Avis</h2>
+    <p class="contract-p">Tout avis prévu à la présente entente doit être transmis par écrit, par courriel avec accusé de réception ou par courrier recommandé, aux adresses indiquées en en-tête. Un avis transmis par courriel est réputé reçu le jour ouvrable suivant son envoi.</p>
+
+    <h2 class="contract-h2">17. Entente complète et modification</h2>
+    <p class="contract-p">La présente entente, incluant son Annexe A, constitue l'intégralité de l'accord entre les parties et remplace toute entente verbale ou écrite antérieure portant sur le même objet. Toute modification doit faire l'objet d'un écrit signé par les deux parties.</p>
+
+    <h2 class="contract-h2">18. Divisibilité</h2>
+    <p class="contract-p">Si une disposition de la présente entente est jugée invalide ou inapplicable par un tribunal compétent, les autres dispositions conservent leur plein effet.</p>
+
+    <h2 class="contract-h2">19. Loi applicable et juridiction</h2>
+    <p class="contract-p">La présente entente est régie et interprétée conformément aux lois en vigueur dans la province de Québec et aux lois fédérales du Canada qui y sont applicables. Tout litige relèvera de la compétence exclusive des tribunaux du district judiciaire de <strong>${escapeHTML(s.contractJudicialDistrict)}</strong>.</p>
+
+    <p class="contract-p" style="margin-top:24px;"><strong>EN FOI DE QUOI</strong>, les parties ont signé la présente entente en deux (2) exemplaires originaux.</p>
+
+    <div class="doc-sign" style="margin-top:30px;">
+      <div class="doc-sign-block">
+        <div class="doc-sign-line"></div>
+        <div class="doc-sign-label">Pour le Prestataire — ${escapeHTML(s.signerName || '_______________________')}<br>${escapeHTML(s.signerTitle || '')}<br>Date : _______________________</div>
+      </div>
+      <div class="doc-sign-block">
+        <div class="doc-sign-line"></div>
+        <div class="doc-sign-label">Pour le Client — ${escapeHTML(client.contact || '_______________________')}<br>${escapeHTML(client.name)}<br>Date : _______________________</div>
+      </div>
+    </div>
+
+    <div class="contract-pagebreak"></div>
+
+    <h1 class="contract-h1" style="margin-top:0;">ANNEXE A — Description et tarification des services</h1>
+
+    <p class="contract-p"><strong>Client :</strong> ${escapeHTML(client.name)} · <strong>Lieu :</strong> ${escapeHTML(client.address || '—')}</p>
+    <p class="contract-p"><strong>Fréquence :</strong> ${escapeHTML(freqLabel(c.frequency))} · <strong>Jours :</strong> ${daysLabel} · <strong>Plage horaire :</strong> ${c.startTime} à ${c.endTime}${team ? ' · <strong>Équipe :</strong> ' + escapeHTML(team.name) : ''}</p>
+
+    ${items.length ? `
+      <table class="doc-items" style="margin-top:14px;">
+        <tr><th>Description du service</th><th class="num">Qté</th><th class="num">Unité</th><th class="num">Prix unitaire</th><th class="num">Montant</th></tr>
+        ${items.map(it => `
+          <tr>
+            <td><div class="doc-item-desc">${escapeHTML(it.desc)}</div></td>
+            <td class="num">${it.qty}</td>
+            <td class="num">${escapeHTML(it.unit)}</td>
+            <td class="num">${fmtMoney(parseNum(it.price))}</td>
+            <td class="num">${fmtMoney(parseNum(it.qty) * parseNum(it.price))}</td>
+          </tr>`).join('')}
+      </table>
+      <div class="doc-totals">
+        <div class="doc-totals-line"><span>Sous-total</span><span class="v">${fmtMoney(t.sub)}</span></div>
+        <div class="doc-totals-line"><span>TPS (${s.tps} %)</span><span class="v">${fmtMoney(t.tps)}</span></div>
+        <div class="doc-totals-line"><span>TVQ (${s.tvq} %)</span><span class="v">${fmtMoney(t.tvq)}</span></div>
+        <div class="doc-totals-line grand"><span>Total par période de facturation</span><span class="v">${fmtMoney(t.total)}</span></div>
+      </div>` : '<p class="contract-p"><em>Aucune ligne de service détaillée. Référer à la soumission liée ou compléter avant signature.</em></p>'}
+
+    ${c.notes ? `
+      <div class="doc-notes" style="margin-top:18px;">
+        <div class="doc-notes-label">Notes complémentaires</div>
+        <div class="doc-notes-body">${escapeHTML(c.notes)}</div>
+      </div>` : ''}
+
+    <div class="doc-foot" style="margin-top:24px;">${escapeHTML(s.company)}${taxIds ? ' · ' + taxIds : ''} — Entente ${c.number}, signée par les parties.</div>
+  </div>`;
+
   window.print();
 }
 
@@ -2779,6 +3307,7 @@ load();
 seed();
 seedServices();   // garantit le catalogue par défaut, même pour les données v3.0 existantes
 renderDashboard();
+bootCloud();
 </script>
 </body>
 </html>
