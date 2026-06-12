@@ -1,11 +1,11 @@
 <!DOCTYPE html>
-<!-- Programmé par Claude Code (Anthropic) -->
+<!-- Programmé par ML — v3.6 (bump version à chaque ajustement) -->
 <html lang="fr">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <meta name="theme-color" content="#0b0f12">
-<title>Lustre — Gestion d'entretien ménager v3.5</title>
+<title>Lustre — Gestion d'entretien ménager v3.6</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=JetBrains+Mono:wght@400;500;600&family=Geist:wght@300;400;500;600;700&display=swap" rel="stylesheet">
@@ -480,6 +480,24 @@ input:focus-visible, select:focus-visible, textarea:focus-visible { outline: non
 ::-webkit-scrollbar-track { background: transparent; }
 .num, .totals-val, .kpi-value, .list-row-end, .deal-card-value { font-variant-numeric: tabular-nums; }
 .panel:has(.tbl) { overflow-x: auto; }
+.tpl-move { width: 20px; height: 16px; font-size: 8px; color: var(--text-subtle); border-radius: 4px; line-height: 1; }
+.tpl-move:hover:not([disabled]) { background: var(--bg-hover); color: var(--text); }
+.tpl-move[disabled] { opacity: 0.25; cursor: default; }
+.tpl-toggle { display: flex; align-items: center; gap: 5px; font-size: 12px; color: var(--text-muted); white-space: nowrap; width: auto; }
+.tpl-toggle input { width: auto; }
+
+.link {
+  color: var(--text);
+  cursor: pointer;
+  border-bottom: 1px dotted var(--text-subtle);
+  transition: color 0.15s, border-color 0.15s;
+}
+.link:hover { color: var(--accent); border-bottom-color: var(--accent); }
+.link.muted { color: var(--text-muted); }
+.link.muted:hover { color: var(--accent); }
+.link.accent { color: var(--accent); border-bottom-color: transparent; font-weight: 600; }
+.link.accent:hover { border-bottom-color: var(--accent); }
+
 kbd {
   font-family: 'JetBrains Mono', monospace;
   font-size: 10px;
@@ -670,7 +688,7 @@ kbd {
       <path d="M5 27 L 22 10 M 12 21 L 18 17 M 16 17 L 20 13" stroke="#ffffff" stroke-opacity="0.55" stroke-width="1.2" stroke-linecap="round" fill="none"/>
     </svg>
     <span><em>Lu</em>stre</span>
-    <span class="logo-version">v3.5</span>
+    <span class="logo-version">v3.6</span>
   </div>
   <button class="nav-btn" onclick="openPalette()" aria-label="Recherche rapide">
     <svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
@@ -691,6 +709,10 @@ kbd {
   <button class="nav-btn" data-view="contracts" onclick="showView('contracts')">
     <svg viewBox="0 0 24 24"><path d="M9 12l2 2 4-4"/><path d="M21 12c0 4.97-4.03 9-9 9s-9-4.03-9-9 4.03-9 9-9c2.5 0 4.78 1.02 6.41 2.67"/></svg>
     <span>Contrats</span>
+  </button>
+  <button class="nav-btn" data-view="template" onclick="showView('template')">
+    <svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><line x1="10" y1="9" x2="8" y2="9"/></svg>
+    <span>Modèle de contrat</span>
   </button>
   <button class="nav-btn" data-view="services" onclick="showView('services')">
     <svg viewBox="0 0 24 24"><path d="M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z"/><line x1="7" y1="7" x2="7.01" y2="7"/></svg>
@@ -818,6 +840,21 @@ kbd {
     <div class="panel"><table class="tbl" id="contractsTable"></table></div>
   </div>
   <div id="contractEditor" style="display:none;"></div>
+</section>
+
+<!-- ============ CONTRACT TEMPLATE ============ -->
+<section class="view" id="view-template">
+  <div class="view-header">
+    <div>
+      <div class="view-title">Modèle de contrat</div>
+      <div class="view-sub">Clauses appliquées par défaut à tous les contrats. Utilise les variables comme <code>{{company}}</code>, <code>{{insurance}}</code>, <code>{{startDate}}</code>.</div>
+    </div>
+    <button class="btn primary" onclick="addTemplateSection()">
+      <svg viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+      Ajouter une clause
+    </button>
+  </div>
+  <div id="templateBody"></div>
 </section>
 
 <!-- ============ SCHEDULE ============ -->
@@ -993,9 +1030,102 @@ const STATE = {
   shifts: [],
   services: [],
   contracts: [],
+  references: [],
+  contractTemplate: null,    // sera initialisé par defaultContractTemplate() au load
   seeded: false,
   servicesSeeded: false
 };
+
+// ============ MODÈLE DE CONTRAT ============
+// Chaque section est rendue dans le PDF entre la couverture et le bordereau.
+// Les placeholders {{xxx}} sont remplacés par les valeurs des Réglages / du contrat / du client.
+function defaultContractTemplate() {
+  return {
+    sections: [
+      { id: 'service-offert', title: 'Service offert', enabled: true,
+        body: "{{company}} ne sera pas tenu responsable d'un service non rendu à terme, dont les causes seraient hors de son contrôle telles que : panne d'électricité, feu, inondation, verglas, tempête de neige (35 cm et +), grève, ligne de piquetage, actes de Dieu ou toutes autres actions causées par le personnel ou la clientèle de nos clients." },
+      { id: 'surface', title: 'Surface de nettoyage', enabled: true,
+        body: "Tout changement à la fréquence des travaux ou à la superficie à nettoyer occasionnera un ajustement des heures de travail qui sera établi suite à une entente entre les deux parties." },
+      { id: 'etat-edifice', title: "Condition présente de l'édifice", enabled: true,
+        body: "{{company}} n'est pas et ne sera pas tenu responsable de l'état présent des lieux tel que : mobilier endommagé, tapis tachés, plancher égratigné, murs endommagés, etc." },
+      { id: 'travaux-supp', title: "Travaux supplémentaires / Appels de services / Services d'urgence", enabled: true,
+        body: "Tout travail supplémentaire effectué par {{company}} sera facturé au taux horaire de {{extraRate}}/h dès la terminaison desdits travaux ; la somme due sera exigible dans les {{extraPaymentDays}} jours suivants. À ce taux horaire, il faut ajouter les taxes applicables. Un appel de service ou un service d'urgence qui occasionne un déplacement non prévu occasionnera une charge minimum de {{extraMin}} heures." },
+      { id: 'assurances', title: 'Assurances', enabled: true,
+        body: "{{company}} détient une assurance au montant de {{insurance}} incluant la responsabilité publique et les dommages à la propriété.\n\nLa couverture d'assurance contre la malhonnêteté des employés vous assure contre toute responsabilité pour les dommages faits ou causés par nos employés jusqu'à concurrence de {{dishonesty}}{{insurancePolicyClause}}." },
+      { id: 'cnesst', title: 'CNESST', enabled: true,
+        body: "Tous les employés de {{company}} possèdent la couverture de la CNESST{{cnesstClause}}." },
+      { id: 'comite-paritaire', title: "Comité paritaire de l'entretien des édifices publics", enabled: true,
+        body: "{{comiteParitaireClause}}" },
+      { id: 'taxes', title: 'Taxes de vente', enabled: true,
+        body: "{{taxesClause}}" },
+      { id: 'supervision', title: 'Supervision', enabled: true,
+        body: "Des inspections régulières de contrôle de qualité seront effectuées par des superviseurs compétents." },
+      { id: 'confidentialite', title: 'Confidentialité', enabled: true,
+        body: "{{company}} fait signer à tous ses employés un engagement de discrétion absolue sur toutes les informations concernant le fonctionnement et les activités de {{company}} d'une part, et de notre clientèle d'autre part." },
+      { id: 'equipement', title: 'Équipement', enabled: true,
+        body: "{{company}} fournit tous les produits nettoyants, les sacs à déchets, le papier hygiénique, le papier à main, le savon à main, les pastilles d'urinoir ainsi que tous les équipements nécessaires à l'exécution de notre mandat.{{exclusionsClause}}" },
+      { id: 'uniformes', title: 'Uniformes', enabled: true,
+        body: "Tous les employés de {{company}} sont identifiés à l'aide d'uniformes propres et soignés arborant le logo de l'entreprise." },
+      { id: 'duree-reconduction', title: 'Durée, reconduction et non-sollicitation', enabled: true,
+        body: "La présente offre prend effet le {{startDate}} et se termine le {{endDate}}. Elle est automatiquement reconduite pour des périodes successives de douze (12) mois, à moins qu'une partie ne transmette à l'autre un avis écrit de non-reconduction au moins {{noticeDays}} jours avant l'échéance. Pendant la durée du contrat et pour {{nonSolMonths}} mois suivant sa fin, le Client s'engage à ne pas embaucher directement les employés affectés à son site, à défaut de quoi des dommages-intérêts liquidés équivalents à six (6) mois de salaire de l'employé concerné seront exigibles." }
+    ]
+  };
+}
+
+// Résout les placeholders pour un contrat + ses données
+function buildPlaceholders(c, client) {
+  const s = STATE.settings;
+  const taxIds = [s.tpsNum ? 'TPS/TVH : ' + s.tpsNum : '', s.tvqNum ? 'TVQ : ' + s.tvqNum : ''].filter(Boolean);
+  return {
+    company: s.company || '',
+    client: client ? client.name : '',
+    insurance: fmtMoneyLong(s.contractInsuranceAmount || 0),
+    dishonesty: fmtMoneyLong(s.contractDishonestyAmount || 0),
+    insurancePolicy: s.insurancePolicy || '',
+    insurancePolicyClause: s.insurancePolicy ? ". Police d'assurance n° " + s.insurancePolicy : '',
+    cssNumber: s.cssNumber || '',
+    cnesstClause: s.cssNumber ? ' sous le numéro ' + s.cssNumber : '',
+    comiteNumber: s.comiteParitaireNum || '',
+    comiteParitaireClause: s.comiteParitaireNum
+      ? s.company + " est membre du Comité paritaire sous le numéro " + s.comiteParitaireNum + "."
+      : s.company + " est membre du Comité paritaire de l'entretien des édifices publics.",
+    taxesClause: taxIds.length ? taxIds.map(x => 'N° ' + x).join('\n') : 'Les numéros de taxes seront fournis sur la première facture.',
+    extraRate: fmtMoneyLong(s.extraWorkHourlyRate || 0),
+    extraMin: s.extraWorkMinHours || 3,
+    extraPaymentDays: s.extraWorkPaymentDays || 45,
+    noticeDays: s.contractNoticeDays || 60,
+    nonSolMonths: s.contractNonSolMonths || 12,
+    startDate: fmtDate(c.startDate),
+    endDate: fmtDate(c.endDate),
+    exclusionsText: s.exclusionsText || '',
+    exclusionsClause: s.exclusionsText ? '\n\nLe client fournit : ' + s.exclusionsText : ''
+  };
+}
+function applyPlaceholders(text, vars) {
+  return String(text || '').replace(/\{\{(\w+)\}\}/g, (m, key) => vars[key] != null ? vars[key] : m);
+}
+
+// Retourne les sections actives pour un contrat donné (template + overrides)
+function effectiveSections(c) {
+  const tpl = STATE.contractTemplate || defaultContractTemplate();
+  const overrides = c.clauseOverrides || { hidden: [], modified: {}, added: [] };
+  const result = [];
+  tpl.sections.forEach(sec => {
+    if (!sec.enabled) return;
+    if ((overrides.hidden || []).includes(sec.id)) return;
+    const mod = (overrides.modified || {})[sec.id];
+    result.push({
+      id: sec.id,
+      title: mod && mod.title != null ? mod.title : sec.title,
+      body: mod && mod.body != null ? mod.body : sec.body,
+      _isCustom: false
+    });
+  });
+  (overrides.added || []).forEach(ext => {
+    result.push({ id: 'custom-' + (ext._id || ''), title: ext.title || '', body: ext.body || '', _isCustom: true });
+  });
+  return result;
+}
 
 function save(opts) {
   opts = opts || {};
@@ -1013,6 +1143,8 @@ function load() {
       // Backfill: anciens objets dépourvus des nouveaux champs
       (parsed.quotes || []).forEach(q => (q.versions || []).forEach(v => { if (!v.frequency) v.frequency = 'hebdo'; }));
       if (!Array.isArray(parsed.contracts)) parsed.contracts = [];
+      if (!Array.isArray(parsed.references)) parsed.references = parseLegacyReferences(parsed.settings && parsed.settings.referencesText);
+      if (!parsed.contractTemplate) parsed.contractTemplate = defaultContractTemplate();
       if (!parsed.cloud) parsed.cloud = { clientId: '', connected: false, email: '', fileId: '', lastSyncAt: 0 };
       if (!parsed.updatedAt) parsed.updatedAt = Date.now();
       Object.assign(STATE, parsed);
@@ -1051,6 +1183,56 @@ function escapeHTML(s) {
 }
 function clientById(id) { return STATE.clients.find(c => c.id === id); }
 function clientName(id) { const c = clientById(id); return c ? c.name : '(client supprimé)'; }
+
+// Migration douce : convertit l'ancien champ texte de références en liste structurée
+function parseLegacyReferences(txt) {
+  if (!txt || typeof txt !== 'string') return [];
+  return txt.split(/\n\s*\n/).map(b => b.trim()).filter(Boolean).map(block => {
+    const lines = block.split('\n').map(l => l.trim()).filter(Boolean);
+    return {
+      id: uid(),
+      company: lines[0] || '',
+      contact: lines[1] || '',
+      address: lines[2] || '',
+      phone: lines.find(l => /\(?\d{3}\)?[\s.-]?\d{3}[\s.-]?\d{4}/.test(l)) || '',
+      email: lines.find(l => /@/.test(l)) || ''
+    };
+  });
+}
+
+// Liens cliquables vers les fiches : stoppe la propagation pour ne pas déclencher le clic du parent
+function linkClient(id, extraClass) {
+  if (!id) return '<span class="text-subtle">—</span>';
+  const c = clientById(id);
+  if (!c) return '<span class="text-subtle">(client supprimé)</span>';
+  return `<a class="link ${extraClass || ''}" onclick="event.stopPropagation();goClient('${id}')">${escapeHTML(c.name)}</a>`;
+}
+function linkContract(id, label) {
+  const c = STATE.contracts.find(x => x.id === id);
+  if (!c) return escapeHTML(label || '—');
+  return `<a class="link accent" onclick="event.stopPropagation();goContract('${id}')">${escapeHTML(label || c.number)}</a>`;
+}
+function linkQuote(id, label) {
+  const q = STATE.quotes.find(x => x.id === id);
+  if (!q) return escapeHTML(label || '—');
+  return `<a class="link accent" onclick="event.stopPropagation();goQuote('${id}')">${escapeHTML(label || q.number)}</a>`;
+}
+function linkInvoice(id, label) {
+  const i = STATE.invoices.find(x => x.id === id);
+  if (!i) return escapeHTML(label || '—');
+  return `<a class="link accent" onclick="event.stopPropagation();goInvoice('${id}')">${escapeHTML(label || i.number)}</a>`;
+}
+function linkDeal(id, label) {
+  const d = STATE.deals.find(x => x.id === id);
+  if (!d) return escapeHTML(label || '—');
+  return `<a class="link" onclick="event.stopPropagation();goDeal('${id}')">${escapeHTML(label || d.title)}</a>`;
+}
+// Navigations sans passer par le menu
+function goClient(id)   { showView('clients');   openClient(id); }
+function goContract(id) { showView('contracts'); openContract(id); }
+function goQuote(id)    { showView('quotes');    openQuote(id); }
+function goInvoice(id)  { showView('invoices');  openInvoice(id); }
+function goDeal(id)     { showView('pipeline');  openDealModal(id); }
 function nextNumber(prefix, list) {
   const year = new Date().getFullYear();
   const re = new RegExp('^' + prefix + '-' + year + '-(\\d+)$');
@@ -1190,6 +1372,13 @@ function seed() {
       items: [{ desc: 'Désinfection hebdomadaire — 4 visites', qty: 4, unit: 'visite', price: 300 }], notes: '' }
   ];
 
+  if (!STATE.references || !STATE.references.length) {
+    STATE.references = [
+      { id: uid(), company: 'Gestion Immobilière Lévesque', contact: 'Mme Caroline Lévesque', address: '450 boul. René-Lévesque O., Montréal', phone: '(514) 555-0142', email: 'c.levesque@gi-levesque.ca' },
+      { id: uid(), company: 'Clinique Médicale Saint-Denis', contact: 'Dr. Patrick Nguyen', address: '1200 rue Saint-Denis, Montréal', phone: '(514) 555-0188', email: '' }
+    ];
+  }
+
   STATE.seeded = true;
   save();
 }
@@ -1227,6 +1416,7 @@ function showView(name) {
   if (name === 'pipeline') renderPipeline();
   if (name === 'quotes') { closeQuoteEditor(); renderQuotes(); }
   if (name === 'contracts') { closeContractEditor(); renderContracts(); }
+  if (name === 'template') renderTemplate();
   if (name === 'schedule') renderSchedule();
   if (name === 'invoices') { closeInvoiceEditor(); renderInvoices(); }
   if (name === 'services') renderServices();
@@ -1289,7 +1479,7 @@ function renderDashboard() {
         return `<div class="list-row" onclick="showView('schedule')">
           <span class="team-dot" style="background:${team ? team.color : '#888'};width:9px;height:9px;border-radius:50%;flex-shrink:0;"></span>
           <div class="list-row-main">
-            <div class="list-row-title">${escapeHTML(clientName(s.clientId))}</div>
+            <div class="list-row-title">${linkClient(s.clientId)}</div>
             <div class="list-row-sub">${team ? escapeHTML(team.name) : '—'}</div>
           </div>
           <div class="list-row-end">${s.start}–${s.end}</div>
@@ -1301,9 +1491,9 @@ function renderDashboard() {
   const cutoff = Date.now() - 7*864e5;
   const follow = STATE.quotes.filter(q => q.status === 'sent' && (q.sentAt || 0) < cutoff);
   document.getElementById('dashFollowups').innerHTML = follow.length
-    ? follow.map(q => `<div class="list-row" onclick="showView('quotes');openQuote('${q.id}')">
+    ? follow.map(q => `<div class="list-row" onclick="goQuote('${q.id}')">
         <div class="list-row-main">
-          <div class="list-row-title">${q.number} — ${escapeHTML(clientName(q.clientId))}</div>
+          <div class="list-row-title">${q.number} — ${linkClient(q.clientId)}</div>
           <div class="list-row-sub">envoyée il y a ${Math.floor((Date.now() - q.sentAt)/864e5)} jours</div>
         </div>
         <div class="list-row-end">${fmtMoney(calcTotals(q.versions[q.currentRev].items, STATE.settings).total)}</div>
@@ -1312,9 +1502,9 @@ function renderDashboard() {
 
   // Overdue invoices
   document.getElementById('dashOverdue').innerHTML = overdue.length
-    ? overdue.map(i => `<div class="list-row" onclick="showView('invoices');openInvoice('${i.id}')">
+    ? overdue.map(i => `<div class="list-row" onclick="goInvoice('${i.id}')">
         <div class="list-row-main">
-          <div class="list-row-title">${i.number} — ${escapeHTML(clientName(i.clientId))}</div>
+          <div class="list-row-title">${i.number} — ${linkClient(i.clientId)}</div>
           <div class="list-row-sub">échéance ${fmtDate(i.dueDate)}</div>
         </div>
         <div class="list-row-end" style="color:var(--danger)">${fmtMoney(calcTotals(i.items, STATE.settings).total)}</div>
@@ -1325,10 +1515,10 @@ function renderDashboard() {
   document.getElementById('dashDeals').innerHTML = activeDeals.length
     ? activeDeals.slice(0, 6).map(d => {
         const stage = STAGES.find(s => s[0] === d.stage);
-        return `<div class="list-row" onclick="showView('pipeline')">
+        return `<div class="list-row" onclick="goDeal('${d.id}')">
           <div class="list-row-main">
             <div class="list-row-title">${escapeHTML(d.title)}</div>
-            <div class="list-row-sub">${escapeHTML(clientName(d.clientId))} · ${stage ? stage[1] : d.stage}</div>
+            <div class="list-row-sub">${linkClient(d.clientId)} · ${stage ? stage[1] : d.stage}</div>
           </div>
           <div class="list-row-end">${fmtMoney(d.value)}/mois</div>
         </div>`;
@@ -1374,7 +1564,7 @@ function renderPipeline() {
                ondragstart="dealDragStart(event,'${d.id}')" ondragend="dealDragEnd(event)"
                onclick="openDealModal('${d.id}')">
             <div class="deal-card-title">${escapeHTML(d.title)}</div>
-            <div class="deal-card-client">${escapeHTML(clientName(d.clientId))}</div>
+            <div class="deal-card-client">${linkClient(d.clientId, 'muted')}</div>
             <div class="deal-card-foot">
               <span class="deal-card-value">${fmtMoney(d.value)}/mois</span>
               <span class="deal-card-freq">${escapeHTML(d.freq || '')}</span>
@@ -1934,7 +2124,7 @@ function renderQuotes() {
     const [label, cls] = QUOTE_STATUS[q.status] || [q.status, ''];
     return `<tr class="clickable" onclick="openQuote('${q.id}')">
       <td><strong>${q.number}</strong>${q.versions.length > 1 ? ` <span class="badge purple">v${v.rev}</span>` : ''}</td>
-      <td>${escapeHTML(clientName(q.clientId))}</td>
+      <td>${linkClient(q.clientId)}</td>
       <td>${fmtDate(v.date)}</td>
       <td><span class="badge ${cls}">${label}</span></td>
       <td class="num">${fmtMoney(tot)}</td>
@@ -2156,7 +2346,7 @@ function renderInvoices() {
     const [label, cls] = late ? ['En retard', 'danger'] : (INV_STATUS[i.status] || [i.status, '']);
     return `<tr class="clickable" onclick="openInvoice('${i.id}')">
       <td><strong>${i.number}</strong></td>
-      <td>${escapeHTML(clientName(i.clientId))}</td>
+      <td>${linkClient(i.clientId)}</td>
       <td>${fmtDate(i.date)}</td>
       <td>${fmtDate(i.dueDate)}</td>
       <td><span class="badge ${cls}">${label}</span></td>
@@ -2334,7 +2524,7 @@ function renderSchedule() {
         const team = STATE.teams.find(t => t.id === s.teamId);
         return `<div class="shift" style="border-left-color:${team ? team.color : '#888'}" onclick="openShiftModal('${s.id}')">
           <div class="shift-time">${s.start} – ${s.end}</div>
-          <div class="shift-client">${escapeHTML(clientName(s.clientId))}</div>
+          <div class="shift-client">${linkClient(s.clientId)}</div>
           <div class="shift-team" style="color:${team ? team.color : 'inherit'}">${team ? escapeHTML(team.name) : '—'}</div>
           ${s.notes ? `<div class="shift-time" style="margin-top:3px">📝 ${escapeHTML(s.notes)}</div>` : ''}
         </div>`;
@@ -2624,7 +2814,7 @@ function renderContracts() {
     const [label, cls] = CONTRACT_STATUS[c.status] || [c.status, ''];
     return `<tr class="clickable" onclick="openContract('${c.id}')">
       <td><strong>${c.number}</strong></td>
-      <td>${escapeHTML(clientName(c.clientId))}</td>
+      <td>${linkClient(c.clientId)}</td>
       <td><span class="badge">${freqLabel(c.frequency)}</span></td>
       <td>${fmtDate(c.startDate)} → ${fmtDate(c.endDate)}</td>
       <td><span class="badge ${cls}">${label}</span></td>
@@ -2655,6 +2845,7 @@ function renderContractEditor() {
       <span class="badge ${statusCls}">${statusLabel}</span>
       ${c.quoteId ? `<button class="btn sm ghost" onclick="openQuoteById('${c.quoteId}')">Voir la soumission liée →</button>` : ''}
       <div class="editor-spacer"></div>
+      <button class="btn sm" onclick="openClauseEditor('${c.id}')">⚖ Personnaliser les clauses</button>
       <button class="btn sm" onclick="printContract('${c.id}')">↧ Exporter en PDF</button>
       ${c.status === 'active'
         ? `<button class="btn sm" onclick="pauseContract()">⏸ Mettre en pause</button>
@@ -2762,10 +2953,7 @@ function openSettings() {
       <textarea id="stIncl" rows="2">${escapeHTML(s.inclusionsText || '')}</textarea></div>
     <div class="field"><label>Exclus du forfait</label>
       <textarea id="stExcl" rows="2">${escapeHTML(s.exclusionsText || '')}</textarea></div>
-    <div class="field"><label>Liste de références clients (apparaît en page 9 de l'offre)</label>
-      <textarea id="stRefs" rows="6" placeholder="STANTEC Experts-conseils&#10;M. Untel&#10;1200, Boul. St-Martin Ouest, Laval&#10;(514) 281-1010&#10;&#10;Excel-Médical Inc.&#10;...">${escapeHTML(s.referencesText || '')}</textarea>
-      <div class="kpi-hint">Une référence par bloc, séparées par une ligne vide.</div>
-    </div>
+    <div class="kpi-hint" style="margin:4px 0 0;">La liste de références clients (page 7 du contrat) se gère maintenant dans <a class="link accent" onclick="closeModal();showView('template')">Modèle de contrat</a>.</div>
     <div class="panel-title" style="margin:18px 0 10px;">Stockage cloud (Google Drive)</div>
     <div id="cloudStatus">${cloudStatusHTML()}</div>
     <div class="panel-title" style="margin:18px 0 10px;">Sauvegarde locale</div>
@@ -2813,8 +3001,7 @@ function saveSettings() {
     extraWorkMinHours: parseNum(get('stExtraMin')) || 3,
     extraWorkPaymentDays: parseNum(get('stExtraDays')) || 45,
     inclusionsText: get('stIncl').trim(),
-    exclusionsText: get('stExcl').trim(),
-    referencesText: get('stRefs')
+    exclusionsText: get('stExcl').trim()
   });
   save(); closeModal(); renderDashboard(); showToast('Réglages enregistrés');
 }
@@ -3197,6 +3384,234 @@ function moneyWords(n) {
   return fmtMoneyLong(n);
 }
 
+// ============ VUE MODÈLE DE CONTRAT ============
+function renderTemplate() {
+  if (!STATE.contractTemplate) STATE.contractTemplate = defaultContractTemplate();
+  const tpl = STATE.contractTemplate;
+  const el = document.getElementById('templateBody');
+
+  const vars = `<div class="panel" style="background:var(--accent-soft);border-color:transparent;">
+    <div class="panel-title" style="color:var(--accent);">Variables disponibles</div>
+    <div style="display:flex;flex-wrap:wrap;gap:6px;">
+      ${['company','client','insurance','dishonesty','insurancePolicy','cnesstClause','comiteNumber','extraRate','extraMin','extraPaymentDays','noticeDays','nonSolMonths','startDate','endDate','exclusionsText']
+        .map(v => `<code style="font-size:11px;background:var(--bg-elevated);padding:2px 7px;border-radius:5px;cursor:pointer;" onclick="copyVar('${v}')">{{${v}}}</code>`).join('')}
+    </div>
+    <div class="kpi-hint" style="margin-top:8px;">Ces clauses sont la base de chaque PDF de contrat. Tu peux aussi les ajuster pour un contrat précis depuis l'éditeur du contrat (bouton « Personnaliser les clauses »).</div>
+  </div>`;
+
+  const sections = tpl.sections.map((sec, i) => `
+    <div class="panel" style="${sec.enabled ? '' : 'opacity:0.55;'}">
+      <div style="display:flex;align-items:center;gap:10px;margin-bottom:10px;">
+        <div style="display:flex;flex-direction:column;gap:2px;">
+          <button class="tpl-move" onclick="moveTemplateSection(${i},-1)" ${i === 0 ? 'disabled' : ''} title="Monter">▲</button>
+          <button class="tpl-move" onclick="moveTemplateSection(${i},1)" ${i === tpl.sections.length - 1 ? 'disabled' : ''} title="Descendre">▼</button>
+        </div>
+        <input style="font-weight:600;flex:1;" value="${escapeHTML(sec.title)}" onchange="updateTemplateSection(${i},'title',this.value)">
+        <label class="tpl-toggle"><input type="checkbox" ${sec.enabled ? 'checked' : ''} onchange="updateTemplateSection(${i},'enabled',this.checked)"> Active</label>
+        <button class="item-del" onclick="deleteTemplateSection(${i})" title="Supprimer cette clause">✕</button>
+      </div>
+      <textarea rows="4" onchange="updateTemplateSection(${i},'body',this.value)">${escapeHTML(sec.body)}</textarea>
+    </div>`).join('');
+
+  const refs = (STATE.references || []).map((r, i) => `
+    <div class="panel" style="padding:14px;">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;">
+        <span class="panel-title" style="margin:0;">Référence ${i + 1}</span>
+        <button class="item-del" onclick="deleteReference(${i})" title="Supprimer">✕</button>
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">
+        <div class="field" style="margin:0;"><label>Entreprise / organisme</label><input value="${escapeHTML(r.company || '')}" onchange="updateReference(${i},'company',this.value)"></div>
+        <div class="field" style="margin:0;"><label>Personne-contact</label><input value="${escapeHTML(r.contact || '')}" onchange="updateReference(${i},'contact',this.value)"></div>
+        <div class="field" style="margin:0;"><label>Adresse</label><input value="${escapeHTML(r.address || '')}" onchange="updateReference(${i},'address',this.value)"></div>
+        <div class="field" style="margin:0;"><label>Téléphone</label><input value="${escapeHTML(r.phone || '')}" onchange="updateReference(${i},'phone',this.value)"></div>
+        <div class="field" style="margin:0;"><label>Courriel</label><input value="${escapeHTML(r.email || '')}" onchange="updateReference(${i},'email',this.value)"></div>
+      </div>
+    </div>`).join('');
+
+  el.innerHTML = vars + sections + `
+    <div style="display:flex;gap:8px;margin:6px 0 26px;">
+      <button class="btn" onclick="addTemplateSection()">+ Ajouter une clause</button>
+      <button class="btn ghost" onclick="resetTemplate()">Réinitialiser le modèle par défaut</button>
+    </div>
+    <div class="view-header" style="margin-bottom:14px;">
+      <div>
+        <div class="view-title" style="font-size:22px;">Références clients</div>
+        <div class="view-sub">Apparaissent en page 7 du contrat exporté.</div>
+      </div>
+      <button class="btn primary" onclick="addReference()">+ Ajouter une référence</button>
+    </div>
+    ${refs || '<div class="panel"><div class="empty-note">Aucune référence. Ajoute tes clients de référence pour les inclure dans le contrat.</div></div>'}`;
+}
+function addReference() {
+  STATE.references.push({ id: uid(), company: '', contact: '', address: '', phone: '', email: '' });
+  save(); renderTemplate();
+}
+function updateReference(i, field, value) {
+  const r = STATE.references[i];
+  if (!r) return;
+  r[field] = value;
+  save();
+}
+function deleteReference(i) {
+  const r = STATE.references[i];
+  if (!r) return;
+  if (r.company && !confirm('Supprimer la référence « ' + r.company + ' » ?')) return;
+  STATE.references.splice(i, 1);
+  save(); renderTemplate();
+  showToast('Référence supprimée');
+}
+function copyVar(v) {
+  const txt = '{{' + v + '}}';
+  if (navigator.clipboard) navigator.clipboard.writeText(txt).then(() => showToast('Copié : ' + txt));
+  else showToast(txt);
+}
+function updateTemplateSection(i, field, value) {
+  const sec = STATE.contractTemplate.sections[i];
+  if (!sec) return;
+  sec[field] = value;
+  save();
+  if (field === 'enabled') renderTemplate();
+}
+function moveTemplateSection(i, dir) {
+  const arr = STATE.contractTemplate.sections;
+  const j = i + dir;
+  if (j < 0 || j >= arr.length) return;
+  [arr[i], arr[j]] = [arr[j], arr[i]];
+  save(); renderTemplate();
+}
+function addTemplateSection() {
+  STATE.contractTemplate.sections.push({ id: 'sec-' + uid(), title: 'Nouvelle clause', enabled: true, body: '' });
+  save(); renderTemplate();
+  showToast('Clause ajoutée');
+}
+function deleteTemplateSection(i) {
+  const sec = STATE.contractTemplate.sections[i];
+  if (!sec) return;
+  if (!confirm('Supprimer la clause « ' + sec.title + ' » du modèle ?')) return;
+  STATE.contractTemplate.sections.splice(i, 1);
+  save(); renderTemplate();
+  showToast('Clause supprimée');
+}
+function resetTemplate() {
+  if (!confirm('Réinitialiser toutes les clauses au modèle par défaut ? Tes modifications du modèle seront perdues (les personnalisations par contrat sont conservées).')) return;
+  STATE.contractTemplate = defaultContractTemplate();
+  save(); renderTemplate();
+  showToast('Modèle réinitialisé');
+}
+
+// ---- Personnalisation des clauses pour UN contrat précis ----
+function ensureOverrides(c) {
+  if (!c.clauseOverrides) c.clauseOverrides = { hidden: [], modified: {}, added: [] };
+  c.clauseOverrides.hidden = c.clauseOverrides.hidden || [];
+  c.clauseOverrides.modified = c.clauseOverrides.modified || {};
+  c.clauseOverrides.added = c.clauseOverrides.added || [];
+  return c.clauseOverrides;
+}
+let CLAUSE_EDIT_CONTRACT = null;
+function openClauseEditor(contractId) {
+  CLAUSE_EDIT_CONTRACT = contractId;
+  renderClauseEditor();
+}
+function renderClauseEditor() {
+  const c = STATE.contracts.find(x => x.id === CLAUSE_EDIT_CONTRACT);
+  if (!c) return;
+  const ov = ensureOverrides(c);
+  const tpl = STATE.contractTemplate || defaultContractTemplate();
+
+  const baseRows = tpl.sections.filter(s => s.enabled).map(sec => {
+    const hidden = ov.hidden.includes(sec.id);
+    const mod = ov.modified[sec.id];
+    const isModified = !!mod;
+    const title = mod && mod.title != null ? mod.title : sec.title;
+    const body = mod && mod.body != null ? mod.body : sec.body;
+    return `
+      <div class="panel" style="${hidden ? 'opacity:0.5;' : ''}">
+        <div style="display:flex;align-items:center;gap:10px;margin-bottom:8px;">
+          <strong style="flex:1;">${escapeHTML(title)}</strong>
+          ${isModified && !hidden ? '<span class="badge accent" style="font-size:10px;">modifiée</span>' : ''}
+          <label class="tpl-toggle"><input type="checkbox" ${hidden ? '' : 'checked'} onchange="toggleClauseHidden('${sec.id}',!this.checked)"> Incluse</label>
+        </div>
+        ${hidden ? '' : `
+          <input style="font-weight:600;margin-bottom:6px;" value="${escapeHTML(title)}" onchange="modifyClause('${sec.id}','title',this.value)">
+          <textarea rows="3" onchange="modifyClause('${sec.id}','body',this.value)">${escapeHTML(body)}</textarea>
+          ${isModified ? `<button class="btn sm ghost" style="margin-top:6px;" onclick="resetClause('${sec.id}')">↺ Revenir au modèle</button>` : ''}
+        `}
+      </div>`;
+  }).join('');
+
+  const addedRows = ov.added.map((ext, i) => `
+    <div class="panel" style="border-color:var(--accent);">
+      <div style="display:flex;align-items:center;gap:10px;margin-bottom:8px;">
+        <span class="badge accent" style="font-size:10px;">clause propre à ce contrat</span>
+        <div style="flex:1;"></div>
+        <button class="item-del" onclick="deleteAddedClause(${i})">✕</button>
+      </div>
+      <input style="font-weight:600;margin-bottom:6px;" placeholder="Titre de la clause" value="${escapeHTML(ext.title || '')}" onchange="updateAddedClause(${i},'title',this.value)">
+      <textarea rows="3" placeholder="Texte de la clause…" onchange="updateAddedClause(${i},'body',this.value)">${escapeHTML(ext.body || '')}</textarea>
+    </div>`).join('');
+
+  openModal(`
+    <div class="modal-title">Clauses — contrat ${c.number}</div>
+    <div class="kpi-hint" style="margin:-4px 0 14px;">Ces ajustements ne s'appliquent qu'à <strong>ce contrat</strong>. Le modèle général reste intact. Tu peux retirer une clause, la réécrire, ou en ajouter une propre à ce client.</div>
+    <div style="max-height:55vh;overflow-y:auto;margin:0 -4px;padding:0 4px;">
+      ${baseRows}
+      ${addedRows}
+    </div>
+    <div style="display:flex;gap:8px;margin-top:12px;">
+      <button class="btn" onclick="addClauseToContract()">+ Clause spécifique</button>
+      ${(ov.hidden.length || Object.keys(ov.modified).length || ov.added.length) ? `<button class="btn ghost" onclick="resetAllClauses('${c.id}')">Tout réinitialiser</button>` : ''}
+    </div>
+    <div class="modal-actions">
+      <button class="btn" onclick="closeModal()">Fermer</button>
+      <button class="btn primary" onclick="closeModal();printContract('${c.id}')">↧ Aperçu PDF</button>
+    </div>`);
+}
+function toggleClauseHidden(secId, hide) {
+  const c = STATE.contracts.find(x => x.id === CLAUSE_EDIT_CONTRACT);
+  const ov = ensureOverrides(c);
+  const idx = ov.hidden.indexOf(secId);
+  if (hide && idx < 0) ov.hidden.push(secId);
+  if (!hide && idx >= 0) ov.hidden.splice(idx, 1);
+  save(); renderClauseEditor();
+}
+function modifyClause(secId, field, value) {
+  const c = STATE.contracts.find(x => x.id === CLAUSE_EDIT_CONTRACT);
+  const ov = ensureOverrides(c);
+  if (!ov.modified[secId]) ov.modified[secId] = {};
+  ov.modified[secId][field] = value;
+  save();
+}
+function resetClause(secId) {
+  const c = STATE.contracts.find(x => x.id === CLAUSE_EDIT_CONTRACT);
+  const ov = ensureOverrides(c);
+  delete ov.modified[secId];
+  save(); renderClauseEditor();
+}
+function addClauseToContract() {
+  const c = STATE.contracts.find(x => x.id === CLAUSE_EDIT_CONTRACT);
+  const ov = ensureOverrides(c);
+  ov.added.push({ _id: uid(), title: '', body: '' });
+  save(); renderClauseEditor();
+}
+function updateAddedClause(i, field, value) {
+  const c = STATE.contracts.find(x => x.id === CLAUSE_EDIT_CONTRACT);
+  const ov = ensureOverrides(c);
+  if (ov.added[i]) { ov.added[i][field] = value; save(); }
+}
+function deleteAddedClause(i) {
+  const c = STATE.contracts.find(x => x.id === CLAUSE_EDIT_CONTRACT);
+  const ov = ensureOverrides(c);
+  ov.added.splice(i, 1);
+  save(); renderClauseEditor();
+}
+function resetAllClauses(contractId) {
+  if (!confirm('Retirer toutes les personnalisations de ce contrat et revenir au modèle général ?')) return;
+  const c = STATE.contracts.find(x => x.id === contractId);
+  c.clauseOverrides = { hidden: [], modified: {}, added: [] };
+  save(); renderClauseEditor();
+  showToast('Clauses réinitialisées');
+}
+
 function printContract(contractId) {
   const c = STATE.contracts.find(x => x.id === contractId);
   if (!c) return;
@@ -3211,6 +3626,7 @@ function printContract(contractId) {
   const today = new Date().toLocaleDateString('fr-CA', { day: 'numeric', month: 'long', year: 'numeric' });
   const taxIds = [s.tpsNum ? 'TPS/TVH : ' + s.tpsNum : '', s.tvqNum ? 'TVQ : ' + s.tvqNum : ''].filter(Boolean);
   const ref = q ? 'Soumission : ' + q.number + (v ? ' v' + v.rev : '') : ('Contrat : ' + c.number);
+  const placeholders = buildPlaceholders(c, client);
   const itemsLookMonthly = items.length > 0 && items.every(it => /mois|mensuel/i.test(it.unit));
   const cityFromAddr = (() => {
     if (!client.address) return '';
@@ -3218,7 +3634,9 @@ function printContract(contractId) {
     return lines[lines.length - 1] || '';
   })();
   const salutation = client.contact ? (/^(M\.|Mme|Madame|Monsieur)/i.test(client.contact) ? client.contact : 'Madame, Monsieur ' + client.contact) : 'Madame, Monsieur';
-  const refsParsed = (s.referencesText || '').trim().split(/\n\s*\n/).map(b => b.trim()).filter(Boolean);
+  const refsList = (STATE.references && STATE.references.length)
+    ? STATE.references
+    : parseLegacyReferences(s.referencesText);
   const itemDescsLower = items.map(it => (it.desc || '').toLowerCase());
   const onDemand = (STATE.services || []).filter(svc => !itemDescsLower.some(d => d.includes((svc.name || '').toLowerCase().slice(0, 10))));
 
@@ -3340,49 +3758,12 @@ function printContract(contractId) {
 
     <div class="contract-pagebreak"></div>
 
-    <!-- PAGE 5 — SPÉCIFICATIONS GÉNÉRALES -->
+    <!-- PAGE 5 — SPÉCIFICATIONS GÉNÉRALES (depuis le modèle de contrat) -->
     <h1 class="contract-h1">Spécifications générales</h1>
-
-    <h2 class="contract-h2">Service offert</h2>
-    <p class="contract-p">${escapeHTML(s.company)} ne sera pas tenu responsable d'un service non rendu à terme, dont les causes seraient hors de son contrôle telles que : panne d'électricité, feu, inondation, verglas, tempête de neige (35 cm et +), grève, ligne de piquetage, actes de Dieu ou toutes autres actions causées par le personnel ou la clientèle de nos clients.</p>
-
-    <h2 class="contract-h2">Surface de nettoyage</h2>
-    <p class="contract-p">Tout changement à la fréquence des travaux ou à la superficie à nettoyer occasionnera un ajustement des heures de travail qui sera établi suite à une entente entre les deux parties.</p>
-
-    <h2 class="contract-h2">Condition présente de l'édifice</h2>
-    <p class="contract-p">${escapeHTML(s.company)} n'est pas et ne sera pas tenu responsable de l'état présent des lieux tel que : mobilier endommagé, tapis tachés, plancher égratigné, murs endommagés, etc.</p>
-
-    <h2 class="contract-h2">Travaux supplémentaires / Appels de services / Services d'urgence</h2>
-    <p class="contract-p">Tout travail supplémentaire effectué par ${escapeHTML(s.company)} sera facturé au taux horaire de <strong>${fmtMoneyLong(s.extraWorkHourlyRate)}/h</strong> dès la terminaison desdits travaux ; la somme due sera exigible dans les <strong>${s.extraWorkPaymentDays} jours</strong> suivants. À ce taux horaire, il faut ajouter les taxes applicables. Un appel de service ou un service d'urgence qui occasionne un déplacement non prévu occasionnera une charge minimum de <strong>${s.extraWorkMinHours} heures</strong>.</p>
-
-    <h2 class="contract-h2">Assurances</h2>
-    <p class="contract-p">${escapeHTML(s.company)} détient une assurance au montant de <strong>${fmtMoneyLong(s.contractInsuranceAmount)}</strong> incluant la responsabilité publique et les dommages à la propriété.</p>
-    <p class="contract-p">La couverture d'assurance contre la malhonnêteté des employés vous assure contre toute responsabilité pour les dommages faits ou causés par nos employés jusqu'à concurrence de <strong>${fmtMoneyLong(s.contractDishonestyAmount)}</strong>${s.insurancePolicy ? '. Police d\'assurance n° <strong>' + escapeHTML(s.insurancePolicy) + '</strong>' : ''}.</p>
-
-    <h2 class="contract-h2">CNESST</h2>
-    <p class="contract-p">Tous les employés de ${escapeHTML(s.company)} possèdent la couverture de la CNESST${s.cssNumber ? ' sous le numéro <strong>' + escapeHTML(s.cssNumber) + '</strong>' : ''}.</p>
-
-    <h2 class="contract-h2">Comité paritaire de l'entretien des édifices publics</h2>
-    <p class="contract-p">${s.comiteParitaireNum ? escapeHTML(s.company) + ' est membre du Comité paritaire sous le numéro <strong>' + escapeHTML(s.comiteParitaireNum) + '</strong>.' : escapeHTML(s.company) + ' est membre du Comité paritaire de l\'entretien des édifices publics.'}</p>
-
-    <h2 class="contract-h2">Taxes de vente</h2>
-    <p class="contract-p">${taxIds.length ? taxIds.map(x => 'N° ' + escapeHTML(x)).join('<br>') : 'Les numéros de taxes seront fournis sur la première facture.'}</p>
-
-    <h2 class="contract-h2">Supervision</h2>
-    <p class="contract-p">Des inspections régulières de contrôle de qualité seront effectuées par des superviseurs compétents.</p>
-
-    <h2 class="contract-h2">Confidentialité</h2>
-    <p class="contract-p">${escapeHTML(s.company)} fait signer à tous ses employés un engagement de discrétion absolue sur toutes les informations concernant le fonctionnement et les activités de ${escapeHTML(s.company)} d'une part, et de notre clientèle d'autre part.</p>
-
-    <h2 class="contract-h2">Équipement</h2>
-    <p class="contract-p">${escapeHTML(s.company)} fournit tous les produits nettoyants, les sacs à déchets, le papier hygiénique, le papier à main, le savon à main, les pastilles d'urinoir ainsi que tous les équipements nécessaires à l'exécution de notre mandat.</p>
-    ${s.exclusionsText ? '<p class="contract-p"><strong>Le client fournit :</strong> ' + escapeHTML(s.exclusionsText) + '</p>' : ''}
-
-    <h2 class="contract-h2">Uniformes</h2>
-    <p class="contract-p">Tous les employés de ${escapeHTML(s.company)} sont identifiés à l'aide d'uniformes propres et soignés arborant le logo de l'entreprise.</p>
-
-    <h2 class="contract-h2">Durée, reconduction et non-sollicitation</h2>
-    <p class="contract-p">La présente offre prend effet le <strong>${fmtDate(c.startDate)}</strong> et se termine le <strong>${fmtDate(c.endDate)}</strong>. Elle est automatiquement reconduite pour des périodes successives de douze (12) mois, à moins qu'une partie ne transmette à l'autre un avis écrit de non-reconduction au moins <strong>${s.contractNoticeDays} jours</strong> avant l'échéance. Pendant la durée du contrat et pour <strong>${s.contractNonSolMonths} mois</strong> suivant sa fin, le Client s'engage à ne pas embaucher directement les employés affectés à son site, à défaut de quoi des dommages-intérêts liquidés équivalents à six (6) mois de salaire de l'employé concerné seront exigibles.</p>
+    ${effectiveSections(c).map(sec => `
+      <h2 class="contract-h2">${escapeHTML(applyPlaceholders(sec.title, placeholders))}</h2>
+      ${escapeHTML(applyPlaceholders(sec.body, placeholders)).split(/\n\n+/).filter(Boolean).map(par => '<p class="contract-p">' + par.replace(/\n/g, '<br>') + '</p>').join('')}
+    `).join('')}
 
     <div class="contract-pagebreak"></div>
 
@@ -3406,9 +3787,15 @@ function printContract(contractId) {
 
     <!-- PAGE 7 — RÉFÉRENCES -->
     <h1 class="contract-h1">Références</h1>
-    ${refsParsed.length ? `
+    ${refsList.length ? `
       <div class="contract-refs">
-        ${refsParsed.map(block => '<div class="contract-ref">' + escapeHTML(block).replace(/\n/g, '<br>') + '</div>').join('')}
+        ${refsList.map(r => '<div class="contract-ref">' + [
+            r.company ? '<strong>' + escapeHTML(r.company) + '</strong>' : '',
+            r.contact ? escapeHTML(r.contact) : '',
+            r.address ? escapeHTML(r.address) : '',
+            r.phone ? escapeHTML(r.phone) : '',
+            r.email ? escapeHTML(r.email) : ''
+          ].filter(Boolean).join('<br>') + '</div>').join('')}
       </div>` : '<p class="contract-p"><em>Liste de références fournie sur demande.</em></p>'}
 
     <div class="contract-pagebreak"></div>
@@ -3484,6 +3871,7 @@ function paletteSources() {
     { type: 'Vue', label: 'Pipeline de vente', run: () => showView('pipeline') },
     { type: 'Vue', label: 'Soumissions', run: () => showView('quotes') },
     { type: 'Vue', label: 'Contrats', run: () => showView('contracts') },
+    { type: 'Vue', label: 'Modèle de contrat', run: () => showView('template') },
     { type: 'Vue', label: 'Services et tarifs', run: () => showView('services') },
     { type: 'Vue', label: 'Horaires des équipes', run: () => showView('schedule') },
     { type: 'Vue', label: 'Factures', run: () => showView('invoices') },
