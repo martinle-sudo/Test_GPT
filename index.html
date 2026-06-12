@@ -1,11 +1,11 @@
 <!DOCTYPE html>
-<!-- Programmé par ML — v3.7 (bump version à chaque ajustement) -->
+<!-- Programmé par ML — v3.8 (bump version à chaque ajustement) -->
 <html lang="fr">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <meta name="theme-color" content="#0b0f12">
-<title>Lustre — Gestion d'entretien ménager v3.7</title>
+<title>Lustre — Gestion d'entretien ménager v3.8</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=JetBrains+Mono:wght@400;500;600&family=Geist:wght@300;400;500;600;700&display=swap" rel="stylesheet">
@@ -500,6 +500,32 @@ input:focus-visible, select:focus-visible, textarea:focus-visible { outline: non
 }
 .theory-note strong { color: #92400e; }
 
+.margin-editor {
+  background: var(--accent-soft);
+  border-radius: 10px;
+  padding: 12px 14px;
+  margin-bottom: 14px;
+}
+.margin-editor label {
+  display: block;
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--accent);
+  margin-bottom: 8px;
+}
+.margin-input-row { display: flex; align-items: center; gap: 8px; }
+.margin-input-row input {
+  width: 90px;
+  font-weight: 600;
+  font-size: 16px;
+  text-align: right;
+  background: var(--bg-elevated);
+}
+.margin-suffix { font-size: 12.5px; color: var(--text-muted); }
+.margin-editor .kpi-hint { margin-top: 8px; }
+
 .tpl-move { width: 20px; height: 16px; font-size: 8px; color: var(--text-subtle); border-radius: 4px; line-height: 1; }
 .tpl-move:hover:not([disabled]) { background: var(--bg-hover); color: var(--text); }
 .tpl-move[disabled] { opacity: 0.25; cursor: default; }
@@ -708,7 +734,7 @@ kbd {
       <path d="M5 27 L 22 10 M 12 21 L 18 17 M 16 17 L 20 13" stroke="#ffffff" stroke-opacity="0.55" stroke-width="1.2" stroke-linecap="round" fill="none"/>
     </svg>
     <span><em>Lu</em>stre</span>
-    <span class="logo-version">v3.7</span>
+    <span class="logo-version">v3.8</span>
   </div>
   <button class="nav-btn" onclick="openPalette()" aria-label="Recherche rapide">
     <svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
@@ -755,7 +781,7 @@ kbd {
     <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
     <span>Réglages</span>
   </button>
-  <div class="nav-foot">Programmé par<br>ML · v3.7</div>
+  <div class="nav-foot">Programmé par<br>ML · v3.8</div>
 </aside>
 
 <main>
@@ -2121,6 +2147,9 @@ function renderClientDetail() {
 }
 function renderClientProfitability(client, invoices, contracts) {
   const marginPct = clientMargin(client);
+  const usingDefault = !(client.margin != null && client.margin !== '');
+  // Profit réel exprimé en % du revenu (markup 40 % → 28,6 % du prix de vente)
+  const realProfitPct = marginPct > 0 ? (marginPct / (100 + marginPct)) * 100 : 0;
   // Revenu déjà facturé (sous-totaux, hors taxes)
   const billedRevenue = invoices.reduce((s, i) => s + calcTotals(i.items, STATE.settings).sub, 0);
   const pBilled = projectFromRevenue(billedRevenue, marginPct, 'leger');
@@ -2131,10 +2160,19 @@ function renderClientProfitability(client, invoices, contracts) {
   return `
     <div class="panel">
       <div class="panel-title">Rentabilité</div>
+      <div class="margin-editor">
+        <label>Marge de profit pour ce client</label>
+        <div class="margin-input-row">
+          <input id="clientMarginInput" inputmode="decimal" value="${usingDefault ? '' : marginPct}" placeholder="${STATE.settings.margeDefaut}"
+                 onchange="updateClientMargin('${client.id}', this.value)">
+          <span class="margin-suffix">% de majoration</span>
+        </div>
+        <div class="kpi-hint">${usingDefault ? 'Vide = marge par défaut (' + STATE.settings.margeDefaut + ' %).' : 'Marge spécifique à ce client.'} Soit un <strong>profit réel de ${realProfitPct.toFixed(1)} %</strong> du revenu.</div>
+      </div>
       <div class="kpi" style="padding:14px;margin-bottom:10px;">
         <div class="kpi-label">Profits jusqu'à maintenant</div>
         <div class="kpi-value" style="font-size:26px;">${fmtMoney(pBilled.profit)}</div>
-        <div class="kpi-hint">${invoices.length} facture${invoices.length > 1 ? 's' : ''} · ${fmtMoney(billedRevenue)} facturés · ${pBilled.profitPct.toFixed(1)} % de marge</div>
+        <div class="kpi-hint">${invoices.length} facture${invoices.length > 1 ? 's' : ''} · ${fmtMoney(billedRevenue)} facturés · profit réel ${pBilled.profitPct.toFixed(1)} %</div>
       </div>
       <div class="kpi" style="padding:14px;margin-bottom:10px;">
         <div class="kpi-label">Profits mensuels</div>
@@ -2147,9 +2185,18 @@ function renderClientProfitability(client, invoices, contracts) {
         <div class="kpi-hint">Calculées sur le coût des factures · ≈ ${fmtHours(pMonthly.hours)}/mois actuel</div>
       </div>
       <div class="theory-note">
-        <strong>Théorique.</strong> Toutes ces valeurs sont calculées à partir de la marge ${client.margin != null && client.margin !== '' ? 'spécifique au client' : 'par défaut'} (${marginPct} %) et du taux horaire chargé du comité paritaire. <strong>Les heures réellement travaillées par tes employés ne sont pas encore enregistrées dans l'app</strong> — pour avoir des chiffres réels, il faudrait ajouter une fonction de pointage des employés.
+        <strong>Théorique.</strong> Marge appliquée : <strong>${marginPct} %</strong> de majoration sur le coût${usingDefault ? ' (valeur par défaut)' : ' (propre au client)'}, soit un <strong>profit réel de ${realProfitPct.toFixed(1)} %</strong> du revenu. Les heures et coûts viennent du taux horaire chargé du comité paritaire. <strong>Les heures réellement travaillées par tes employés ne sont pas encore enregistrées dans l'app</strong> — pour des chiffres réels, il faudrait ajouter une fonction de pointage des employés.
       </div>
     </div>`;
+}
+function updateClientMargin(id, value) {
+  const c = clientById(id);
+  if (!c) return;
+  const v = String(value).trim();
+  c.margin = v === '' ? '' : parseNum(v);
+  save();
+  renderClientDetail();
+  showToast(v === '' ? 'Marge remise au défaut' : 'Marge mise à jour : ' + parseNum(v) + ' %');
 }
 function newQuoteForClient(id) { showView('quotes'); newQuote(id); }
 function newInvoiceForClient(id) { showView('invoices'); newInvoice(id); }
@@ -2355,6 +2402,8 @@ function renderQuoteProfitability(q, v, t) {
   if (sub <= 0) return `<aside class="editor-side"><div class="panel"><div class="panel-title">Rentabilité projetée</div><div class="empty-note">Ajoute des lignes pour voir l'estimé.</div></div></aside>`;
   const client = clientById(q.clientId);
   const marginPct = clientMargin(client);
+  const usingDefault = !(client && client.margin != null && client.margin !== '');
+  const realProfitPct = marginPct > 0 ? (marginPct / (100 + marginPct)) * 100 : 0;
   // Estimation du revenu annuel pour mettre la projection en perspective
   const allMonthly = v.items.length && v.items.every(it => /mois|mensuel/i.test(it.unit));
   const visitsPerMonth = freqPerWeek(v.frequency || 'hebdo') * 4.345;
@@ -2376,7 +2425,7 @@ function renderQuoteProfitability(q, v, t) {
         <div class="kpi" style="padding:14px;margin-bottom:10px;">
           <div class="kpi-label">Profit projeté sur 12 mois</div>
           <div class="kpi-value" style="font-size:24px;">${fmtMoney(pAnnual.profit)}</div>
-          <div class="kpi-hint">${pAnnual.profitPct.toFixed(1)} % de marge · ${fmtMoney(pPeriod.profit)} par période</div>
+          <div class="kpi-hint">profit réel ${pAnnual.profitPct.toFixed(1)} % · ${fmtMoney(pPeriod.profit)} par période</div>
         </div>
         <div class="kpi" style="padding:14px;margin-bottom:10px;">
           <div class="kpi-label">Coût main-d'œuvre estimé</div>
@@ -2389,7 +2438,7 @@ function renderQuoteProfitability(q, v, t) {
           <div class="kpi-hint">≈ ${fmtHours(pAnnual.hours / 12)} par mois</div>
         </div>
         <div class="theory-note" style="margin-top:14px;">
-          <strong>Théorique.</strong> Calcul basé sur ${client && client.margin != null && client.margin !== '' ? 'la marge spécifique au client' : 'la marge par défaut'} (${marginPct} %) et le taux horaire chargé du comité paritaire. Les heures réellement travaillées par les employés ne sont pas encore enregistrées dans l'app.
+          <strong>Théorique.</strong> Marge ${usingDefault ? 'par défaut' : 'du client'} : <strong>${marginPct} %</strong> de majoration, soit un <strong>profit réel de ${realProfitPct.toFixed(1)} %</strong> du revenu. Taux horaire chargé du comité paritaire. Les heures réellement travaillées par les employés ne sont pas encore enregistrées dans l'app.${usingDefault ? ' Ajuste la marge depuis la fiche du client.' : ''}
         </div>
       </div>
     </aside>`;
@@ -3043,11 +3092,15 @@ function renderContractEditor() {
     </div>`;
 }
 function renderContractProfitability(c) {
+  const client = clientById(c.clientId);
+  const marginPct = clientMargin(client);
+  const usingDefault = !(client && client.margin != null && client.margin !== '');
+  const realProfitPct = marginPct > 0 ? (marginPct / (100 + marginPct)) * 100 : 0;
   const monthly = contractMonthlyRevenue(c);
   const months = monthsBetweenISO(c.startDate, c.endDate) || 1;
   const totalRev = monthly * months;
-  const p = projectFromRevenue(totalRev, STATE.settings.margeDefaut, 'leger');
-  const pMonthly = projectFromRevenue(monthly, STATE.settings.margeDefaut, 'leger');
+  const p = projectFromRevenue(totalRev, marginPct, 'leger');
+  const pMonthly = projectFromRevenue(monthly, marginPct, 'leger');
   return `
     <aside class="editor-side">
       <div class="panel">
@@ -3061,7 +3114,7 @@ function renderContractProfitability(c) {
           <div class="kpi" style="padding:14px;margin-bottom:10px;">
             <div class="kpi-label">Profit total projeté</div>
             <div class="kpi-value" style="font-size:24px;">${fmtMoney(p.profit)}</div>
-            <div class="kpi-hint">${p.profitPct.toFixed(1)} % de marge (sur le prix de vente) · ${fmtMoney(pMonthly.profit)}/mois</div>
+            <div class="kpi-hint">profit réel ${p.profitPct.toFixed(1)} % du revenu · ${fmtMoney(pMonthly.profit)}/mois</div>
           </div>
           <div class="kpi" style="padding:14px;margin-bottom:10px;">
             <div class="kpi-label">Coût main-d'œuvre estimé</div>
@@ -3075,7 +3128,7 @@ function renderContractProfitability(c) {
           </div>` : `
           <div class="empty-note">Lie ce contrat à une soumission acceptée pour voir la projection.</div>`}
         <div class="theory-note" style="margin-top:14px;">
-          <strong>Théorique.</strong> Calculé avec la marge par défaut (${parseNum(STATE.settings.margeDefaut)} %) et le taux horaire chargé du comité paritaire — les heures réellement travaillées par les employés ne sont pas encore enregistrées dans l'app.
+          <strong>Théorique.</strong> Marge ${usingDefault ? 'par défaut' : 'du client'} : <strong>${marginPct} %</strong> de majoration, soit un <strong>profit réel de ${realProfitPct.toFixed(1)} %</strong> du revenu. Taux horaire chargé du comité paritaire. Les heures réellement travaillées par les employés ne sont pas encore enregistrées dans l'app.${usingDefault ? ' Ajuste la marge depuis la fiche du client.' : ''}
         </div>
       </div>
     </aside>`;
@@ -3438,7 +3491,7 @@ function exportData() {
   const payload = { ...STATE };
   delete payload.cloud;
   payload.exportedAt = new Date().toISOString();
-  payload.appVersion = '3.4';
+  payload.appVersion = '3.8';
   const blob = new Blob([JSON.stringify(payload, null, 2)], { type: 'application/json' });
   const url = URL.createObjectURL(blob);
   const a = document.createElement('a');
