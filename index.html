@@ -1,11 +1,11 @@
 <!DOCTYPE html>
-<!-- Programmé par ML — v3.6 (bump version à chaque ajustement) -->
+<!-- Programmé par ML — v3.7 (bump version à chaque ajustement) -->
 <html lang="fr">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <meta name="theme-color" content="#0b0f12">
-<title>Lustre — Gestion d'entretien ménager v3.6</title>
+<title>Lustre — Gestion d'entretien ménager v3.7</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=JetBrains+Mono:wght@400;500;600&family=Geist:wght@300;400;500;600;700&display=swap" rel="stylesheet">
@@ -480,6 +480,26 @@ input:focus-visible, select:focus-visible, textarea:focus-visible { outline: non
 ::-webkit-scrollbar-track { background: transparent; }
 .num, .totals-val, .kpi-value, .list-row-end, .deal-card-value { font-variant-numeric: tabular-nums; }
 .panel:has(.tbl) { overflow-x: auto; }
+.editor-cols { display: grid; grid-template-columns: minmax(0, 1fr) 320px; gap: 18px; align-items: start; }
+.editor-cols .panel { margin-bottom: 16px; }
+.editor-side { display: flex; flex-direction: column; gap: 14px; position: sticky; top: 18px; }
+.editor-side .panel { margin: 0; }
+.editor-side .kpi { background: var(--bg-card); border: 1px solid var(--border); }
+@media (max-width: 1100px) {
+  .editor-cols { grid-template-columns: 1fr; }
+  .editor-side { position: static; }
+}
+.theory-note {
+  font-size: 11px;
+  line-height: 1.55;
+  color: var(--text-muted);
+  padding: 9px 11px;
+  background: var(--warn-soft);
+  border-left: 3px solid var(--warn);
+  border-radius: 6px;
+}
+.theory-note strong { color: #92400e; }
+
 .tpl-move { width: 20px; height: 16px; font-size: 8px; color: var(--text-subtle); border-radius: 4px; line-height: 1; }
 .tpl-move:hover:not([disabled]) { background: var(--bg-hover); color: var(--text); }
 .tpl-move[disabled] { opacity: 0.25; cursor: default; }
@@ -688,7 +708,7 @@ kbd {
       <path d="M5 27 L 22 10 M 12 21 L 18 17 M 16 17 L 20 13" stroke="#ffffff" stroke-opacity="0.55" stroke-width="1.2" stroke-linecap="round" fill="none"/>
     </svg>
     <span><em>Lu</em>stre</span>
-    <span class="logo-version">v3.6</span>
+    <span class="logo-version">v3.7</span>
   </div>
   <button class="nav-btn" onclick="openPalette()" aria-label="Recherche rapide">
     <svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
@@ -735,7 +755,7 @@ kbd {
     <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
     <span>Réglages</span>
   </button>
-  <div class="nav-foot">Programmé par<br>Claude Code</div>
+  <div class="nav-foot">Programmé par<br>ML · v3.7</div>
 </aside>
 
 <main>
@@ -1279,6 +1299,47 @@ function profitOnPrice(cost, price) {
 function clientMargin(client) {
   if (client && client.margin != null && client.margin !== '') return parseNum(client.margin);
   return parseNum(STATE.settings.margeDefaut);
+}
+// Projection théorique à partir d'un revenu : coût (= rev / (1+marge)), profit, heures théoriques
+function projectFromRevenue(revenue, marginPct, laborType) {
+  const m = parseNum(marginPct == null ? STATE.settings.margeDefaut : marginPct);
+  const factor = 1 + m / 100;
+  const cost = factor > 0 ? revenue / factor : 0;
+  const profit = revenue - cost;
+  const hourly = loadedHourly(laborType || 'leger');
+  const hours = hourly > 0 ? cost / hourly : 0;
+  return { revenue, cost, profit, hours, marginPct: m, profitPct: revenue > 0 ? (profit / revenue) * 100 : 0 };
+}
+// Nombre de mois entre deux dates ISO (au moins 1)
+function monthsBetweenISO(startISO, endISO) {
+  if (!startISO || !endISO) return 0;
+  const days = Math.max(0, diffDaysISO(startISO, endISO) + 1);
+  return days / 30.4375;
+}
+// Revenu mensuel projeté pour un contrat à partir de sa soumission liée + fréquence
+function contractMonthlyRevenue(contract) {
+  if (!contract) return 0;
+  const q = contract.quoteId ? STATE.quotes.find(x => x.id === contract.quoteId) : null;
+  const v = q ? q.versions[Math.min(contract.quoteRev != null ? contract.quoteRev - 1 : q.currentRev, q.versions.length - 1)] : null;
+  if (!v) return 0;
+  const sub = calcTotals(v.items.filter(it => it.desc || parseNum(it.price)), STATE.settings).sub;
+  // Si les unités des items sont en /mois, c'est déjà mensuel
+  const allMonthly = v.items.length && v.items.every(it => /mois|mensuel/i.test(it.unit));
+  if (allMonthly || contract.frequency === 'mensuelle') return sub;
+  if (contract.frequency === 'ponctuelle') {
+    // Étalé sur la durée du contrat
+    const months = monthsBetweenISO(contract.startDate, contract.endDate);
+    return months > 0 ? sub / months : sub;
+  }
+  // Sinon, sub est par visite × visites/mois
+  const visitsPerMonth = freqPerWeek(contract.frequency) * 4.345;
+  return sub * (visitsPerMonth || 1);
+}
+// Petit format d'heures lisible (53 h, 12,5 h, 1 240 h)
+function fmtHours(h) {
+  if (!isFinite(h) || h <= 0) return '0 h';
+  if (h < 100) return h.toLocaleString('fr-CA', { maximumFractionDigits: 1 }) + ' h';
+  return Math.round(h).toLocaleString('fr-CA') + ' h';
 }
 let TOAST_ACTION = null;
 function showToast(msg, opts = {}) {
@@ -1984,7 +2045,7 @@ function renderClientDetail() {
           ${cQuotes.length ? cQuotes.map(q => {
             const v = q.versions[q.currentRev];
             const [label, cls] = QUOTE_STATUS[q.status] || [q.status, ''];
-            return `<div class="list-row" onclick="openQuoteById('${q.id}')">
+            return `<div class="list-row" onclick="goQuote('${q.id}')">
               <div class="list-row-main">
                 <div class="list-row-title">${q.number} <span class="badge ${cls}" style="margin-left:6px;font-size:10px;padding:1px 7px;">${label}</span></div>
                 <div class="list-row-sub">${fmtDate(v.date)} · ${freqLabel(v.frequency || 'hebdo')}${q.versions.length > 1 ? ' · v' + v.rev : ''}</div>
@@ -1995,11 +2056,25 @@ function renderClientDetail() {
         </div>
 
         <div class="panel">
+          <div class="panel-title">Contrats (${cContracts.length})</div>
+          ${cContracts.length ? cContracts.map(ct => {
+            const [label, cls] = CONTRACT_STATUS[ct.status] || [ct.status, ''];
+            return `<div class="list-row" onclick="goContract('${ct.id}')">
+              <div class="list-row-main">
+                <div class="list-row-title">${ct.number} <span class="badge ${cls}" style="margin-left:6px;font-size:10px;padding:1px 7px;">${label}</span></div>
+                <div class="list-row-sub">${freqLabel(ct.frequency)} · ${fmtDate(ct.startDate)} → ${fmtDate(ct.endDate)}</div>
+              </div>
+              <div class="list-row-end">${contractOccurrenceCount(ct)} visites</div>
+            </div>`;
+          }).join('') : '<div class="empty-note">Aucun contrat actif. Convertis une soumission acceptée en contrat pour planifier les visites.</div>'}
+        </div>
+
+        <div class="panel">
           <div class="panel-title">Factures (${cInvoices.length})</div>
           ${cInvoices.length ? cInvoices.slice(0, 6).map(i => {
             const late = invoiceIsOverdue(i);
             const [label, cls] = late ? ['En retard', 'danger'] : (INV_STATUS[i.status] || [i.status, '']);
-            return `<div class="list-row" onclick="showView('invoices');openInvoice('${i.id}')">
+            return `<div class="list-row" onclick="goInvoice('${i.id}')">
               <div class="list-row-main">
                 <div class="list-row-title">${i.number} <span class="badge ${cls}" style="margin-left:6px;font-size:10px;padding:1px 7px;">${label}</span></div>
                 <div class="list-row-sub">${fmtDate(i.date)} · échéance ${fmtDate(i.dueDate)}</div>
@@ -2011,19 +2086,7 @@ function renderClientDetail() {
       </div>
 
       <div>
-        <div class="panel">
-          <div class="panel-title">Contrats (${cContracts.length})</div>
-          ${cContracts.length ? cContracts.map(ct => {
-            const [label, cls] = CONTRACT_STATUS[ct.status] || [ct.status, ''];
-            return `<div class="list-row" onclick="openContractById('${ct.id}')">
-              <div class="list-row-main">
-                <div class="list-row-title">${ct.number} <span class="badge ${cls}" style="margin-left:6px;font-size:10px;padding:1px 7px;">${label}</span></div>
-                <div class="list-row-sub">${freqLabel(ct.frequency)} · ${fmtDate(ct.startDate)} → ${fmtDate(ct.endDate)}</div>
-              </div>
-              <div class="list-row-end">${contractOccurrenceCount(ct)} visites</div>
-            </div>`;
-          }).join('') : '<div class="empty-note">Aucun contrat actif. Convertis une soumission acceptée en contrat pour planifier les visites.</div>'}
-        </div>
+        ${renderClientProfitability(c, cInvoices, cContracts)}
 
         <div class="panel">
           <div class="panel-title">Quarts à venir (${upcomingShifts.length})</div>
@@ -2044,7 +2107,7 @@ function renderClientDetail() {
           <div class="panel-title">Pipeline actif (${cDeals.length})</div>
           ${cDeals.map(dl => {
             const stage = STAGES.find(s => s[0] === dl.stage);
-            return `<div class="list-row" onclick="showView('pipeline');openDealModal('${dl.id}')">
+            return `<div class="list-row" onclick="goDeal('${dl.id}')">
               <div class="list-row-main">
                 <div class="list-row-title">${escapeHTML(dl.title)}</div>
                 <div class="list-row-sub">${stage ? stage[1] : dl.stage}</div>
@@ -2053,6 +2116,38 @@ function renderClientDetail() {
             </div>`;
           }).join('')}
         </div>` : ''}
+      </div>
+    </div>`;
+}
+function renderClientProfitability(client, invoices, contracts) {
+  const marginPct = clientMargin(client);
+  // Revenu déjà facturé (sous-totaux, hors taxes)
+  const billedRevenue = invoices.reduce((s, i) => s + calcTotals(i.items, STATE.settings).sub, 0);
+  const pBilled = projectFromRevenue(billedRevenue, marginPct, 'leger');
+  // Revenu mensuel des contrats actifs
+  const activeContracts = contracts.filter(c => c.status === 'active');
+  const monthlyRev = activeContracts.reduce((s, c) => s + contractMonthlyRevenue(c), 0);
+  const pMonthly = projectFromRevenue(monthlyRev, marginPct, 'leger');
+  return `
+    <div class="panel">
+      <div class="panel-title">Rentabilité</div>
+      <div class="kpi" style="padding:14px;margin-bottom:10px;">
+        <div class="kpi-label">Profits jusqu'à maintenant</div>
+        <div class="kpi-value" style="font-size:26px;">${fmtMoney(pBilled.profit)}</div>
+        <div class="kpi-hint">${invoices.length} facture${invoices.length > 1 ? 's' : ''} · ${fmtMoney(billedRevenue)} facturés · ${pBilled.profitPct.toFixed(1)} % de marge</div>
+      </div>
+      <div class="kpi" style="padding:14px;margin-bottom:10px;">
+        <div class="kpi-label">Profits mensuels</div>
+        <div class="kpi-value accent" style="font-size:26px;">${fmtMoney(pMonthly.profit)}</div>
+        <div class="kpi-hint">${activeContracts.length ? activeContracts.length + ' contrat' + (activeContracts.length > 1 ? 's' : '') + ' actif' + (activeContracts.length > 1 ? 's' : '') + ' · ' + fmtMoney(monthlyRev) + '/mois' : 'Aucun contrat actif — active un contrat pour projeter.'}</div>
+      </div>
+      <div class="kpi" style="padding:14px;margin-bottom:14px;">
+        <div class="kpi-label">Heures travaillées (estimées)</div>
+        <div class="kpi-value warn" style="font-size:26px;">${fmtHours(pBilled.hours)}</div>
+        <div class="kpi-hint">Calculées sur le coût des factures · ≈ ${fmtHours(pMonthly.hours)}/mois actuel</div>
+      </div>
+      <div class="theory-note">
+        <strong>Théorique.</strong> Toutes ces valeurs sont calculées à partir de la marge ${client.margin != null && client.margin !== '' ? 'spécifique au client' : 'par défaut'} (${marginPct} %) et du taux horaire chargé du comité paritaire. <strong>Les heures réellement travaillées par tes employés ne sont pas encore enregistrées dans l'app</strong> — pour avoir des chiffres réels, il faudrait ajouter une fonction de pointage des employés.
       </div>
     </div>`;
 }
@@ -2195,6 +2290,7 @@ function renderQuoteEditor() {
 
     ${readonly ? '<div class="archived-banner">Version archivée — lecture seule. La version la plus récente est éditable.</div>' : ''}
 
+    <div class="editor-cols">
     <div class="panel">
       <div class="field-grid">
         <div class="field"><label>Client</label>
@@ -2239,6 +2335,8 @@ function renderQuoteEditor() {
       <div class="field" style="margin-top:14px;"><label>Notes / conditions (apparaissent sur le PDF)</label>
         <textarea onchange="updateRevField('notes', this.value)" ${readonly ? 'disabled' : ''}>${escapeHTML(v.notes || '')}</textarea></div>
     </div>
+    ${renderQuoteProfitability(q, v, t)}
+    </div>
 
     ${(() => {
       const existing = STATE.contracts.find(c => c.quoteId === q.id);
@@ -2251,6 +2349,50 @@ function renderQuoteEditor() {
       return actions.length ? '<div style="display:flex;gap:10px;flex-wrap:wrap;">' + actions.join('') + '</div>' : '';
     })()}
   `;
+}
+function renderQuoteProfitability(q, v, t) {
+  const sub = t.sub;
+  if (sub <= 0) return `<aside class="editor-side"><div class="panel"><div class="panel-title">Rentabilité projetée</div><div class="empty-note">Ajoute des lignes pour voir l'estimé.</div></div></aside>`;
+  const client = clientById(q.clientId);
+  const marginPct = clientMargin(client);
+  // Estimation du revenu annuel pour mettre la projection en perspective
+  const allMonthly = v.items.length && v.items.every(it => /mois|mensuel/i.test(it.unit));
+  const visitsPerMonth = freqPerWeek(v.frequency || 'hebdo') * 4.345;
+  const monthlyRev = (v.frequency === 'mensuelle' || allMonthly) ? sub
+                    : (v.frequency === 'ponctuelle') ? 0
+                    : sub * (visitsPerMonth || 1);
+  const annualRev = (v.frequency === 'ponctuelle') ? sub : monthlyRev * 12;
+  const pPeriod = projectFromRevenue(sub, marginPct, 'leger');
+  const pAnnual = projectFromRevenue(annualRev, marginPct, 'leger');
+  return `
+    <aside class="editor-side">
+      <div class="panel">
+        <div class="panel-title">Rentabilité projetée</div>
+        <div class="kpi" style="padding:14px;margin-bottom:10px;">
+          <div class="kpi-label">${v.frequency === 'ponctuelle' ? 'Revenu du mandat' : 'Revenu par période'}</div>
+          <div class="kpi-value accent" style="font-size:24px;">${fmtMoney(sub)}</div>
+          ${v.frequency !== 'ponctuelle' && monthlyRev > 0 ? `<div class="kpi-hint">${fmtMoney(monthlyRev)}/mois · ${fmtMoney(annualRev)}/an estimé</div>` : ''}
+        </div>
+        <div class="kpi" style="padding:14px;margin-bottom:10px;">
+          <div class="kpi-label">Profit projeté sur 12 mois</div>
+          <div class="kpi-value" style="font-size:24px;">${fmtMoney(pAnnual.profit)}</div>
+          <div class="kpi-hint">${pAnnual.profitPct.toFixed(1)} % de marge · ${fmtMoney(pPeriod.profit)} par période</div>
+        </div>
+        <div class="kpi" style="padding:14px;margin-bottom:10px;">
+          <div class="kpi-label">Coût main-d'œuvre estimé</div>
+          <div class="kpi-value warn" style="font-size:22px;">${fmtMoney(pAnnual.cost)}/an</div>
+          <div class="kpi-hint">${fmtMoneyLong(loadedHourly('leger'))}/h chargé</div>
+        </div>
+        <div class="kpi" style="padding:14px;">
+          <div class="kpi-label">Heures théoriques (12 mois)</div>
+          <div class="kpi-value" style="font-size:22px;">${fmtHours(pAnnual.hours)}</div>
+          <div class="kpi-hint">≈ ${fmtHours(pAnnual.hours / 12)} par mois</div>
+        </div>
+        <div class="theory-note" style="margin-top:14px;">
+          <strong>Théorique.</strong> Calcul basé sur ${client && client.margin != null && client.margin !== '' ? 'la marge spécifique au client' : 'la marge par défaut'} (${marginPct} %) et le taux horaire chargé du comité paritaire. Les heures réellement travaillées par les employés ne sont pas encore enregistrées dans l'app.
+        </div>
+      </div>
+    </aside>`;
 }
 function openContractById(id) { showView('contracts'); openContract(id); }
 function curQuote() { return STATE.quotes.find(x => x.id === OPEN_QUOTE_ID); }
@@ -2854,6 +2996,7 @@ function renderContractEditor() {
       <button class="btn sm danger" onclick="deleteContract()">Supprimer</button>
     </div>
 
+    <div class="editor-cols">
     <div class="panel">
       <div class="field-grid">
         <div class="field"><label>Titre</label>
@@ -2895,7 +3038,47 @@ function renderContractEditor() {
           : ''}
         ${c.status === 'active' ? `<button class="btn sm" style="margin-left:auto" onclick="activateContract('${c.id}')">↻ Replanifier</button>` : ''}
       </div>
+    </div>
+    ${renderContractProfitability(c)}
     </div>`;
+}
+function renderContractProfitability(c) {
+  const monthly = contractMonthlyRevenue(c);
+  const months = monthsBetweenISO(c.startDate, c.endDate) || 1;
+  const totalRev = monthly * months;
+  const p = projectFromRevenue(totalRev, STATE.settings.margeDefaut, 'leger');
+  const pMonthly = projectFromRevenue(monthly, STATE.settings.margeDefaut, 'leger');
+  return `
+    <aside class="editor-side">
+      <div class="panel">
+        <div class="panel-title">Rentabilité projetée</div>
+        ${monthly > 0 ? `
+          <div class="kpi" style="padding:14px;margin-bottom:10px;">
+            <div class="kpi-label">Revenu mensuel</div>
+            <div class="kpi-value accent" style="font-size:24px;">${fmtMoney(monthly)}</div>
+            <div class="kpi-hint">${months.toFixed(1)} mois de contrat → ${fmtMoney(totalRev)} au total</div>
+          </div>
+          <div class="kpi" style="padding:14px;margin-bottom:10px;">
+            <div class="kpi-label">Profit total projeté</div>
+            <div class="kpi-value" style="font-size:24px;">${fmtMoney(p.profit)}</div>
+            <div class="kpi-hint">${p.profitPct.toFixed(1)} % de marge (sur le prix de vente) · ${fmtMoney(pMonthly.profit)}/mois</div>
+          </div>
+          <div class="kpi" style="padding:14px;margin-bottom:10px;">
+            <div class="kpi-label">Coût main-d'œuvre estimé</div>
+            <div class="kpi-value warn" style="font-size:22px;">${fmtMoney(p.cost)}</div>
+            <div class="kpi-hint">${fmtMoney(pMonthly.cost)}/mois · ${fmtMoneyLong(loadedHourly('leger'))}/h chargé</div>
+          </div>
+          <div class="kpi" style="padding:14px;">
+            <div class="kpi-label">Heures théoriques</div>
+            <div class="kpi-value" style="font-size:22px;">${fmtHours(p.hours)}</div>
+            <div class="kpi-hint">≈ ${fmtHours(pMonthly.hours)} par mois</div>
+          </div>` : `
+          <div class="empty-note">Lie ce contrat à une soumission acceptée pour voir la projection.</div>`}
+        <div class="theory-note" style="margin-top:14px;">
+          <strong>Théorique.</strong> Calculé avec la marge par défaut (${parseNum(STATE.settings.margeDefaut)} %) et le taux horaire chargé du comité paritaire — les heures réellement travaillées par les employés ne sont pas encore enregistrées dans l'app.
+        </div>
+      </div>
+    </aside>`;
 }
 function openQuoteById(quoteId) {
   showView('quotes');
