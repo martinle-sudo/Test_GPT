@@ -15,6 +15,10 @@ export function errorHandler(err, _req, res, _next) {
       .status(err.status)
       .json({ error: err.message, ...(err.details ? { details: err.details } : {}) });
   }
+  // Erreurs portant un status + expose (ex. assertStripe → 503) : message sûr.
+  if (err?.expose && Number.isInteger(err.status)) {
+    return res.status(err.status).json({ error: err.message });
+  }
   // Violation d'unicité PostgreSQL → 409 lisible.
   if (err?.code === '23505') {
     return res.status(409).json({ error: 'Cette ressource existe déjà' });
