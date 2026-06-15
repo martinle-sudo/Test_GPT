@@ -1,15 +1,17 @@
 <!DOCTYPE html>
-<!-- Programmé par ML — v3.10 (bump version à chaque ajustement) -->
+<!-- Programmé par ML — v3.11 (bump version à chaque ajustement) -->
 <html lang="fr">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <meta name="theme-color" content="#0b0f12">
-<title>Lustre — Gestion d'entretien ménager v3.10</title>
+<title>Lustre — Gestion d'entretien ménager v3.11</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=JetBrains+Mono:wght@400;500;600&family=Geist:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 <script src="https://accounts.google.com/gsi/client" async defer></script>
+<!-- Client Supabase (mode SaaS) — expose window.supabase.createClient -->
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <style>
 :root {
   --bg: #ffffff;
@@ -909,7 +911,7 @@ kbd {
       <path d="M5 27 L 22 10 M 12 21 L 18 17 M 16 17 L 20 13" stroke="#ffffff" stroke-opacity="0.55" stroke-width="1.2" stroke-linecap="round" fill="none"/>
     </svg>
     <span><em>Lu</em>stre</span>
-    <span class="logo-version">v3.10</span>
+    <span class="logo-version">v3.11</span>
   </div>
   <button class="nav-btn" onclick="openPalette()" aria-label="Recherche rapide">
     <svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
@@ -958,7 +960,7 @@ kbd {
   </button>
   <!-- Bloc compte (visible seulement en mode SaaS) -->
   <div id="accountBlock" class="account-block" hidden></div>
-  <div class="nav-foot">Programmé par<br>ML · v3.10</div>
+  <div class="nav-foot">Programmé par<br>ML · v3.11</div>
 </aside>
 
 <main>
@@ -1350,190 +1352,226 @@ function effectiveSections(c) {
   return result;
 }
 
-// ============ MODE SAAS (backend Node) ============
+// ============ MODE SAAS (backend Supabase) ============
+// ⚙️  CONFIGURATION — À REMPLIR PAR MARTIN :
+//    Va dans ton dashboard Supabase → Project Settings → API.
+//    Copie « Project URL » et « anon public » ci-dessous.
+//    La clé "anon" est PUBLIQUE (faite pour le navigateur) : aucun risque
+//    à la mettre ici. La sécurité est assurée par la Row Level Security.
+const SUPABASE_URL = 'https://oijvhagvmzvggxlzvsye.supabase.co';
+const SUPABASE_ANON_KEY = 'COLLE-TA-CLE-ANON-ICI'; // ex. eyJhbGciOi...
+
 // L'app fonctionne dans deux modes :
-//   * "saas"  → backend Node détecté : auth requise, état persisté côté
-//               serveur (isolé par organisation via la Row Level Security
-//               de PostgreSQL). C'est le mode utilisé sur le serveur de
-//               production (Dreamhost).
-//   * "local" → pas de backend (ex. fichier ouvert en file://) : on garde
-//               l'ancien comportement (localStorage + Google Drive optionnel).
-// La détection se fait au boot via /api/auth/me. Tout le reste de l'app
-// (renderers, calculs, PDF…) est indifférent au mode : on passe par save()
-// et load() qui choisissent l'implémentation.
+//   * "saas"  → Supabase configuré : authentification + données isolées par
+//               organisation (Row Level Security PostgreSQL).
+//   * "local" → Supabase non configuré (clé absente) ou hors-ligne : ancien
+//               comportement (localStorage + Google Drive optionnel).
 const SAAS = {
-  mode: 'local',          // 'saas' ou 'local'
-  user: null,             // { id, email, name } si connecté
-  membership: null,       // { organizationId, role }
-  organizations: [],      // liste des orgs du user
-  subscription: null,     // { status, active, ... }
-  csrfToken: null,
-  remoteUpdatedAt: null,  // pour le verrouillage optimiste
+  mode: 'local',
+  sb: null,            // client Supabase
+  user: null,          // utilisateur connecté (Supabase Auth)
+  organizations: [],   // [{ id, name, role }]
+  currentOrg: null,    // organisation active (choix frontend)
+  subscription: null,  // { status, active, ... }
+  remoteUpdatedAt: null,
   saveTimer: null,
-  apiBase: '',            // origine relative (même domaine)
 };
 
-async function api(path, opts) {
-  opts = opts || {};
-  const init = {
-    method: opts.method || 'GET',
-    credentials: 'include',
-    headers: { 'Content-Type': 'application/json' },
-  };
-  if (SAAS.csrfToken && init.method !== 'GET') init.headers['X-CSRF-Token'] = SAAS.csrfToken;
-  if (opts.body != null) init.body = JSON.stringify(opts.body);
-  const res = await fetch(SAAS.apiBase + path, init);
-  let data = null;
-  try { data = await res.json(); } catch(_) {}
-  if (!res.ok) {
-    const err = new Error((data && data.error) || ('HTTP ' + res.status));
-    err.status = res.status;
-    err.data = data;
-    throw err;
-  }
-  return data;
+const CUR_ORG_KEY = 'lustre_current_org';
+
+function saasConfigured() {
+  return typeof SUPABASE_ANON_KEY === 'string'
+    && SUPABASE_ANON_KEY.startsWith('eyJ')          // un JWT valide commence par eyJ
+    && typeof window !== 'undefined'
+    && window.supabase && typeof window.supabase.createClient === 'function';
 }
 
 async function saasDetectAndBoot() {
-  // Sans réseau (ex. file://), fetch lèvera : on tombe en mode local.
-  try {
-    const me = await api('/api/auth/me');
-    SAAS.mode = 'saas';
-    if (me.user) {
-      SAAS.user = me.user;
-      SAAS.membership = me.membership || null;
-      SAAS.csrfToken = me.csrfToken || null;
-      SAAS.organizations = (await api('/api/orgs')).organizations || [];
-      // Sélection auto d'une organisation si aucune n'est active mais que
-      // l'utilisateur en possède : évite un écran intermédiaire.
-      if (!SAAS.membership && SAAS.organizations.length) {
-        await saasSwitchOrg(SAAS.organizations[0].id, { silent: true });
-      }
-      if (SAAS.membership) {
-        await saasLoadStateFromServer();
-        await saasRefreshBilling();
-      }
-    }
-    return true;
-  } catch (_) {
-    SAAS.mode = 'local';
-    return false;
+  if (!saasConfigured()) { SAAS.mode = 'local'; return false; }
+  SAAS.mode = 'saas';
+  SAAS.sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
+    auth: { persistSession: true, autoRefreshToken: true },
+  });
+  const { data: { session } } = await SAAS.sb.auth.getSession();
+  if (session && session.user) {
+    SAAS.user = session.user;
+    await saasAfterAuth();
+  }
+  return true;
+}
+
+// Après connexion : charge les organisations (en crée une si l'utilisateur
+// n'en a aucune), sélectionne l'organisation active, charge état + abonnement.
+async function saasAfterAuth() {
+  await saasLoadOrgs();
+  if (!SAAS.organizations.length) {
+    const name = (SAAS.user.user_metadata && SAAS.user.user_metadata.name)
+      ? SAAS.user.user_metadata.name + ' — organisation' : 'Mon organisation';
+    await saasCreateOrg(name, { silent: true });
+    await saasLoadOrgs();
+  }
+  const stored = localStorage.getItem(CUR_ORG_KEY);
+  SAAS.currentOrg = SAAS.organizations.find(o => o.id === stored) || SAAS.organizations[0] || null;
+  if (SAAS.currentOrg) {
+    localStorage.setItem(CUR_ORG_KEY, SAAS.currentOrg.id);
+    await saasLoadStateFromServer();
+    await saasRefreshBilling();
+  }
+}
+
+async function saasLoadOrgs() {
+  const { data, error } = await SAAS.sb
+    .from('memberships')
+    .select('role, organizations(id, name, created_at)');
+  if (error) throw error;
+  SAAS.organizations = (data || [])
+    .filter(m => m.organizations)
+    .map(m => ({ ...m.organizations, role: m.role }));
+}
+
+async function saasCreateOrg(name, opts) {
+  opts = opts || {};
+  const { error } = await SAAS.sb.rpc('create_organization', { p_name: name });
+  if (error) throw error;
+  if (!opts.silent) {
+    await saasLoadOrgs();
+    showToast('Organisation créée');
   }
 }
 
 async function saasLoadStateFromServer() {
-  const { state, updatedAt } = await api('/api/state');
-  SAAS.remoteUpdatedAt = updatedAt;
-  // On hydrate STATE avec ce que le serveur a, puis on laisse load()
-  // appliquer ses backfills de migration sur ce contenu.
-  if (state && typeof state === 'object' && Object.keys(state).length) {
-    // load() relit localStorage : on y dépose temporairement l'état serveur
-    // pour que les backfills s'appliquent uniformément, peu importe la source.
-    localStorage.setItem('lustre_v3', JSON.stringify(state));
+  const { data, error } = await SAAS.sb
+    .from('app_states')
+    .select('state, updated_at')
+    .eq('organization_id', SAAS.currentOrg.id)
+    .maybeSingle();
+  if (error) throw error;
+  SAAS.remoteUpdatedAt = data ? data.updated_at : null;
+  if (data && data.state && Object.keys(data.state).length) {
+    // On dépose l'état serveur dans localStorage pour que load() applique
+    // ses migrations/backfills uniformément, peu importe la source.
+    localStorage.setItem('lustre_v3', JSON.stringify(data.state));
   } else {
-    // Org neuve : aucun état serveur. On efface le résidu local d'un autre
+    // Org neuve : pas d'état serveur. On purge le résidu local d'un autre
     // compte pour ne pas fuiter d'anciennes données entre utilisateurs.
     localStorage.removeItem('lustre_v3');
   }
 }
 
 async function saasRefreshBilling() {
-  try { SAAS.subscription = await api('/api/billing/status'); }
-  catch (_) { SAAS.subscription = null; }
+  try {
+    const { data } = await SAAS.sb
+      .from('subscriptions')
+      .select('status, current_period_end, price_id')
+      .eq('organization_id', SAAS.currentOrg.id)
+      .maybeSingle();
+    SAAS.subscription = data
+      ? { status: data.status, active: ['active', 'trialing'].includes(data.status),
+          currentPeriodEnd: data.current_period_end, priceId: data.price_id }
+      : { status: 'inactive', active: false };
+  } catch (_) {
+    SAAS.subscription = { status: 'inactive', active: false };
+  }
 }
 
 function saasSchedulePush() {
-  if (SAAS.mode !== 'saas' || !SAAS.membership) return;
+  if (SAAS.mode !== 'saas' || !SAAS.currentOrg) return;
   clearTimeout(SAAS.saveTimer);
   SAAS.saveTimer = setTimeout(() => saasPushState(), 1200);
 }
 
 async function saasPushState() {
-  if (SAAS.mode !== 'saas' || !SAAS.membership) return;
+  if (SAAS.mode !== 'saas' || !SAAS.currentOrg) return;
   try {
     const payload = { ...STATE };
     delete payload.cloud; // la config Google Drive est strictement locale
-    const r = await api('/api/state', {
-      method: 'PUT',
-      body: { state: payload, expectedUpdatedAt: SAAS.remoteUpdatedAt },
+    const { data, error } = await SAAS.sb.rpc('save_app_state', {
+      p_org: SAAS.currentOrg.id,
+      p_state: payload,
+      p_expected: SAAS.remoteUpdatedAt,
     });
-    SAAS.remoteUpdatedAt = r.updatedAt;
+    if (error) throw error;
+    SAAS.remoteUpdatedAt = data; // nouveau updated_at
   } catch (err) {
-    if (err.status === 409) {
-      // Un autre membre a sauvegardé entre-temps. On recharge la version
-      // serveur pour ne pas écraser son travail.
+    const msg = (err && err.message) || '';
+    if (msg.includes('conflict')) {
       showToast('Données mises à jour ailleurs — rechargement…', { variant: 'error' });
       await saasLoadStateFromServer();
       location.reload();
-    } else if (err.status === 401) {
-      showToast('Session expirée — reconnecte-toi', { variant: 'error' });
-      saasShowAuth();
+    } else if (msg.includes('forbidden') || (err && err.code === '42501')) {
+      showToast('Droits insuffisants pour sauvegarder (rôle lecteur ?)', { variant: 'error' });
     } else {
       console.error('Sync échouée :', err);
-      showToast('Sauvegarde serveur échouée : ' + err.message, { variant: 'error' });
+      showToast('Sauvegarde serveur échouée : ' + msg, { variant: 'error' });
     }
   }
 }
 
 async function saasRegister(form) {
-  const data = await api('/api/auth/register', { method: 'POST', body: form });
+  const { data, error } = await SAAS.sb.auth.signUp({
+    email: form.email,
+    password: form.password,
+    options: { data: { name: form.name || '' } },
+  });
+  if (error) throw error;
+  // Si la confirmation par courriel est activée, il n'y a pas encore de
+  // session : on demande à l'utilisateur de confirmer son adresse.
+  if (!data.session) {
+    return { needsConfirmation: true };
+  }
   SAAS.user = data.user;
-  SAAS.csrfToken = data.csrfToken;
-  // Le serveur a déjà créé une 1ʳᵉ organisation et basculé la session dessus.
-  const me = await api('/api/auth/me');
-  SAAS.membership = me.membership;
-  SAAS.organizations = (await api('/api/orgs')).organizations || [];
+  await saasAfterAuth();
+  return { needsConfirmation: false };
 }
 
 async function saasLogin(form) {
-  const data = await api('/api/auth/login', { method: 'POST', body: form });
+  const { data, error } = await SAAS.sb.auth.signInWithPassword({
+    email: form.email,
+    password: form.password,
+  });
+  if (error) throw error;
   SAAS.user = data.user;
-  SAAS.csrfToken = data.csrfToken;
-  const me = await api('/api/auth/me');
-  SAAS.membership = me.membership;
-  SAAS.organizations = (await api('/api/orgs')).organizations || [];
-  if (!SAAS.membership && SAAS.organizations.length) {
-    await saasSwitchOrg(SAAS.organizations[0].id, { silent: true });
-  }
+  await saasAfterAuth();
 }
 
-async function saasSwitchOrg(orgId, opts) {
-  opts = opts || {};
-  const r = await api('/api/auth/switch-org', {
-    method: 'POST',
-    body: { organizationId: orgId },
-  });
-  SAAS.membership = { organizationId: r.organizationId, role: r.role };
-  await saasLoadStateFromServer();
-  await saasRefreshBilling();
-  if (!opts.silent) {
-    showToast('Organisation changée');
-    setTimeout(() => location.reload(), 400);
-  }
+async function saasSwitchOrg(orgId) {
+  const org = SAAS.organizations.find(o => o.id === orgId);
+  if (!org) return;
+  SAAS.currentOrg = org;
+  localStorage.setItem(CUR_ORG_KEY, orgId);
+  showToast('Organisation : ' + org.name);
+  setTimeout(() => location.reload(), 300);
 }
 
 async function saasLogout() {
-  try { await api('/api/auth/logout', { method: 'POST' }); } catch(_) {}
+  try { await SAAS.sb.auth.signOut(); } catch (_) {}
   // On efface le cache local : éviter qu'un autre utilisateur sur le même
-  // poste retrouve les données du précédent au prochain démarrage.
+  // poste retrouve les données du précédent.
   localStorage.removeItem('lustre_v3');
+  localStorage.removeItem(CUR_ORG_KEY);
   location.reload();
 }
 
 async function saasStartCheckout() {
   try {
-    const { url } = await api('/api/billing/checkout', { method: 'POST', body: {} });
-    if (url) window.location.assign(url);
+    const { data, error } = await SAAS.sb.functions.invoke('stripe-checkout', {
+      body: { organizationId: SAAS.currentOrg.id },
+    });
+    if (error) throw error;
+    if (data && data.url) window.location.assign(data.url);
   } catch (err) {
-    showToast('Checkout indisponible : ' + err.message, { variant: 'error' });
+    showToast('Checkout indisponible : ' + ((err && err.message) || ''), { variant: 'error' });
   }
 }
 async function saasOpenPortal() {
   try {
-    const { url } = await api('/api/billing/portal', { method: 'POST', body: {} });
-    if (url) window.location.assign(url);
+    const { data, error } = await SAAS.sb.functions.invoke('stripe-portal', {
+      body: { organizationId: SAAS.currentOrg.id },
+    });
+    if (error) throw error;
+    if (data && data.url) window.location.assign(data.url);
   } catch (err) {
-    showToast('Portail Stripe indisponible : ' + err.message, { variant: 'error' });
+    showToast('Portail Stripe indisponible : ' + ((err && err.message) || ''), { variant: 'error' });
   }
 }
 
@@ -1557,7 +1595,6 @@ function authSwitchTab(tab) {
 function saasShowAuth() {
   document.getElementById('authShell').hidden = false;
   document.getElementById('appShell').style.display = 'none';
-  // Focus utile : on commence par le courriel.
   setTimeout(() => document.getElementById('authEmail').focus(), 100);
 }
 function saasHideAuth() {
@@ -1576,23 +1613,36 @@ async function authSubmit(ev) {
     const password = document.getElementById('authPassword').value;
     if (AUTH_TAB === 'register') {
       const name = document.getElementById('authName').value.trim();
-      await saasRegister({ email, password, name });
+      const res = await saasRegister({ email, password, name });
+      if (res.needsConfirmation) {
+        errBox.style.cssText = 'background:var(--accent-soft);color:#0f766e;';
+        errBox.textContent = 'Compte créé ! Vérifie ton courriel pour confirmer ton adresse, puis connecte-toi.';
+        errBox.hidden = false;
+        authSwitchTab('login');
+        return;
+      }
     } else {
       await saasLogin({ email, password });
     }
-    if (SAAS.membership) {
-      await saasLoadStateFromServer();
-      await saasRefreshBilling();
-    }
     saasHideAuth();
-    // Recharge propre : tous les renderers vont prendre le STATE serveur.
     location.reload();
   } catch (err) {
-    errBox.textContent = err.message || 'Échec de la requête';
+    errBox.style.cssText = '';
+    errBox.textContent = saasAuthErrorMessage(err);
     errBox.hidden = false;
   } finally {
     btn.disabled = false;
   }
+}
+
+// Traduit les messages d'erreur Supabase courants en français clair.
+function saasAuthErrorMessage(err) {
+  const m = (err && err.message) || 'Échec de la requête';
+  if (/invalid login credentials/i.test(m)) return 'Courriel ou mot de passe incorrect';
+  if (/email not confirmed/i.test(m)) return 'Courriel pas encore confirmé — vérifie ta boîte de réception';
+  if (/user already registered/i.test(m)) return 'Un compte existe déjà avec ce courriel';
+  if (/password should be at least/i.test(m)) return 'Mot de passe trop court (6 caractères minimum)';
+  return m;
 }
 
 // ============ UI — bloc compte dans la sidebar ============
@@ -1601,11 +1651,11 @@ function renderAccountBlock() {
   if (!el) return;
   if (SAAS.mode !== 'saas' || !SAAS.user) { el.hidden = true; return; }
   el.hidden = false;
-  const initials = (SAAS.user.email || '?').slice(0, 2).toUpperCase();
-  const currentOrg = SAAS.organizations.find(o =>
-    SAAS.membership && o.id === SAAS.membership.organizationId);
-  const orgName = currentOrg ? currentOrg.name : '(aucune organisation)';
-  const role = SAAS.membership ? SAAS.membership.role : '';
+  const email = SAAS.user.email || '';
+  const name = (SAAS.user.user_metadata && SAAS.user.user_metadata.name) || email;
+  const initials = (email || '?').slice(0, 2).toUpperCase();
+  const orgName = SAAS.currentOrg ? SAAS.currentOrg.name : '(aucune organisation)';
+  const role = SAAS.currentOrg ? SAAS.currentOrg.role : '';
   const sub = SAAS.subscription;
   const subBadge = sub && sub.active
     ? '<span class="account-status">Abonnement actif</span>'
@@ -1613,7 +1663,7 @@ function renderAccountBlock() {
 
   const orgSwitcher = SAAS.organizations.length > 1
     ? `<select onchange="saasSwitchOrg(this.value)" style="font-size:11px;padding:4px 6px;margin-top:4px;">
-         ${SAAS.organizations.map(o => `<option value="${o.id}" ${currentOrg && o.id === currentOrg.id ? 'selected' : ''}>${escapeHTML(o.name)}</option>`).join('')}
+         ${SAAS.organizations.map(o => `<option value="${o.id}" ${SAAS.currentOrg && o.id === SAAS.currentOrg.id ? 'selected' : ''}>${escapeHTML(o.name)}</option>`).join('')}
        </select>`
     : '';
 
@@ -1625,7 +1675,7 @@ function renderAccountBlock() {
     <div class="account-row">
       <div class="account-avatar" aria-hidden="true">${escapeHTML(initials)}</div>
       <div class="account-meta">
-        <div class="account-email" title="${escapeHTML(SAAS.user.email)}">${escapeHTML(SAAS.user.name || SAAS.user.email)}</div>
+        <div class="account-email" title="${escapeHTML(email)}">${escapeHTML(name)}</div>
         <div class="account-org" title="${escapeHTML(orgName)}">${escapeHTML(orgName)}${role ? ' · ' + role : ''}</div>
       </div>
     </div>
@@ -3963,7 +4013,7 @@ function exportData() {
   const payload = { ...STATE };
   delete payload.cloud;
   payload.exportedAt = new Date().toISOString();
-  payload.appVersion = '3.10';
+  payload.appVersion = '3.11';
   const blob = new Blob([JSON.stringify(payload, null, 2)], { type: 'application/json' });
   const url = URL.createObjectURL(blob);
   const a = document.createElement('a');

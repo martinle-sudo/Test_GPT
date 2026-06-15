@@ -1,8 +1,17 @@
-# Lustre — Gestion d'entretien ménager (v3.9)
+# Lustre — Gestion d'entretien ménager (v3.11)
 
-Application web monofichier (`index.html`) pour gérer une entreprise d'entretien ménager.
-Conçue pour un usage par le gestionnaire uniquement — aucun compte utilisateur,
-toutes les données sont stockées localement dans le navigateur (localStorage).
+Application web pour gérer une entreprise d'entretien ménager. Fonctionne en
+**deux modes** selon la configuration :
+
+- **Mode SaaS (Supabase)** — comptes utilisateurs, organisations, données
+  isolées par client via la Row Level Security PostgreSQL, abonnements Stripe.
+  Voir [`supabase/README.md`](supabase/README.md) pour le déploiement.
+- **Mode local** — sans configuration : tout est stocké dans le navigateur
+  (localStorage), avec sauvegarde Google Drive optionnelle. Idéal pour tester
+  ou un usage solo.
+
+Le mode est détecté automatiquement au démarrage : si la clé Supabase est
+renseignée dans `index.html`, c'est le mode SaaS ; sinon, le mode local.
 
 ## Modules
 
@@ -48,9 +57,28 @@ choisir « Enregistrer au format PDF » comme destination.
 
 ## Démarrage
 
-Ouvrir `index.html` dans un navigateur. Des données de démonstration sont
-chargées au premier lancement ; « Réglages → Réinitialiser les données »
-permet de repartir à neuf.
+**Mode local** : ouvrir `index.html` dans un navigateur. Des données de
+démonstration sont chargées au premier lancement ; « Réglages → Réinitialiser
+les données » permet de repartir à neuf.
+
+**Mode SaaS** : suivre [`supabase/README.md`](supabase/README.md) (créer la
+base, coller la clé `anon`, déployer les fonctions Stripe). L'app peut alors
+être hébergée comme simple fichier statique (GitHub Pages, Netlify…).
+
+## Architecture SaaS
+
+```
+  Navigateur (index.html)
+        │  clé "anon" publique, appels directs
+        ▼
+  Supabase
+   ├── Postgres + Row Level Security  → isole chaque organisation
+   ├── Auth (courriel / mot de passe) → comptes, sessions
+   └── Edge Functions (Stripe)        → checkout, portail, webhooks
+```
+
+- `supabase/migrations/` — schéma SQL + politiques de sécurité (RLS)
+- `supabase/functions/` — fonctions Stripe (Deno)
 
 ---
-Programmé par Claude Code (Anthropic).
+Programmé par ML.
