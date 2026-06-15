@@ -1,4 +1,6 @@
-# Lustre — Backend SaaS (Phase 1 : fondations sécurisées)
+# Lustre — Backend SaaS (Phase 1 + Phase 2)
+
+> **Tu veux le déployer ?** → lis [DEPLOY-DREAMHOST.md](./DEPLOY-DREAMHOST.md).
 
 Ce dossier `backend/` est le **cerveau central** qui transforme Lustre, jusqu'ici
 une app navigateur, en une vraie plateforme SaaS multi-clients. Il fournit :
@@ -90,6 +92,8 @@ localhost:4000/api/billing/webhook` (CLI Stripe).
 | POST | `/api/orgs/members` | **admin** | Inviter / changer le rôle d'un membre |
 | DELETE | `/api/orgs/members/:id` | **admin** | Retirer un membre |
 | GET/POST/PUT/DELETE | `/api/clients` | reader / member | Exemple de ressource isolée par tenant |
+| GET | `/api/state` | reader | Charger l'état Lustre de l'organisation |
+| PUT | `/api/state` | member | Sauvegarder l'état (avec verrouillage optimiste) |
 | GET | `/api/billing/status` | reader | Statut d'abonnement |
 | POST | `/api/billing/checkout` | **admin** | Démarrer un abonnement Stripe |
 | POST | `/api/billing/portal` | **admin** | Gérer / annuler l'abonnement |

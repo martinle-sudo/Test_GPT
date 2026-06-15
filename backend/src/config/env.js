@@ -38,6 +38,16 @@ export const isProd = env.NODE_ENV === 'production';
 export const isTest = env.NODE_ENV === 'test';
 
 // Stripe est optionnel en dev : on prévient mais on ne bloque pas.
+// On exige une vraie clé (pas un placeholder type "sk_test_xxx") avant
+// de considérer Stripe « configuré » — sinon les routes facturation
+// renvoient 503 avec un message clair plutôt qu'une erreur Stripe opaque.
+function isRealStripeKey(k) {
+  if (!k) return false;
+  if (!/^(sk_test_|sk_live_)/.test(k)) return false;
+  // Au-delà du préfixe : au moins 16 caractères, pas "xxx".
+  const tail = k.replace(/^(sk_test_|sk_live_)/, '');
+  return tail.length >= 16 && !/^x+$/i.test(tail);
+}
 export const stripeConfigured = Boolean(
-  env.STRIPE_SECRET_KEY && env.STRIPE_WEBHOOK_SECRET,
+  isRealStripeKey(env.STRIPE_SECRET_KEY) && env.STRIPE_WEBHOOK_SECRET,
 );

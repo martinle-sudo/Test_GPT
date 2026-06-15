@@ -1,4 +1,5 @@
 import { pool } from '../../db/pool.js';
+import { withTenant } from '../../db/withTenant.js';
 import { env } from '../../config/env.js';
 import { stripe, assertStripe } from './stripeClient.js';
 
@@ -9,19 +10,23 @@ import { stripe, assertStripe } from './stripeClient.js';
 // ============================================================
 
 // Récupère (ou crée) la ligne d'abonnement d'une organisation.
-async function getOrCreateSubscriptionRow(organizationId) {
-  const existing = await pool.query(
-    'select * from subscriptions where organization_id = $1',
-    [organizationId],
-  );
-  if (existing.rows.length) return existing.rows[0];
-  const inserted = await pool.query(
-    `insert into subscriptions (organization_id, status)
-     values ($1, 'inactive')
-     returning *`,
-    [organizationId],
-  );
-  return inserted.rows[0];
+// IMPORTANT : passe par withTenant pour que la RLS autorise l'insertion
+// (organization_id doit correspondre à app.current_org sinon WITH CHECK refuse).
+function getOrCreateSubscriptionRow(organizationId) {
+  return withTenant(organizationId, async (db) => {
+    const existing = await db.query(
+      'select * from subscriptions where organization_id = $1',
+      [organizationId],
+    );
+    if (existing.rows.length) return existing.rows[0];
+    const inserted = await db.query(
+      `insert into subscriptions (organization_id, status)
+       values ($1, 'inactive')
+       returning *`,
+      [organizationId],
+    );
+    return inserted.rows[0];
+  });
 }
 
 // Garantit qu'un client Stripe existe pour l'organisation, et mémorise son id.
@@ -33,9 +38,11 @@ async function ensureStripeCustomer(organizationId, email) {
     email,
     metadata: { organization_id: organizationId },
   });
-  await pool.query(
-    'update subscriptions set stripe_customer_id = $2, updated_at = now() where organization_id = $1',
-    [organizationId, customer.id],
+  await withTenant(organizationId, (db) =>
+    db.query(
+      'update subscriptions set stripe_customer_id = $2, updated_at = now() where organization_id = $1',
+      [organizationId, customer.id],
+    ),
   );
   return customer.id;
 }
@@ -106,25 +113,30 @@ async function syncSubscriptionRecord(subscription, organizationId) {
   const periodEnd = subscription.current_period_end
     ? new Date(subscription.current_period_end * 1000)
     : null;
-  await pool.query(
-    `insert into subscriptions
-       (organization_id, stripe_customer_id, stripe_subscription_id, status, price_id, current_period_end, updated_at)
-     values ($1, $2, $3, $4, $5, $6, now())
-     on conflict (organization_id) do update set
-       stripe_customer_id     = excluded.stripe_customer_id,
-       stripe_subscription_id = excluded.stripe_subscription_id,
-       status                 = excluded.status,
-       price_id               = excluded.price_id,
-       current_period_end     = excluded.current_period_end,
-       updated_at             = now()`,
-    [
-      organizationId,
-      subscription.customer,
-      subscription.id,
-      subscription.status,
-      priceId,
-      periodEnd,
-    ],
+  // Le webhook tourne sans utilisateur connecté, mais on connaît l'org cible
+  // (récupérée des metadata Stripe). On l'injecte explicitement comme
+  // contexte tenant → la RLS autorise l'upsert.
+  await withTenant(organizationId, (db) =>
+    db.query(
+      `insert into subscriptions
+         (organization_id, stripe_customer_id, stripe_subscription_id, status, price_id, current_period_end, updated_at)
+       values ($1, $2, $3, $4, $5, $6, now())
+       on conflict (organization_id) do update set
+         stripe_customer_id     = excluded.stripe_customer_id,
+         stripe_subscription_id = excluded.stripe_subscription_id,
+         status                 = excluded.status,
+         price_id               = excluded.price_id,
+         current_period_end     = excluded.current_period_end,
+         updated_at             = now()`,
+      [
+        organizationId,
+        subscription.customer,
+        subscription.id,
+        subscription.status,
+        priceId,
+        periodEnd,
+      ],
+    ),
   );
 }
 

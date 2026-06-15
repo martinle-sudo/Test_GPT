@@ -1,11 +1,11 @@
 <!DOCTYPE html>
-<!-- Programmé par ML — v3.9 (bump version à chaque ajustement) -->
+<!-- Programmé par ML — v3.10 (bump version à chaque ajustement) -->
 <html lang="fr">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <meta name="theme-color" content="#0b0f12">
-<title>Lustre — Gestion d'entretien ménager v3.9</title>
+<title>Lustre — Gestion d'entretien ménager v3.10</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=JetBrains+Mono:wght@400;500;600&family=Geist:wght@300;400;500;600;700&display=swap" rel="stylesheet">
@@ -544,6 +544,144 @@ input:focus-visible, select:focus-visible, textarea:focus-visible { outline: non
 .link.accent { color: var(--accent); border-bottom-color: transparent; font-weight: 600; }
 .link.accent:hover { border-bottom-color: var(--accent); }
 
+/* ============ Écran d'authentification (mode SaaS) ============ */
+.auth-shell {
+  position: fixed; inset: 0;
+  background: linear-gradient(180deg, var(--bg-card) 0%, var(--bg) 60%);
+  display: flex; align-items: center; justify-content: center;
+  padding: 24px; z-index: 1000;
+}
+.auth-shell[hidden] { display: none; }
+.auth-card {
+  width: 100%; max-width: 420px;
+  background: var(--bg-elevated);
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  padding: 28px 28px 24px;
+  box-shadow: var(--shadow-lg);
+}
+.auth-brand {
+  display: flex; align-items: center; gap: 12px;
+  margin-bottom: 22px;
+}
+.auth-brand-text {
+  font-family: 'Instrument Serif', serif;
+  font-size: 30px;
+  font-style: italic;
+  letter-spacing: -0.02em;
+  color: var(--text);
+}
+.auth-brand-text em { color: var(--accent); font-style: italic; }
+.auth-tabs {
+  display: flex; gap: 4px;
+  background: var(--bg-card);
+  padding: 4px;
+  border-radius: 9px;
+  margin-bottom: 18px;
+}
+.auth-tab {
+  flex: 1; padding: 8px 12px;
+  border-radius: 6px;
+  font-size: 13px; font-weight: 500;
+  color: var(--text-muted);
+  transition: background 0.15s, color 0.15s;
+}
+.auth-tab.active {
+  background: var(--bg-elevated);
+  color: var(--text);
+  box-shadow: var(--shadow-sm);
+}
+.auth-form { display: flex; flex-direction: column; gap: 14px; }
+.auth-field { display: flex; flex-direction: column; gap: 6px; }
+.auth-field label {
+  font-size: 12px; color: var(--text-muted);
+  font-weight: 500;
+}
+.auth-error {
+  background: var(--danger-soft);
+  color: #b91c1c;
+  border-radius: 8px;
+  padding: 9px 12px;
+  font-size: 12.5px;
+}
+.auth-submit {
+  margin-top: 6px;
+  padding: 11px 16px;
+  border-radius: 9px;
+  background: var(--accent);
+  color: #ffffff;
+  font-weight: 600;
+  font-size: 14px;
+  border: 1px solid var(--accent);
+  transition: background 0.15s, transform 0.1s;
+}
+.auth-submit:hover { background: #0f766e; }
+.auth-submit:active { transform: scale(0.99); }
+.auth-submit:disabled { opacity: 0.6; cursor: wait; }
+.auth-note {
+  text-align: center; font-size: 12.5px;
+  color: var(--text-muted); margin-top: 4px;
+}
+.auth-note a { color: var(--accent); text-decoration: none; font-weight: 500; }
+.auth-note a:hover { text-decoration: underline; }
+
+/* ============ Menu compte (bouton dans la sidebar bas) ============ */
+.account-block {
+  margin-top: 10px;
+  padding: 10px 11px;
+  background: var(--bg-elevated);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  display: flex; flex-direction: column; gap: 6px;
+  box-shadow: var(--shadow-sm);
+}
+.account-row {
+  display: flex; align-items: center; gap: 8px;
+  font-size: 12.5px;
+}
+.account-avatar {
+  width: 26px; height: 26px;
+  border-radius: 50%;
+  background: var(--accent-soft);
+  color: var(--accent);
+  display: flex; align-items: center; justify-content: center;
+  font-weight: 700; font-size: 11px;
+  flex-shrink: 0;
+}
+.account-meta { min-width: 0; flex: 1; }
+.account-email {
+  color: var(--text); font-weight: 500;
+  overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+}
+.account-org {
+  font-size: 10.5px; color: var(--text-subtle);
+  overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+}
+.account-actions { display: flex; gap: 6px; flex-wrap: wrap; }
+.account-actions button {
+  flex: 1; padding: 5px 8px;
+  border-radius: 6px;
+  font-size: 11px;
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  color: var(--text-muted);
+  transition: background 0.15s, color 0.15s;
+}
+.account-actions button:hover { background: var(--bg-hover); color: var(--text); }
+.account-actions button.primary { background: var(--accent); color: #fff; border-color: var(--accent); }
+.account-actions button.primary:hover { background: #0f766e; }
+.account-status {
+  font-size: 10.5px;
+  padding: 4px 8px;
+  border-radius: 99px;
+  background: var(--success-soft);
+  color: #166534;
+  font-weight: 500;
+  display: inline-flex; align-items: center;
+  align-self: flex-start;
+}
+.account-status.inactive { background: var(--warn-soft); color: #92400e; }
+
 kbd {
   font-family: 'JetBrains Mono', monospace;
   font-size: 10px;
@@ -726,7 +864,44 @@ kbd {
 </head>
 <body>
 
-<div class="app">
+<!-- Écran d'authentification (mode SaaS). Caché par défaut, affiché au boot
+     par showAuth() si on est sur le backend et pas encore connecté. -->
+<div class="auth-shell" id="authShell" hidden>
+  <div class="auth-card">
+    <div class="auth-brand">
+      <svg viewBox="0 0 32 32" width="36" height="36" aria-hidden="true">
+        <path d="M5 27 C 5 14, 14 5, 27 5 C 27 18, 18 27, 5 27 Z" fill="#0d9488"/>
+        <path d="M5 27 L 22 10 M 12 21 L 18 17 M 16 17 L 20 13" stroke="#ffffff" stroke-opacity="0.55" stroke-width="1.2" stroke-linecap="round" fill="none"/>
+      </svg>
+      <div class="auth-brand-text"><em>Lu</em>stre</div>
+    </div>
+    <div class="auth-tabs" role="tablist">
+      <button class="auth-tab active" data-tab="login" onclick="authSwitchTab('login')" role="tab">Connexion</button>
+      <button class="auth-tab" data-tab="register" onclick="authSwitchTab('register')" role="tab">Créer un compte</button>
+    </div>
+    <form id="authForm" class="auth-form" onsubmit="authSubmit(event)" novalidate>
+      <div class="auth-field" id="authNameField" hidden>
+        <label for="authName">Nom</label>
+        <input id="authName" type="text" autocomplete="name" placeholder="Comment t'appelles-tu ?">
+      </div>
+      <div class="auth-field">
+        <label for="authEmail">Courriel</label>
+        <input id="authEmail" type="email" autocomplete="email" required placeholder="toi@entreprise.ca">
+      </div>
+      <div class="auth-field">
+        <label for="authPassword">Mot de passe</label>
+        <input id="authPassword" type="password" autocomplete="current-password" required minlength="10" placeholder="10 caractères minimum">
+      </div>
+      <div class="auth-error" id="authError" role="alert" hidden></div>
+      <button type="submit" class="auth-submit" id="authSubmitBtn">Se connecter</button>
+      <div class="auth-note" id="authSwitchNote">
+        Pas encore de compte ? <a href="#" onclick="authSwitchTab('register');return false;">Créer un compte</a>
+      </div>
+    </form>
+  </div>
+</div>
+
+<div class="app" id="appShell">
 <aside class="sidebar" aria-label="Navigation principale">
   <div class="logo">
     <svg class="logo-leaf" viewBox="0 0 32 32" aria-hidden="true">
@@ -734,7 +909,7 @@ kbd {
       <path d="M5 27 L 22 10 M 12 21 L 18 17 M 16 17 L 20 13" stroke="#ffffff" stroke-opacity="0.55" stroke-width="1.2" stroke-linecap="round" fill="none"/>
     </svg>
     <span><em>Lu</em>stre</span>
-    <span class="logo-version">v3.9</span>
+    <span class="logo-version">v3.10</span>
   </div>
   <button class="nav-btn" onclick="openPalette()" aria-label="Recherche rapide">
     <svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
@@ -781,7 +956,9 @@ kbd {
     <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
     <span>Réglages</span>
   </button>
-  <div class="nav-foot">Programmé par<br>ML · v3.9</div>
+  <!-- Bloc compte (visible seulement en mode SaaS) -->
+  <div id="accountBlock" class="account-block" hidden></div>
+  <div class="nav-foot">Programmé par<br>ML · v3.10</div>
 </aside>
 
 <main>
@@ -1173,12 +1350,306 @@ function effectiveSections(c) {
   return result;
 }
 
+// ============ MODE SAAS (backend Node) ============
+// L'app fonctionne dans deux modes :
+//   * "saas"  → backend Node détecté : auth requise, état persisté côté
+//               serveur (isolé par organisation via la Row Level Security
+//               de PostgreSQL). C'est le mode utilisé sur le serveur de
+//               production (Dreamhost).
+//   * "local" → pas de backend (ex. fichier ouvert en file://) : on garde
+//               l'ancien comportement (localStorage + Google Drive optionnel).
+// La détection se fait au boot via /api/auth/me. Tout le reste de l'app
+// (renderers, calculs, PDF…) est indifférent au mode : on passe par save()
+// et load() qui choisissent l'implémentation.
+const SAAS = {
+  mode: 'local',          // 'saas' ou 'local'
+  user: null,             // { id, email, name } si connecté
+  membership: null,       // { organizationId, role }
+  organizations: [],      // liste des orgs du user
+  subscription: null,     // { status, active, ... }
+  csrfToken: null,
+  remoteUpdatedAt: null,  // pour le verrouillage optimiste
+  saveTimer: null,
+  apiBase: '',            // origine relative (même domaine)
+};
+
+async function api(path, opts) {
+  opts = opts || {};
+  const init = {
+    method: opts.method || 'GET',
+    credentials: 'include',
+    headers: { 'Content-Type': 'application/json' },
+  };
+  if (SAAS.csrfToken && init.method !== 'GET') init.headers['X-CSRF-Token'] = SAAS.csrfToken;
+  if (opts.body != null) init.body = JSON.stringify(opts.body);
+  const res = await fetch(SAAS.apiBase + path, init);
+  let data = null;
+  try { data = await res.json(); } catch(_) {}
+  if (!res.ok) {
+    const err = new Error((data && data.error) || ('HTTP ' + res.status));
+    err.status = res.status;
+    err.data = data;
+    throw err;
+  }
+  return data;
+}
+
+async function saasDetectAndBoot() {
+  // Sans réseau (ex. file://), fetch lèvera : on tombe en mode local.
+  try {
+    const me = await api('/api/auth/me');
+    SAAS.mode = 'saas';
+    if (me.user) {
+      SAAS.user = me.user;
+      SAAS.membership = me.membership || null;
+      SAAS.csrfToken = me.csrfToken || null;
+      SAAS.organizations = (await api('/api/orgs')).organizations || [];
+      // Sélection auto d'une organisation si aucune n'est active mais que
+      // l'utilisateur en possède : évite un écran intermédiaire.
+      if (!SAAS.membership && SAAS.organizations.length) {
+        await saasSwitchOrg(SAAS.organizations[0].id, { silent: true });
+      }
+      if (SAAS.membership) {
+        await saasLoadStateFromServer();
+        await saasRefreshBilling();
+      }
+    }
+    return true;
+  } catch (_) {
+    SAAS.mode = 'local';
+    return false;
+  }
+}
+
+async function saasLoadStateFromServer() {
+  const { state, updatedAt } = await api('/api/state');
+  SAAS.remoteUpdatedAt = updatedAt;
+  // On hydrate STATE avec ce que le serveur a, puis on laisse load()
+  // appliquer ses backfills de migration sur ce contenu.
+  if (state && typeof state === 'object' && Object.keys(state).length) {
+    // load() relit localStorage : on y dépose temporairement l'état serveur
+    // pour que les backfills s'appliquent uniformément, peu importe la source.
+    localStorage.setItem('lustre_v3', JSON.stringify(state));
+  } else {
+    // Org neuve : aucun état serveur. On efface le résidu local d'un autre
+    // compte pour ne pas fuiter d'anciennes données entre utilisateurs.
+    localStorage.removeItem('lustre_v3');
+  }
+}
+
+async function saasRefreshBilling() {
+  try { SAAS.subscription = await api('/api/billing/status'); }
+  catch (_) { SAAS.subscription = null; }
+}
+
+function saasSchedulePush() {
+  if (SAAS.mode !== 'saas' || !SAAS.membership) return;
+  clearTimeout(SAAS.saveTimer);
+  SAAS.saveTimer = setTimeout(() => saasPushState(), 1200);
+}
+
+async function saasPushState() {
+  if (SAAS.mode !== 'saas' || !SAAS.membership) return;
+  try {
+    const payload = { ...STATE };
+    delete payload.cloud; // la config Google Drive est strictement locale
+    const r = await api('/api/state', {
+      method: 'PUT',
+      body: { state: payload, expectedUpdatedAt: SAAS.remoteUpdatedAt },
+    });
+    SAAS.remoteUpdatedAt = r.updatedAt;
+  } catch (err) {
+    if (err.status === 409) {
+      // Un autre membre a sauvegardé entre-temps. On recharge la version
+      // serveur pour ne pas écraser son travail.
+      showToast('Données mises à jour ailleurs — rechargement…', { variant: 'error' });
+      await saasLoadStateFromServer();
+      location.reload();
+    } else if (err.status === 401) {
+      showToast('Session expirée — reconnecte-toi', { variant: 'error' });
+      saasShowAuth();
+    } else {
+      console.error('Sync échouée :', err);
+      showToast('Sauvegarde serveur échouée : ' + err.message, { variant: 'error' });
+    }
+  }
+}
+
+async function saasRegister(form) {
+  const data = await api('/api/auth/register', { method: 'POST', body: form });
+  SAAS.user = data.user;
+  SAAS.csrfToken = data.csrfToken;
+  // Le serveur a déjà créé une 1ʳᵉ organisation et basculé la session dessus.
+  const me = await api('/api/auth/me');
+  SAAS.membership = me.membership;
+  SAAS.organizations = (await api('/api/orgs')).organizations || [];
+}
+
+async function saasLogin(form) {
+  const data = await api('/api/auth/login', { method: 'POST', body: form });
+  SAAS.user = data.user;
+  SAAS.csrfToken = data.csrfToken;
+  const me = await api('/api/auth/me');
+  SAAS.membership = me.membership;
+  SAAS.organizations = (await api('/api/orgs')).organizations || [];
+  if (!SAAS.membership && SAAS.organizations.length) {
+    await saasSwitchOrg(SAAS.organizations[0].id, { silent: true });
+  }
+}
+
+async function saasSwitchOrg(orgId, opts) {
+  opts = opts || {};
+  const r = await api('/api/auth/switch-org', {
+    method: 'POST',
+    body: { organizationId: orgId },
+  });
+  SAAS.membership = { organizationId: r.organizationId, role: r.role };
+  await saasLoadStateFromServer();
+  await saasRefreshBilling();
+  if (!opts.silent) {
+    showToast('Organisation changée');
+    setTimeout(() => location.reload(), 400);
+  }
+}
+
+async function saasLogout() {
+  try { await api('/api/auth/logout', { method: 'POST' }); } catch(_) {}
+  // On efface le cache local : éviter qu'un autre utilisateur sur le même
+  // poste retrouve les données du précédent au prochain démarrage.
+  localStorage.removeItem('lustre_v3');
+  location.reload();
+}
+
+async function saasStartCheckout() {
+  try {
+    const { url } = await api('/api/billing/checkout', { method: 'POST', body: {} });
+    if (url) window.location.assign(url);
+  } catch (err) {
+    showToast('Checkout indisponible : ' + err.message, { variant: 'error' });
+  }
+}
+async function saasOpenPortal() {
+  try {
+    const { url } = await api('/api/billing/portal', { method: 'POST', body: {} });
+    if (url) window.location.assign(url);
+  } catch (err) {
+    showToast('Portail Stripe indisponible : ' + err.message, { variant: 'error' });
+  }
+}
+
+// ============ UI — écran d'auth ============
+let AUTH_TAB = 'login';
+function authSwitchTab(tab) {
+  AUTH_TAB = tab;
+  document.querySelectorAll('.auth-tab').forEach(b =>
+    b.classList.toggle('active', b.dataset.tab === tab));
+  document.getElementById('authNameField').hidden = tab !== 'register';
+  document.getElementById('authSubmitBtn').textContent =
+    tab === 'register' ? 'Créer mon compte' : 'Se connecter';
+  document.getElementById('authPassword').setAttribute('autocomplete',
+    tab === 'register' ? 'new-password' : 'current-password');
+  document.getElementById('authSwitchNote').innerHTML = tab === 'register'
+    ? 'Déjà un compte ? <a href="#" onclick="authSwitchTab(\'login\');return false;">Se connecter</a>'
+    : 'Pas encore de compte ? <a href="#" onclick="authSwitchTab(\'register\');return false;">Créer un compte</a>';
+  document.getElementById('authError').hidden = true;
+}
+
+function saasShowAuth() {
+  document.getElementById('authShell').hidden = false;
+  document.getElementById('appShell').style.display = 'none';
+  // Focus utile : on commence par le courriel.
+  setTimeout(() => document.getElementById('authEmail').focus(), 100);
+}
+function saasHideAuth() {
+  document.getElementById('authShell').hidden = true;
+  document.getElementById('appShell').style.display = '';
+}
+
+async function authSubmit(ev) {
+  ev.preventDefault();
+  const btn = document.getElementById('authSubmitBtn');
+  const errBox = document.getElementById('authError');
+  errBox.hidden = true;
+  btn.disabled = true;
+  try {
+    const email = document.getElementById('authEmail').value.trim();
+    const password = document.getElementById('authPassword').value;
+    if (AUTH_TAB === 'register') {
+      const name = document.getElementById('authName').value.trim();
+      await saasRegister({ email, password, name });
+    } else {
+      await saasLogin({ email, password });
+    }
+    if (SAAS.membership) {
+      await saasLoadStateFromServer();
+      await saasRefreshBilling();
+    }
+    saasHideAuth();
+    // Recharge propre : tous les renderers vont prendre le STATE serveur.
+    location.reload();
+  } catch (err) {
+    errBox.textContent = err.message || 'Échec de la requête';
+    errBox.hidden = false;
+  } finally {
+    btn.disabled = false;
+  }
+}
+
+// ============ UI — bloc compte dans la sidebar ============
+function renderAccountBlock() {
+  const el = document.getElementById('accountBlock');
+  if (!el) return;
+  if (SAAS.mode !== 'saas' || !SAAS.user) { el.hidden = true; return; }
+  el.hidden = false;
+  const initials = (SAAS.user.email || '?').slice(0, 2).toUpperCase();
+  const currentOrg = SAAS.organizations.find(o =>
+    SAAS.membership && o.id === SAAS.membership.organizationId);
+  const orgName = currentOrg ? currentOrg.name : '(aucune organisation)';
+  const role = SAAS.membership ? SAAS.membership.role : '';
+  const sub = SAAS.subscription;
+  const subBadge = sub && sub.active
+    ? '<span class="account-status">Abonnement actif</span>'
+    : '<span class="account-status inactive">Pas d\'abonnement</span>';
+
+  const orgSwitcher = SAAS.organizations.length > 1
+    ? `<select onchange="saasSwitchOrg(this.value)" style="font-size:11px;padding:4px 6px;margin-top:4px;">
+         ${SAAS.organizations.map(o => `<option value="${o.id}" ${currentOrg && o.id === currentOrg.id ? 'selected' : ''}>${escapeHTML(o.name)}</option>`).join('')}
+       </select>`
+    : '';
+
+  const billingBtn = sub && sub.active
+    ? `<button onclick="saasOpenPortal()">Gérer l'abonnement</button>`
+    : `<button class="primary" onclick="saasStartCheckout()">S'abonner</button>`;
+
+  el.innerHTML = `
+    <div class="account-row">
+      <div class="account-avatar" aria-hidden="true">${escapeHTML(initials)}</div>
+      <div class="account-meta">
+        <div class="account-email" title="${escapeHTML(SAAS.user.email)}">${escapeHTML(SAAS.user.name || SAAS.user.email)}</div>
+        <div class="account-org" title="${escapeHTML(orgName)}">${escapeHTML(orgName)}${role ? ' · ' + role : ''}</div>
+      </div>
+    </div>
+    ${subBadge}
+    ${orgSwitcher}
+    <div class="account-actions">
+      ${billingBtn}
+      <button onclick="saasLogout()">Déconnexion</button>
+    </div>
+  `;
+}
+
+// ============ Persistance (save/load) ============
 function save(opts) {
   opts = opts || {};
   if (!opts.skipBump) STATE.updatedAt = Date.now();
   try { localStorage.setItem('lustre_v3', JSON.stringify(STATE)); }
   catch(e) { console.error(e); }
-  if (!opts.skipPush && typeof schedulePush === 'function') schedulePush();
+  if (!opts.skipPush) {
+    // En mode SaaS, on synchronise vers le backend.
+    if (SAAS.mode === 'saas') saasSchedulePush();
+    // En mode local, Google Drive éventuellement.
+    else if (typeof schedulePush === 'function') schedulePush();
+  }
 }
 function load() {
   try {
@@ -3492,7 +3963,7 @@ function exportData() {
   const payload = { ...STATE };
   delete payload.cloud;
   payload.exportedAt = new Date().toISOString();
-  payload.appVersion = '3.9';
+  payload.appVersion = '3.10';
   const blob = new Blob([JSON.stringify(payload, null, 2)], { type: 'application/json' });
   const url = URL.createObjectURL(blob);
   const a = document.createElement('a');
@@ -4215,11 +4686,27 @@ document.getElementById('modalBox').addEventListener('keydown', (e) => {
 });
 
 // ============ INIT ============
-load();
-seed();
-seedServices();   // garantit le catalogue par défaut, même pour les données v3.0 existantes
-renderDashboard();
-bootCloud();
+// 1) Détecter le mode (SaaS ou local) en pingant le backend.
+// 2) Si mode SaaS sans session → écran d'authentification, on s'arrête là.
+// 3) Sinon, déroulement normal : charger l'état, semer si vide, rendre.
+(async () => {
+  await saasDetectAndBoot();
+  if (SAAS.mode === 'saas' && !SAAS.user) {
+    saasShowAuth();
+    return;
+  }
+  load();
+  // En mode SaaS, on NE sème PAS les données de démo : on respecte l'état
+  // du serveur (organisation neuve = app vide, prête à recevoir TES données).
+  if (SAAS.mode !== 'saas') {
+    seed();
+  }
+  seedServices(); // garantit le catalogue par défaut, même pour les anciennes données
+  renderDashboard();
+  renderAccountBlock();
+  // Google Drive n'a de sens qu'en mode local (sinon le backend est la source de vérité).
+  if (SAAS.mode !== 'saas') bootCloud();
+})();
 </script>
 </body>
 </html>
