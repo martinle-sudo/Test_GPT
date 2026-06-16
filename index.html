@@ -1,11 +1,11 @@
 <!DOCTYPE html>
-<!-- Programmé par ML — v3.13 (bump version à chaque ajustement) -->
+<!-- Programmé par ML — v3.14 (bump version à chaque ajustement) -->
 <html lang="fr">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <meta name="theme-color" content="#0b0f12">
-<title>Lustre — Gestion d'entretien ménager v3.13</title>
+<title>Lustre — Gestion d'entretien ménager v3.14</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=JetBrains+Mono:wght@400;500;600&family=Geist:wght@300;400;500;600;700&display=swap" rel="stylesheet">
@@ -957,7 +957,7 @@ kbd {
       <path d="M5 27 L 22 10 M 12 21 L 18 17 M 16 17 L 20 13" stroke="#ffffff" stroke-opacity="0.55" stroke-width="1.2" stroke-linecap="round" fill="none"/>
     </svg>
     <span><em>Lu</em>stre</span>
-    <span class="logo-version">v3.13</span>
+    <span class="logo-version">v3.14</span>
   </div>
   <button class="nav-btn" onclick="openPalette()" aria-label="Recherche rapide">
     <svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
@@ -1012,7 +1012,7 @@ kbd {
   </button>
   <!-- Bloc compte (visible seulement en mode SaaS) -->
   <div id="accountBlock" class="account-block" hidden></div>
-  <div class="nav-foot">Programmé par<br>ML · v3.13</div>
+  <div class="nav-foot">Programmé par<br>ML · v3.14</div>
 </aside>
 
 <main>
@@ -1875,26 +1875,51 @@ async function saasLogout() {
   location.reload();
 }
 
+// supabase.functions.invoke masque le message d'erreur réel derrière un
+// générique « non-2xx status code ». Cette fonction extrait le vrai message
+// renvoyé par l'Edge Function (corps JSON { error: ... }) pour l'afficher.
+async function readFnError(err) {
+  try {
+    if (err && err.context && typeof err.context.json === 'function') {
+      const body = await err.context.json();
+      if (body && body.error) return body.error;
+    }
+  } catch (_) {}
+  try {
+    if (err && err.context && typeof err.context.text === 'function') {
+      const txt = await err.context.text();
+      if (txt) return txt.slice(0, 300);
+    }
+  } catch (_) {}
+  return (err && err.message) || 'Erreur inconnue';
+}
+
 async function saasStartCheckout() {
+  if (!SAAS.currentOrg) { showToast('Aucune organisation active', { variant: 'error' }); return; }
   try {
     const { data, error } = await SAAS.sb.functions.invoke('stripe-checkout', {
       body: { organizationId: SAAS.currentOrg.id },
     });
     if (error) throw error;
+    if (data && data.error) throw new Error(data.error);
     if (data && data.url) window.location.assign(data.url);
+    else showToast('Réponse inattendue du serveur de paiement', { variant: 'error' });
   } catch (err) {
-    showToast('Checkout indisponible : ' + ((err && err.message) || ''), { variant: 'error' });
+    showToast('Abonnement indisponible : ' + (await readFnError(err)), { variant: 'error' });
   }
 }
 async function saasOpenPortal() {
+  if (!SAAS.currentOrg) { showToast('Aucune organisation active', { variant: 'error' }); return; }
   try {
     const { data, error } = await SAAS.sb.functions.invoke('stripe-portal', {
       body: { organizationId: SAAS.currentOrg.id },
     });
     if (error) throw error;
+    if (data && data.error) throw new Error(data.error);
     if (data && data.url) window.location.assign(data.url);
+    else showToast('Réponse inattendue du serveur de paiement', { variant: 'error' });
   } catch (err) {
-    showToast('Portail Stripe indisponible : ' + ((err && err.message) || ''), { variant: 'error' });
+    showToast('Portail Stripe indisponible : ' + (await readFnError(err)), { variant: 'error' });
   }
 }
 
