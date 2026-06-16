@@ -55,7 +55,58 @@ configurer un expéditeur courriel (SMTP) dans Authentication → Emails.
 Les paiements passent par trois petites fonctions (Edge Functions) déjà
 écrites dans `supabase/functions/`. Il faut les déployer.
 
-### a) Installer l'outil Supabase (une fois)
+> **Deux méthodes.** La méthode **A (navigateur)** ne demande RIEN à
+> installer — recommandée si tu n'es pas développeur. La méthode **B
+> (terminal)** est pour ceux qui ont déjà l'habitude de la ligne de commande.
+
+### MÉTHODE A — Tout dans le navigateur (recommandée)
+
+Tu n'as pas besoin de télécharger le projet ni d'installer quoi que ce soit.
+
+**1) Créer les 3 fonctions**
+
+Pour chacune des trois fonctions (`stripe-checkout`, `stripe-portal`,
+`stripe-webhook`) :
+
+1. Supabase → menu de gauche → **Edge Functions** → **Deploy a new function**
+   → **Via Editor** (éditeur dans le navigateur).
+2. **Nom** : exactement `stripe-checkout` (puis `stripe-portal`, puis
+   `stripe-webhook`).
+3. Ouvre le fichier correspondant sur GitHub
+   (`supabase/functions/stripe-checkout/index.ts`), clique sur l'icône
+   **Copy raw file**, et **colle tout** dans l'éditeur (remplace ce qu'il y a).
+4. **Deploy**.
+5. ⚠ Pour `stripe-webhook` UNIQUEMENT : dans les réglages de la fonction,
+   **désactive « Verify JWT »** (c'est Stripe qui l'appelle, pas un
+   utilisateur connecté ; sa sécurité vient de la signature Stripe).
+
+**2) Enregistrer les secrets**
+
+Supabase → **Edge Functions** → **Secrets** (ou *Project Settings → Edge
+Functions → Secrets*). Ajoute ces clés une par une (bouton *Add new secret*) :
+
+| Nom | Valeur |
+|-----|--------|
+| `STRIPE_SECRET_KEY` | ta clé secrète Stripe (`sk_test_…`) |
+| `STRIPE_PRICE_ID` | l'identifiant de ton prix (`price_…`) |
+| `APP_BASE_URL` | l'adresse de ton app (ex. `https://martinle-sudo.github.io/Test_GPT`) |
+| `STRIPE_WEBHOOK_SECRET` | (tu l'ajouteras à l'étape webhook, plus bas) |
+
+> `SUPABASE_URL`, `SUPABASE_ANON_KEY` et `SUPABASE_SERVICE_ROLE_KEY` sont
+> déjà fournis automatiquement aux fonctions — tu n'as pas à les ajouter.
+
+Passe directement à **« Configurer le webhook Stripe »** plus bas.
+
+---
+
+### MÉTHODE B — En ligne de commande (alternative)
+
+Cette méthode télécharge les fonctions depuis ton ordinateur. Il faut donc
+d'abord récupérer le projet en local : sur la page GitHub du dépôt, bouton
+vert **Code → Download ZIP**, décompresse, puis ouvre un terminal dans ce
+dossier.
+
+#### a) Installer l'outil Supabase (une fois)
 
 Sur ton Mac :
 ```bash
