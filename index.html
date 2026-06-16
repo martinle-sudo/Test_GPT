@@ -1,11 +1,11 @@
 <!DOCTYPE html>
-<!-- Programmé par ML — v3.11 (bump version à chaque ajustement) -->
+<!-- Programmé par ML — v3.12 (bump version à chaque ajustement) -->
 <html lang="fr">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <meta name="theme-color" content="#0b0f12">
-<title>Lustre — Gestion d'entretien ménager v3.11</title>
+<title>Lustre — Gestion d'entretien ménager v3.12</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=JetBrains+Mono:wght@400;500;600&family=Geist:wght@300;400;500;600;700&display=swap" rel="stylesheet">
@@ -684,6 +684,52 @@ input:focus-visible, select:focus-visible, textarea:focus-visible { outline: non
 }
 .account-status.inactive { background: var(--warn-soft); color: #92400e; }
 
+/* Sélecteur de langue */
+.lang-switch {
+  display: flex; gap: 3px;
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 3px;
+  margin: 4px 2px 6px;
+}
+.lang-btn {
+  flex: 1; padding: 5px 0;
+  border-radius: 5px;
+  font-size: 11px; font-weight: 600;
+  color: var(--text-muted);
+  letter-spacing: 0.03em;
+  transition: background 0.15s, color 0.15s;
+}
+.lang-btn:hover { color: var(--text); }
+.lang-btn.active { background: var(--bg-elevated); color: var(--accent); box-shadow: var(--shadow-sm); }
+
+/* Cadenas sur un item de nav verrouillé */
+.nav-lock { margin-left: auto; font-size: 12px; opacity: 0.75; }
+.nav-btn.locked { opacity: 0.6; }
+
+/* Bandeau d'abonnement (mode démo) */
+.trial-banner {
+  background: linear-gradient(90deg, var(--accent-soft), var(--purple-soft));
+  border: 1px solid var(--accent);
+  color: var(--text);
+  border-radius: 10px;
+  padding: 9px 14px;
+  margin-bottom: 16px;
+  display: flex; align-items: center; gap: 12px;
+  font-size: 13px;
+}
+.trial-banner strong { color: var(--accent); }
+.trial-banner button {
+  margin-left: auto;
+  padding: 6px 14px;
+  border-radius: 7px;
+  background: var(--accent); color: #fff;
+  font-weight: 600; font-size: 12.5px;
+  white-space: nowrap;
+}
+.trial-banner button:hover { background: #0f766e; }
+
 kbd {
   font-family: 'JetBrains Mono', monospace;
   font-size: 10px;
@@ -878,26 +924,26 @@ kbd {
       <div class="auth-brand-text"><em>Lu</em>stre</div>
     </div>
     <div class="auth-tabs" role="tablist">
-      <button class="auth-tab active" data-tab="login" onclick="authSwitchTab('login')" role="tab">Connexion</button>
-      <button class="auth-tab" data-tab="register" onclick="authSwitchTab('register')" role="tab">Créer un compte</button>
+      <button class="auth-tab active" data-tab="login" onclick="authSwitchTab('login')" role="tab" data-i18n="auth.login">Connexion</button>
+      <button class="auth-tab" data-tab="register" onclick="authSwitchTab('register')" role="tab" data-i18n="auth.register">Créer un compte</button>
     </div>
     <form id="authForm" class="auth-form" onsubmit="authSubmit(event)" novalidate>
       <div class="auth-field" id="authNameField" hidden>
-        <label for="authName">Nom</label>
-        <input id="authName" type="text" autocomplete="name" placeholder="Comment t'appelles-tu ?">
+        <label for="authName" data-i18n="auth.name">Nom</label>
+        <input id="authName" type="text" autocomplete="name" data-i18n-ph="auth.name.ph" placeholder="Comment t'appelles-tu ?">
       </div>
       <div class="auth-field">
-        <label for="authEmail">Courriel</label>
+        <label for="authEmail" data-i18n="auth.email">Courriel</label>
         <input id="authEmail" type="email" autocomplete="email" required placeholder="toi@entreprise.ca">
       </div>
       <div class="auth-field">
-        <label for="authPassword">Mot de passe</label>
-        <input id="authPassword" type="password" autocomplete="current-password" required minlength="10" placeholder="10 caractères minimum">
+        <label for="authPassword" data-i18n="auth.password">Mot de passe</label>
+        <input id="authPassword" type="password" autocomplete="current-password" required minlength="6" data-i18n-ph="auth.password.ph" placeholder="6 caractères minimum">
       </div>
       <div class="auth-error" id="authError" role="alert" hidden></div>
-      <button type="submit" class="auth-submit" id="authSubmitBtn">Se connecter</button>
+      <button type="submit" class="auth-submit" id="authSubmitBtn" data-i18n="auth.submit.login">Se connecter</button>
       <div class="auth-note" id="authSwitchNote">
-        Pas encore de compte ? <a href="#" onclick="authSwitchTab('register');return false;">Créer un compte</a>
+        <span data-i18n="auth.noaccount">Pas encore de compte ?</span> <a href="#" onclick="authSwitchTab('register');return false;" data-i18n="auth.register">Créer un compte</a>
       </div>
     </form>
   </div>
@@ -911,56 +957,62 @@ kbd {
       <path d="M5 27 L 22 10 M 12 21 L 18 17 M 16 17 L 20 13" stroke="#ffffff" stroke-opacity="0.55" stroke-width="1.2" stroke-linecap="round" fill="none"/>
     </svg>
     <span><em>Lu</em>stre</span>
-    <span class="logo-version">v3.11</span>
+    <span class="logo-version">v3.12</span>
   </div>
   <button class="nav-btn" onclick="openPalette()" aria-label="Recherche rapide">
     <svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
-    <span style="flex:1;text-align:left">Recherche</span><kbd>Ctrl K</kbd>
+    <span style="flex:1;text-align:left" data-i18n="nav.search">Recherche</span><kbd>Ctrl K</kbd>
   </button>
   <button class="nav-btn active" data-view="dashboard" onclick="showView('dashboard')">
     <svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="9" rx="1"/><rect x="14" y="3" width="7" height="5" rx="1"/><rect x="14" y="12" width="7" height="9" rx="1"/><rect x="3" y="16" width="7" height="5" rx="1"/></svg>
-    <span>Tableau de bord</span>
+    <span data-i18n="nav.dashboard">Tableau de bord</span>
   </button>
   <button class="nav-btn" data-view="pipeline" onclick="showView('pipeline')">
     <svg viewBox="0 0 24 24"><path d="M3 4h18l-7 8v6l-4 2v-8z"/></svg>
-    <span>Pipeline</span>
+    <span data-i18n="nav.pipeline">Pipeline</span>
   </button>
   <button class="nav-btn" data-view="quotes" onclick="showView('quotes')">
     <svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="8" y1="13" x2="16" y2="13"/><line x1="8" y1="17" x2="13" y2="17"/></svg>
-    <span>Soumissions</span>
+    <span data-i18n="nav.quotes">Soumissions</span>
   </button>
   <button class="nav-btn" data-view="contracts" onclick="showView('contracts')">
     <svg viewBox="0 0 24 24"><path d="M9 12l2 2 4-4"/><path d="M21 12c0 4.97-4.03 9-9 9s-9-4.03-9-9 4.03-9 9-9c2.5 0 4.78 1.02 6.41 2.67"/></svg>
-    <span>Contrats</span>
+    <span data-i18n="nav.contracts">Contrats</span>
   </button>
-  <button class="nav-btn" data-view="template" onclick="showView('template')">
+  <button class="nav-btn" id="navTemplate" data-view="template" onclick="showView('template')">
     <svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><line x1="10" y1="9" x2="8" y2="9"/></svg>
-    <span>Modèle de contrat</span>
+    <span data-i18n="nav.template">Modèle de contrat</span>
+    <span class="nav-lock" id="navTemplateLock" hidden aria-hidden="true">🔒</span>
   </button>
   <button class="nav-btn" data-view="services" onclick="showView('services')">
     <svg viewBox="0 0 24 24"><path d="M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z"/><line x1="7" y1="7" x2="7.01" y2="7"/></svg>
-    <span>Services &amp; tarifs</span>
+    <span data-i18n="nav.services">Services &amp; tarifs</span>
   </button>
   <button class="nav-btn" data-view="schedule" onclick="showView('schedule')">
     <svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
-    <span>Horaires</span>
+    <span data-i18n="nav.schedule">Horaires</span>
   </button>
   <button class="nav-btn" data-view="invoices" onclick="showView('invoices')">
     <svg viewBox="0 0 24 24"><path d="M21 4H3a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h18a2 2 0 0 0 2-2V6a2 2 0 0 0-2-2z"/><line x1="1" y1="10" x2="23" y2="10"/></svg>
-    <span>Factures</span>
+    <span data-i18n="nav.invoices">Factures</span>
   </button>
   <button class="nav-btn" data-view="clients" onclick="showView('clients')">
     <svg viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
-    <span>Clients</span>
+    <span data-i18n="nav.clients">Clients</span>
   </button>
   <div class="nav-spacer"></div>
+  <div class="lang-switch" role="group" aria-label="Langue">
+    <button class="lang-btn" data-lang="fr" onclick="setLang('fr')">FR</button>
+    <button class="lang-btn" data-lang="en" onclick="setLang('en')">EN</button>
+    <button class="lang-btn" data-lang="es" onclick="setLang('es')">ES</button>
+  </div>
   <button class="nav-btn" onclick="openSettings()">
     <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
-    <span>Réglages</span>
+    <span data-i18n="nav.settings">Réglages</span>
   </button>
   <!-- Bloc compte (visible seulement en mode SaaS) -->
   <div id="accountBlock" class="account-block" hidden></div>
-  <div class="nav-foot">Programmé par<br>ML · v3.11</div>
+  <div class="nav-foot">Programmé par<br>ML · v3.12</div>
 </aside>
 
 <main>
@@ -969,7 +1021,7 @@ kbd {
 <section class="view active" id="view-dashboard">
   <div class="view-header">
     <div>
-      <div class="view-title">Tableau de bord</div>
+      <div class="view-title" data-i18n="view.dashboard.title">Tableau de bord</div>
       <div class="view-sub" id="dashDate"></div>
     </div>
   </div>
@@ -1009,8 +1061,8 @@ kbd {
 <section class="view" id="view-pipeline">
   <div class="view-header">
     <div>
-      <div class="view-title">Pipeline de vente</div>
-      <div class="view-sub">Glisse les cartes d'une étape à l'autre</div>
+      <div class="view-title" data-i18n="view.pipeline.title">Pipeline de vente</div>
+      <div class="view-sub" data-i18n="view.pipeline.sub">Glisse les cartes d'une étape à l'autre</div>
     </div>
     <div style="display:flex;gap:10px;align-items:center;">
       <label style="font-size:12px;color:var(--text-muted);white-space:nowrap;">Trier&nbsp;par</label>
@@ -1036,8 +1088,8 @@ kbd {
   <div id="quotesList">
     <div class="view-header">
       <div>
-        <div class="view-title">Soumissions</div>
-        <div class="view-sub">Avec versions et export PDF</div>
+        <div class="view-title" data-i18n="view.quotes.title">Soumissions</div>
+        <div class="view-sub" data-i18n="view.quotes.sub">Avec versions et export PDF</div>
       </div>
       <button class="btn primary" onclick="newQuote()">
         <svg viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
@@ -1054,8 +1106,8 @@ kbd {
   <div id="contractsList">
     <div class="view-header">
       <div>
-        <div class="view-title">Contrats</div>
-        <div class="view-sub">Récurrence + équipe assignée — planifie automatiquement les quarts dans l'horaire</div>
+        <div class="view-title" data-i18n="view.contracts.title">Contrats</div>
+        <div class="view-sub" data-i18n="view.contracts.sub">Récurrence + équipe assignée — planifie automatiquement les quarts dans l'horaire</div>
       </div>
       <button class="btn primary" onclick="newContract()">
         <svg viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
@@ -1071,7 +1123,7 @@ kbd {
 <section class="view" id="view-template">
   <div class="view-header">
     <div>
-      <div class="view-title">Modèle de contrat</div>
+      <div class="view-title" data-i18n="view.template.title">Modèle de contrat</div>
       <div class="view-sub">Clauses appliquées par défaut à tous les contrats. Utilise les variables comme <code>{{company}}</code>, <code>{{insurance}}</code>, <code>{{startDate}}</code>.</div>
     </div>
     <button class="btn primary" onclick="addTemplateSection()">
@@ -1086,7 +1138,7 @@ kbd {
 <section class="view" id="view-schedule">
   <div class="view-header">
     <div>
-      <div class="view-title">Horaires des équipes</div>
+      <div class="view-title" data-i18n="view.schedule.title">Horaires des équipes</div>
       <div class="view-sub" id="schedHours"></div>
     </div>
     <div class="week-nav">
@@ -1105,8 +1157,8 @@ kbd {
   <div id="invoicesList">
     <div class="view-header">
       <div>
-        <div class="view-title">Factures</div>
-        <div class="view-sub">Suivi des paiements — pas de comptabilité</div>
+        <div class="view-title" data-i18n="view.invoices.title">Factures</div>
+        <div class="view-sub" data-i18n="view.invoices.sub">Suivi des paiements — pas de comptabilité</div>
       </div>
       <button class="btn primary" onclick="newInvoice()">
         <svg viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
@@ -1123,8 +1175,8 @@ kbd {
 <section class="view" id="view-services">
   <div class="view-header">
     <div>
-      <div class="view-title">Services &amp; tarifs</div>
-      <div class="view-sub">Prix calculés à partir des salaires du comité paritaire — à ajouter à la demande dans une soumission</div>
+      <div class="view-title" data-i18n="view.services.title">Services &amp; tarifs</div>
+      <div class="view-sub" data-i18n="view.services.sub">Prix calculés à partir des salaires du comité paritaire — à ajouter à la demande dans une soumission</div>
     </div>
     <button class="btn primary" onclick="openServiceModal()">
       <svg viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
@@ -1140,8 +1192,8 @@ kbd {
   <div id="clientsList">
     <div class="view-header">
       <div>
-        <div class="view-title">Clients</div>
-        <div class="view-sub">Registre partagé — pipeline, soumissions, contrats, horaires, factures</div>
+        <div class="view-title" data-i18n="view.clients.title">Clients</div>
+        <div class="view-sub" data-i18n="view.clients.sub">Registre partagé — pipeline, soumissions, contrats, horaires, factures</div>
       </div>
       <button class="btn primary" onclick="openClientModal()">
         <svg viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
@@ -1350,6 +1402,202 @@ function effectiveSections(c) {
     result.push({ id: 'custom-' + (ext._id || ''), title: ext.title || '', body: ext.body || '', _isCustom: true });
   });
   return result;
+}
+
+// ============ INTERNATIONALISATION (FR / EN / ES) ============
+// Système léger : t('clé') renvoie la traduction dans la langue courante,
+// avec repli sur le français si une clé manque. Le HTML statique porte des
+// attributs data-i18n / data-i18n-ph appliqués par applyStaticTranslations().
+const I18N = {
+  lang: 'fr',
+  dict: {
+    fr: {
+      'nav.search': 'Recherche', 'nav.dashboard': 'Tableau de bord', 'nav.pipeline': 'Pipeline',
+      'nav.quotes': 'Soumissions', 'nav.contracts': 'Contrats', 'nav.template': 'Modèle de contrat',
+      'nav.services': 'Services & tarifs', 'nav.schedule': 'Horaires', 'nav.invoices': 'Factures',
+      'nav.clients': 'Clients', 'nav.settings': 'Réglages',
+      'view.dashboard.title': 'Tableau de bord', 'view.pipeline.title': 'Pipeline de vente',
+      'view.pipeline.sub': "Glisse les cartes d'une étape à l'autre", 'view.quotes.title': 'Soumissions',
+      'view.quotes.sub': 'Avec versions et export PDF', 'view.contracts.title': 'Contrats',
+      'view.contracts.sub': "Récurrence + équipe assignée — planifie automatiquement les quarts dans l'horaire",
+      'view.template.title': 'Modèle de contrat', 'view.schedule.title': 'Horaires des équipes',
+      'view.invoices.title': 'Factures', 'view.invoices.sub': 'Suivi des paiements — pas de comptabilité',
+      'view.services.title': 'Services & tarifs',
+      'view.services.sub': 'Prix calculés à partir des salaires du comité paritaire — à ajouter à la demande dans une soumission',
+      'view.clients.title': 'Clients', 'view.clients.sub': 'Registre partagé — pipeline, soumissions, contrats, horaires, factures',
+      'auth.login': 'Connexion', 'auth.register': 'Créer un compte', 'auth.name': 'Nom',
+      'auth.name.ph': "Comment t'appelles-tu ?", 'auth.email': 'Courriel', 'auth.password': 'Mot de passe',
+      'auth.password.ph': '6 caractères minimum', 'auth.submit.login': 'Se connecter', 'auth.submit.register': 'Créer mon compte',
+      'auth.noaccount': 'Pas encore de compte ?', 'auth.hasaccount': 'Déjà un compte ?',
+      'account.logout': 'Déconnexion', 'account.subscribe': "S'abonner", 'account.manage': "Gérer l'abonnement",
+      'account.active': 'Abonnement actif', 'account.inactive': "Pas d'abonnement", 'account.noorg': '(aucune organisation)',
+      'sub.reminder': "Abonne-toi pour enregistrer ton travail. En mode démo, rien n'est sauvegardé.",
+      'sub.cta': "S'abonner",
+      'sub.modal.title': 'Passe à la version complète',
+      'sub.modal.body': "Tu explores Lustre en mode démonstration : tu peux tout essayer, mais l'enregistrement et la page « Modèle de contrat » nécessitent un abonnement. Abonne-toi pour commencer à travailler pour de vrai.",
+      'sub.modal.later': 'Plus tard', 'sub.modal.subscribe': "S'abonner maintenant",
+      'sub.locked': 'Réservé aux abonnés',
+      'trial.banner': "Mode démonstration — explore librement. Abonne-toi pour enregistrer ton travail.",
+      'trial.cta': "S'abonner",
+    },
+    en: {
+      'nav.search': 'Search', 'nav.dashboard': 'Dashboard', 'nav.pipeline': 'Pipeline',
+      'nav.quotes': 'Quotes', 'nav.contracts': 'Contracts', 'nav.template': 'Contract template',
+      'nav.services': 'Services & rates', 'nav.schedule': 'Schedule', 'nav.invoices': 'Invoices',
+      'nav.clients': 'Clients', 'nav.settings': 'Settings',
+      'view.dashboard.title': 'Dashboard', 'view.pipeline.title': 'Sales pipeline',
+      'view.pipeline.sub': 'Drag cards from one stage to the next', 'view.quotes.title': 'Quotes',
+      'view.quotes.sub': 'With versions and PDF export', 'view.contracts.title': 'Contracts',
+      'view.contracts.sub': 'Recurrence + assigned team — automatically schedules shifts',
+      'view.template.title': 'Contract template', 'view.schedule.title': 'Team schedule',
+      'view.invoices.title': 'Invoices', 'view.invoices.sub': 'Payment tracking — not accounting',
+      'view.services.title': 'Services & rates',
+      'view.services.sub': 'Prices computed from joint-committee wages — add on demand to a quote',
+      'view.clients.title': 'Clients', 'view.clients.sub': 'Shared registry — pipeline, quotes, contracts, schedule, invoices',
+      'auth.login': 'Sign in', 'auth.register': 'Create account', 'auth.name': 'Name',
+      'auth.name.ph': "What's your name?", 'auth.email': 'Email', 'auth.password': 'Password',
+      'auth.password.ph': '6 characters minimum', 'auth.submit.login': 'Sign in', 'auth.submit.register': 'Create my account',
+      'auth.noaccount': 'No account yet?', 'auth.hasaccount': 'Already have an account?',
+      'account.logout': 'Sign out', 'account.subscribe': 'Subscribe', 'account.manage': 'Manage subscription',
+      'account.active': 'Active subscription', 'account.inactive': 'No subscription', 'account.noorg': '(no organization)',
+      'sub.reminder': "Subscribe to save your work. In demo mode, nothing is saved.",
+      'sub.cta': 'Subscribe',
+      'sub.modal.title': 'Upgrade to the full version',
+      'sub.modal.body': "You're exploring Lustre in demo mode: try everything you like, but saving and the “Contract template” page require a subscription. Subscribe to start working for real.",
+      'sub.modal.later': 'Later', 'sub.modal.subscribe': 'Subscribe now',
+      'sub.locked': 'Subscribers only',
+      'trial.banner': 'Demo mode — explore freely. Subscribe to save your work.',
+      'trial.cta': 'Subscribe',
+    },
+    es: {
+      'nav.search': 'Buscar', 'nav.dashboard': 'Panel', 'nav.pipeline': 'Pipeline',
+      'nav.quotes': 'Cotizaciones', 'nav.contracts': 'Contratos', 'nav.template': 'Plantilla de contrato',
+      'nav.services': 'Servicios y tarifas', 'nav.schedule': 'Horarios', 'nav.invoices': 'Facturas',
+      'nav.clients': 'Clientes', 'nav.settings': 'Ajustes',
+      'view.dashboard.title': 'Panel', 'view.pipeline.title': 'Pipeline de ventas',
+      'view.pipeline.sub': 'Arrastra las tarjetas de una etapa a otra', 'view.quotes.title': 'Cotizaciones',
+      'view.quotes.sub': 'Con versiones y exportación PDF', 'view.contracts.title': 'Contratos',
+      'view.contracts.sub': 'Recurrencia + equipo asignado — programa los turnos automáticamente',
+      'view.template.title': 'Plantilla de contrato', 'view.schedule.title': 'Horario de equipos',
+      'view.invoices.title': 'Facturas', 'view.invoices.sub': 'Seguimiento de pagos — sin contabilidad',
+      'view.services.title': 'Servicios y tarifas',
+      'view.services.sub': 'Precios calculados a partir de los salarios del comité paritario — añadir a una cotización',
+      'view.clients.title': 'Clientes', 'view.clients.sub': 'Registro compartido — pipeline, cotizaciones, contratos, horarios, facturas',
+      'auth.login': 'Iniciar sesión', 'auth.register': 'Crear cuenta', 'auth.name': 'Nombre',
+      'auth.name.ph': '¿Cómo te llamas?', 'auth.email': 'Correo', 'auth.password': 'Contraseña',
+      'auth.password.ph': '6 caracteres mínimo', 'auth.submit.login': 'Iniciar sesión', 'auth.submit.register': 'Crear mi cuenta',
+      'auth.noaccount': '¿Aún no tienes cuenta?', 'auth.hasaccount': '¿Ya tienes una cuenta?',
+      'account.logout': 'Cerrar sesión', 'account.subscribe': 'Suscribirse', 'account.manage': 'Gestionar suscripción',
+      'account.active': 'Suscripción activa', 'account.inactive': 'Sin suscripción', 'account.noorg': '(ninguna organización)',
+      'sub.reminder': 'Suscríbete para guardar tu trabajo. En modo demo, no se guarda nada.',
+      'sub.cta': 'Suscribirse',
+      'sub.modal.title': 'Pasa a la versión completa',
+      'sub.modal.body': 'Estás explorando Lustre en modo demostración: prueba todo lo que quieras, pero guardar y la página «Plantilla de contrato» requieren una suscripción. Suscríbete para empezar a trabajar de verdad.',
+      'sub.modal.later': 'Más tarde', 'sub.modal.subscribe': 'Suscribirse ahora',
+      'sub.locked': 'Solo suscriptores',
+      'trial.banner': 'Modo demostración — explora libremente. Suscríbete para guardar tu trabajo.',
+      'trial.cta': 'Suscribirse',
+    },
+  },
+};
+
+function t(key, vars) {
+  const d = I18N.dict[I18N.lang] || I18N.dict.fr;
+  let s = d[key];
+  if (s == null) s = I18N.dict.fr[key];
+  if (s == null) return key;
+  if (vars) for (const k in vars) s = s.replace(new RegExp('\\{' + k + '\\}', 'g'), vars[k]);
+  return s;
+}
+
+function applyStaticTranslations() {
+  document.querySelectorAll('[data-i18n]').forEach(el => {
+    el.textContent = t(el.getAttribute('data-i18n'));
+  });
+  document.querySelectorAll('[data-i18n-ph]').forEach(el => {
+    el.setAttribute('placeholder', t(el.getAttribute('data-i18n-ph')));
+  });
+  document.querySelectorAll('.lang-btn').forEach(b => {
+    b.classList.toggle('active', b.dataset.lang === I18N.lang);
+  });
+  document.documentElement.lang = I18N.lang;
+}
+
+function setLang(lang) {
+  if (!I18N.dict[lang]) return;
+  I18N.lang = lang;
+  try { localStorage.setItem('lustre_lang', lang); } catch (_) {}
+  applyStaticTranslations();
+  // Re-rend les surfaces dynamiques (en-têtes de l'écran d'auth, bloc compte,
+  // et la vue active) pour que tout suive la langue.
+  if (typeof authSwitchTab === 'function') authSwitchTab(typeof AUTH_TAB !== 'undefined' ? AUTH_TAB : 'login');
+  if (typeof renderAccountBlock === 'function') renderAccountBlock();
+  const active = document.querySelector('.view.active');
+  if (active && typeof showView === 'function') showView(active.id.replace('view-', ''));
+}
+
+function initLang() {
+  let stored = null;
+  try { stored = localStorage.getItem('lustre_lang'); } catch (_) {}
+  const nav = (typeof navigator !== 'undefined' && navigator.language ? navigator.language : 'fr').slice(0, 2);
+  I18N.lang = I18N.dict[stored] ? stored : (I18N.dict[nav] ? nav : 'fr');
+  applyStaticTranslations();
+}
+
+// ============ ABONNEMENT — accès & limites (mode démo) ============
+// Règle métier : en mode SaaS, sans abonnement actif, l'utilisateur peut
+// TOUT explorer mais ne peut RIEN enregistrer, et la page « Modèle de
+// contrat » est verrouillée. En mode local, aucune restriction.
+function isSubscribed() {
+  return !!(SAAS.subscription && SAAS.subscription.active);
+}
+function canUse() {
+  if (SAAS.mode !== 'saas') return true;   // mode local : tout permis
+  return isSubscribed();
+}
+
+let SUB_REMINDER_AT = 0;
+let APP_BOOTING = true;  // vrai pendant le chargement (évite le rappel au boot)
+function remindSubscribe(opts) {
+  opts = opts || {};
+  if (APP_BOOTING) return;  // pas de rappel pendant l'amorçage (seed démo)
+  if (opts.modal) { openSubscribeModal(); return; }
+  const now = Date.now();
+  if (now - SUB_REMINDER_AT < 12000) return;  // throttle des rappels
+  SUB_REMINDER_AT = now;
+  showToast(t('sub.reminder'), { variant: 'error', action: { label: t('sub.cta'), fn: saasStartCheckout } });
+}
+
+function openSubscribeModal() {
+  openModal(`
+    <div class="modal-title">${t('sub.modal.title')}</div>
+    <p style="color:var(--text-muted);line-height:1.6;margin:-4px 0 18px;">${t('sub.modal.body')}</p>
+    <div class="modal-actions">
+      <button class="btn ghost" onclick="closeModal()">${t('sub.modal.later')}</button>
+      <button class="btn primary" onclick="closeModal();saasStartCheckout()">${t('sub.modal.subscribe')}</button>
+    </div>`);
+}
+
+function renderTrialBanner() {
+  // Affiche un bandeau « mode démo » en haut de chaque vue quand non abonné.
+  const main = document.querySelector('main');
+  if (!main) return;
+  const existing = document.getElementById('trialBanner');
+  if (canUse() || SAAS.mode !== 'saas') { if (existing) existing.remove(); return; }
+  if (existing) { existing.querySelector('span').innerHTML = '🎭 ' + t('trial.banner'); existing.querySelector('button').textContent = t('trial.cta'); return; }
+  const div = document.createElement('div');
+  div.className = 'trial-banner';
+  div.id = 'trialBanner';
+  div.innerHTML = `<span>🎭 ${t('trial.banner')}</span><button onclick="saasStartCheckout()">${t('trial.cta')}</button>`;
+  main.insertBefore(div, main.firstChild);
+}
+
+function updateLockedNav() {
+  const lock = document.getElementById('navTemplateLock');
+  const btn = document.getElementById('navTemplate');
+  const locked = (SAAS.mode === 'saas' && !canUse());
+  if (lock) lock.hidden = !locked;
+  if (btn) btn.classList.toggle('locked', locked);
 }
 
 // ============ MODE SAAS (backend Supabase) ============
@@ -1583,12 +1831,12 @@ function authSwitchTab(tab) {
     b.classList.toggle('active', b.dataset.tab === tab));
   document.getElementById('authNameField').hidden = tab !== 'register';
   document.getElementById('authSubmitBtn').textContent =
-    tab === 'register' ? 'Créer mon compte' : 'Se connecter';
+    tab === 'register' ? t('auth.submit.register') : t('auth.submit.login');
   document.getElementById('authPassword').setAttribute('autocomplete',
     tab === 'register' ? 'new-password' : 'current-password');
   document.getElementById('authSwitchNote').innerHTML = tab === 'register'
-    ? 'Déjà un compte ? <a href="#" onclick="authSwitchTab(\'login\');return false;">Se connecter</a>'
-    : 'Pas encore de compte ? <a href="#" onclick="authSwitchTab(\'register\');return false;">Créer un compte</a>';
+    ? `${t('auth.hasaccount')} <a href="#" onclick="authSwitchTab('login');return false;">${t('auth.login')}</a>`
+    : `${t('auth.noaccount')} <a href="#" onclick="authSwitchTab('register');return false;">${t('auth.register')}</a>`;
   document.getElementById('authError').hidden = true;
 }
 
@@ -1654,12 +1902,12 @@ function renderAccountBlock() {
   const email = SAAS.user.email || '';
   const name = (SAAS.user.user_metadata && SAAS.user.user_metadata.name) || email;
   const initials = (email || '?').slice(0, 2).toUpperCase();
-  const orgName = SAAS.currentOrg ? SAAS.currentOrg.name : '(aucune organisation)';
+  const orgName = SAAS.currentOrg ? SAAS.currentOrg.name : t('account.noorg');
   const role = SAAS.currentOrg ? SAAS.currentOrg.role : '';
   const sub = SAAS.subscription;
   const subBadge = sub && sub.active
-    ? '<span class="account-status">Abonnement actif</span>'
-    : '<span class="account-status inactive">Pas d\'abonnement</span>';
+    ? `<span class="account-status">${t('account.active')}</span>`
+    : `<span class="account-status inactive">${t('account.inactive')}</span>`;
 
   const orgSwitcher = SAAS.organizations.length > 1
     ? `<select onchange="saasSwitchOrg(this.value)" style="font-size:11px;padding:4px 6px;margin-top:4px;">
@@ -1668,8 +1916,8 @@ function renderAccountBlock() {
     : '';
 
   const billingBtn = sub && sub.active
-    ? `<button onclick="saasOpenPortal()">Gérer l'abonnement</button>`
-    : `<button class="primary" onclick="saasStartCheckout()">S'abonner</button>`;
+    ? `<button onclick="saasOpenPortal()">${t('account.manage')}</button>`
+    : `<button class="primary" onclick="saasStartCheckout()">${t('account.subscribe')}</button>`;
 
   el.innerHTML = `
     <div class="account-row">
@@ -1683,7 +1931,7 @@ function renderAccountBlock() {
     ${orgSwitcher}
     <div class="account-actions">
       ${billingBtn}
-      <button onclick="saasLogout()">Déconnexion</button>
+      <button onclick="saasLogout()">${t('account.logout')}</button>
     </div>
   `;
 }
@@ -1691,6 +1939,15 @@ function renderAccountBlock() {
 // ============ Persistance (save/load) ============
 function save(opts) {
   opts = opts || {};
+  // Verrouillage abonnement : en mode SaaS sans abonnement actif, on
+  // n'enregistre RIEN (ni localement, ni au serveur) et on rappelle de
+  // s'abonner. Les changements restent visibles à l'écran (démo), mais ne
+  // survivent pas à un rechargement. opts.system = sauvegardes internes
+  // (ex. langue) qui ne doivent pas déclencher le rappel.
+  if (!canUse() && !opts.system) {
+    remindSubscribe();
+    return;
+  }
   if (!opts.skipBump) STATE.updatedAt = Date.now();
   try { localStorage.setItem('lustre_v3', JSON.stringify(STATE)); }
   catch(e) { console.error(e); }
@@ -2021,6 +2278,11 @@ function seedServices() {
 
 // ============ NAVIGATION ============
 function showView(name) {
+  // « Modèle de contrat » est réservé aux abonnés.
+  if (name === 'template' && !canUse()) {
+    openSubscribeModal();
+    return;
+  }
   document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
   document.getElementById('view-' + name).classList.add('active');
   document.querySelectorAll('.nav-btn[data-view]').forEach(b =>
@@ -2034,6 +2296,8 @@ function showView(name) {
   if (name === 'invoices') { closeInvoiceEditor(); renderInvoices(); }
   if (name === 'services') renderServices();
   if (name === 'clients') renderClients();
+  renderTrialBanner();
+  updateLockedNav();
 }
 
 // ============ MODAL ============
@@ -4736,26 +5000,43 @@ document.getElementById('modalBox').addEventListener('keydown', (e) => {
 });
 
 // ============ INIT ============
-// 1) Détecter le mode (SaaS ou local) en pingant le backend.
-// 2) Si mode SaaS sans session → écran d'authentification, on s'arrête là.
-// 3) Sinon, déroulement normal : charger l'état, semer si vide, rendre.
+// 1) Choisir la langue (mémorisée ou langue du navigateur).
+// 2) Détecter le mode (SaaS ou local).
+// 3) Si mode SaaS sans session → écran d'authentification, on s'arrête là.
+// 4) Sinon : charger l'état, semer si pertinent, rendre, appliquer les
+//    limites d'abonnement (bandeau démo, page verrouillée).
+function stateIsEmpty() {
+  return !(STATE.clients && STATE.clients.length) &&
+         !(STATE.quotes && STATE.quotes.length) &&
+         !(STATE.invoices && STATE.invoices.length) &&
+         !(STATE.contracts && STATE.contracts.length);
+}
 (async () => {
+  initLang();
   await saasDetectAndBoot();
   if (SAAS.mode === 'saas' && !SAAS.user) {
     saasShowAuth();
     return;
   }
   load();
-  // En mode SaaS, on NE sème PAS les données de démo : on respecte l'état
-  // du serveur (organisation neuve = app vide, prête à recevoir TES données).
+  // Mode local : démo classique.
+  // Mode SaaS NON abonné + organisation vide : on charge une démo EN MÉMOIRE
+  //   (jamais enregistrée, car save() est verrouillé) pour montrer la
+  //   richesse de l'app — l'utilisateur doit s'abonner pour vraiment l'utiliser.
+  // Mode SaaS abonné : on respecte l'état serveur (org neuve = app vide).
   if (SAAS.mode !== 'saas') {
+    seed();
+  } else if (!canUse() && stateIsEmpty()) {
     seed();
   }
   seedServices(); // garantit le catalogue par défaut, même pour les anciennes données
   renderDashboard();
   renderAccountBlock();
+  renderTrialBanner();
+  updateLockedNav();
   // Google Drive n'a de sens qu'en mode local (sinon le backend est la source de vérité).
   if (SAAS.mode !== 'saas') bootCloud();
+  APP_BOOTING = false;  // l'amorçage est terminé : les rappels d'abonnement peuvent s'afficher
 })();
 </script>
 </body>
