@@ -1459,6 +1459,87 @@ const I18N = {
       'settings.logo.remove': "Retirer le logo",
       'settings.logo.none': "(aucun logo)",
       'settings.logo.upload': "Choisir un logo…",
+      // ----- Documents imprimés (soumissions, factures, contrats) -----
+      'doc.kind.quote': 'Soumission', 'doc.kind.invoice': 'Facture',
+      'doc.date': 'Date', 'doc.version': 'Version', 'doc.validity': 'Valide {n} jours',
+      'doc.duedate': 'Échéance',
+      'doc.preparedfor': 'Préparée pour', 'doc.billto': 'Facturée à',
+      'doc.frequency': 'Fréquence du service',
+      'doc.col.desc': 'Description', 'doc.col.qty': 'Qté', 'doc.col.unit': 'Unité',
+      'doc.col.unitprice': 'Prix unit.', 'doc.col.amount': 'Montant',
+      'doc.subtotal': 'Sous-total', 'doc.total': 'Total',
+      'doc.notes': 'Notes et conditions',
+      'doc.sign.client': 'Signature du client — pour acceptation', 'doc.sign.date': 'Date',
+      'doc.foot.quote': 'Merci de votre confiance.', 'doc.foot.invoice': 'Merci de votre paiement.',
+      // Contrat
+      'ct.dateprefix': 'Le ',
+      'ct.subject': 'Objet :', 'ct.subject.body': "Offre de services pour l'entretien ménager",
+      'ct.subject.at': ' des espaces situés au ',
+      'ct.salut.default': 'Madame, Monsieur', 'ct.salut.prefix': 'Madame, Monsieur ',
+      'ct.intro': "Suite à votre demande, il nous fait plaisir de vous présenter notre offre pour les services d'entretien ménager",
+      'ct.intro.at': ' à ',
+      'ct.thanks': "Nous tenons à vous remercier tout particulièrement de votre confiance et de l'attention dont vous nous faites preuve, et espérons vous compter parmi notre clientèle satisfaite dans un avenir rapproché. Nous tenons également à vous souligner que notre mission est d'offrir des services de qualité en gardant toujours comme priorité la satisfaction du client.",
+      'ct.team.prefix': ' vous offre un calibre de personnel qualifié ainsi qu\'une supervision sérieuse',
+      'ct.team.byPrefix': ' effectuée par ',
+      'ct.team.suffix': ", qui compte plusieurs années d'expérience dans le domaine. De plus, {company} utilise de l'équipement moderne et des produits de haute qualité.",
+      'ct.invitation': "Espérant le tout à votre entière satisfaction, n'hésitez pas à communiquer avec nous pour de plus amples informations.",
+      'ct.closing.prefix': 'Je vous prie d\'agréer, ',
+      'ct.closing.suffix': ", l'expression de nos salutations distinguées et l'assurance de notre dévouement.",
+      'ct.closing.madame': 'Madame', 'ct.closing.monsieur': 'Monsieur',
+      'ct.attach': 'Pièce jointe : Offre de services',
+      'ct.contact.cell': 'Cellulaire : ', 'ct.contact.office': 'Bureau : ', 'ct.contact.email': 'Courriel : ',
+      'ct.cover.for': 'Préparée pour', 'ct.cover.attn': 'Attention :', 'ct.cover.ref.quote': 'Soumission : ', 'ct.cover.ref.contract': 'Contrat : ',
+      'ct.toc.title': 'Table des matières',
+      'ct.toc.schedule': 'Calendrier des tâches',
+      'ct.toc.specs': 'Spécifications générales',
+      'ct.toc.spec.service': 'Service offert',
+      'ct.toc.spec.area': 'Surface de nettoyage',
+      'ct.toc.spec.state': "Condition présente de l'édifice",
+      'ct.toc.spec.extra': 'Travaux supplémentaires / appels de services',
+      'ct.toc.spec.insurance': 'Assurances',
+      'ct.toc.spec.cnesst': 'CNESST',
+      'ct.toc.spec.joint': 'Comité paritaire',
+      'ct.toc.spec.taxes': 'Taxes de vente',
+      'ct.toc.spec.supervision': 'Supervision',
+      'ct.toc.spec.confidentiality': 'Confidentialité',
+      'ct.toc.spec.equipment': 'Équipement',
+      'ct.toc.spec.uniforms': 'Uniformes',
+      'ct.toc.spec.duration': 'Durée, reconduction et non-sollicitation',
+      'ct.toc.ondemand': 'Services sur demande (non inclus)',
+      'ct.toc.references': 'Références',
+      'ct.toc.prices': 'Bordereau de prix',
+      'ct.schedule.title': 'Calendrier des tâches',
+      'ct.schedule.freq': 'Fréquence du service :', 'ct.schedule.on': ' — les ', 'ct.schedule.between': ', entre ', 'ct.schedule.and': ' et ',
+      'ct.schedule.col.desc': 'Description de la tâche', 'ct.schedule.col.qty': 'Quantité', 'ct.schedule.col.unit': 'Unité / fréquence',
+      'ct.schedule.empty': 'Aucune tâche détaillée dans la soumission liée. Compléter avant signature.',
+      'ct.notes.extra': 'Notes complémentaires',
+      'ct.specs.title': 'Spécifications générales',
+      'ct.ondemand.title': 'Services sur demande (non inclus)',
+      'ct.ondemand.intro': 'Les services suivants ne sont pas inclus dans le forfait mensuel et peuvent être ajoutés sur demande ponctuelle :',
+      'ct.ondemand.onquote': ' — sur devis',
+      'ct.ondemand.default.stripping': 'Décapage et cirage des planchers',
+      'ct.ondemand.default.chairs': 'Lavage de chaises par extraction',
+      'ct.ondemand.default.lights': "Nettoyage des appareils d'éclairage",
+      'ct.ondemand.default.spring': 'Grand ménage saisonnier',
+      'ct.ondemand.default.disinfect': 'Désinfection ponctuelle (après incident)',
+      'ct.refs.title': 'Références',
+      'ct.refs.empty': 'Liste de références fournie sur demande.',
+      'ct.prices.title': 'Bordereau de prix',
+      'ct.prices.col.desc': 'Description', 'ct.prices.col.qty': 'Qté', 'ct.prices.col.unit': 'Unité',
+      'ct.prices.col.unitprice': 'Prix unitaire', 'ct.prices.col.amount': 'Montant',
+      'ct.prices.subtotal': 'Sous-total', 'ct.prices.total.monthly': 'Total mensuel', 'ct.prices.total.period': 'Total par période',
+      'ct.prices.empty': 'Aucune ligne de tarification. Compléter avant signature.',
+      'ct.notes.title': 'Notes',
+      'ct.notes.annual': 'Cette tarification mensuelle est basée sur un contrat annuel.',
+      'ct.notes.taxes': 'À ces montants il faut ajouter les taxes applicables.',
+      'ct.notes.included': 'Inclus :', 'ct.notes.excluded': 'Exclus :',
+      'ct.sign.provider': 'Pour le prestataire — ', 'ct.sign.client': 'Pour le client — ', 'ct.sign.date': 'Date : _______________________',
+      'ct.foot.offer': 'Offre de services ',
+      // Fréquences (pour les documents imprimés)
+      'freq.ponctuelle': 'Ponctuelle', 'freq.hebdo': 'Hebdomadaire', 'freq.2x-sem': '2× par semaine',
+      'freq.3x-sem': '3× par semaine', 'freq.bi-mens': 'Aux 2 semaines', 'freq.mensuelle': 'Mensuelle',
+      // Jours abrégés
+      'wd.lundi': 'Lun', 'wd.mardi': 'Mar', 'wd.mercredi': 'Mer', 'wd.jeudi': 'Jeu', 'wd.vendredi': 'Ven', 'wd.samedi': 'Sam', 'wd.dimanche': 'Dim',
     },
     en: {
       'nav.search': 'Search', 'nav.dashboard': 'Dashboard', 'nav.pipeline': 'Pipeline',
@@ -1500,6 +1581,84 @@ const I18N = {
       'settings.logo.remove': 'Remove logo',
       'settings.logo.none': '(no logo)',
       'settings.logo.upload': 'Choose a logo…',
+      // ----- Printed documents (quotes, invoices, contracts) -----
+      'doc.kind.quote': 'Quote', 'doc.kind.invoice': 'Invoice',
+      'doc.date': 'Date', 'doc.version': 'Version', 'doc.validity': 'Valid for {n} days',
+      'doc.duedate': 'Due date',
+      'doc.preparedfor': 'Prepared for', 'doc.billto': 'Bill to',
+      'doc.frequency': 'Service frequency',
+      'doc.col.desc': 'Description', 'doc.col.qty': 'Qty', 'doc.col.unit': 'Unit',
+      'doc.col.unitprice': 'Unit price', 'doc.col.amount': 'Amount',
+      'doc.subtotal': 'Subtotal', 'doc.total': 'Total',
+      'doc.notes': 'Notes and conditions',
+      'doc.sign.client': 'Client signature — to accept', 'doc.sign.date': 'Date',
+      'doc.foot.quote': 'Thank you for your trust.', 'doc.foot.invoice': 'Thank you for your payment.',
+      'ct.dateprefix': '',
+      'ct.subject': 'Subject:', 'ct.subject.body': 'Cleaning services offer',
+      'ct.subject.at': ' for the premises located at ',
+      'ct.salut.default': 'Dear Sir or Madam', 'ct.salut.prefix': 'Dear ',
+      'ct.intro': 'Following your request, we are pleased to present our offer for cleaning services',
+      'ct.intro.at': ' in ',
+      'ct.thanks': "We would like to thank you for your trust and the attention you have given us, and we hope to count you among our satisfied clients in the near future. Our mission is to provide quality services, with customer satisfaction always as our top priority.",
+      'ct.team.prefix': ' offers you qualified personnel and serious supervision',
+      'ct.team.byPrefix': ' by ',
+      'ct.team.suffix': ', with several years of experience in the field. {company} also uses modern equipment and high-quality products.',
+      'ct.invitation': 'Hoping everything will be to your full satisfaction, do not hesitate to contact us for further information.',
+      'ct.closing.prefix': 'Please accept, ',
+      'ct.closing.suffix': ', our most distinguished regards and the assurance of our dedication.',
+      'ct.closing.madame': 'Madam', 'ct.closing.monsieur': 'Sir',
+      'ct.attach': 'Attached: Services offer',
+      'ct.contact.cell': 'Mobile: ', 'ct.contact.office': 'Office: ', 'ct.contact.email': 'Email: ',
+      'ct.cover.for': 'Prepared for', 'ct.cover.attn': 'Attention:', 'ct.cover.ref.quote': 'Quote: ', 'ct.cover.ref.contract': 'Contract: ',
+      'ct.toc.title': 'Table of contents',
+      'ct.toc.schedule': 'Schedule of tasks',
+      'ct.toc.specs': 'General specifications',
+      'ct.toc.spec.service': 'Service offered',
+      'ct.toc.spec.area': 'Cleaning area',
+      'ct.toc.spec.state': 'Current condition of the building',
+      'ct.toc.spec.extra': 'Additional work / service calls',
+      'ct.toc.spec.insurance': 'Insurance',
+      'ct.toc.spec.cnesst': 'CNESST',
+      'ct.toc.spec.joint': 'Joint committee',
+      'ct.toc.spec.taxes': 'Sales taxes',
+      'ct.toc.spec.supervision': 'Supervision',
+      'ct.toc.spec.confidentiality': 'Confidentiality',
+      'ct.toc.spec.equipment': 'Equipment',
+      'ct.toc.spec.uniforms': 'Uniforms',
+      'ct.toc.spec.duration': 'Duration, renewal and non-solicitation',
+      'ct.toc.ondemand': 'On-demand services (not included)',
+      'ct.toc.references': 'References',
+      'ct.toc.prices': 'Price list',
+      'ct.schedule.title': 'Schedule of tasks',
+      'ct.schedule.freq': 'Service frequency:', 'ct.schedule.on': ' — on ', 'ct.schedule.between': ', between ', 'ct.schedule.and': ' and ',
+      'ct.schedule.col.desc': 'Task description', 'ct.schedule.col.qty': 'Quantity', 'ct.schedule.col.unit': 'Unit / frequency',
+      'ct.schedule.empty': 'No detailed task in the linked quote. Complete before signing.',
+      'ct.notes.extra': 'Additional notes',
+      'ct.specs.title': 'General specifications',
+      'ct.ondemand.title': 'On-demand services (not included)',
+      'ct.ondemand.intro': 'The following services are not included in the monthly package and can be added on request:',
+      'ct.ondemand.onquote': ' — quoted on request',
+      'ct.ondemand.default.stripping': 'Floor stripping and waxing',
+      'ct.ondemand.default.chairs': 'Chair washing by extraction',
+      'ct.ondemand.default.lights': 'Light fixture cleaning',
+      'ct.ondemand.default.spring': 'Seasonal deep cleaning',
+      'ct.ondemand.default.disinfect': 'One-time disinfection (after incident)',
+      'ct.refs.title': 'References',
+      'ct.refs.empty': 'List of references provided on request.',
+      'ct.prices.title': 'Price list',
+      'ct.prices.col.desc': 'Description', 'ct.prices.col.qty': 'Qty', 'ct.prices.col.unit': 'Unit',
+      'ct.prices.col.unitprice': 'Unit price', 'ct.prices.col.amount': 'Amount',
+      'ct.prices.subtotal': 'Subtotal', 'ct.prices.total.monthly': 'Monthly total', 'ct.prices.total.period': 'Total per period',
+      'ct.prices.empty': 'No pricing line. Complete before signing.',
+      'ct.notes.title': 'Notes',
+      'ct.notes.annual': 'This monthly pricing is based on a one-year contract.',
+      'ct.notes.taxes': 'Applicable taxes must be added to these amounts.',
+      'ct.notes.included': 'Included:', 'ct.notes.excluded': 'Excluded:',
+      'ct.sign.provider': 'For the provider — ', 'ct.sign.client': 'For the client — ', 'ct.sign.date': 'Date: _______________________',
+      'ct.foot.offer': 'Services offer ',
+      'freq.ponctuelle': 'One-time', 'freq.hebdo': 'Weekly', 'freq.2x-sem': '2× per week',
+      'freq.3x-sem': '3× per week', 'freq.bi-mens': 'Every 2 weeks', 'freq.mensuelle': 'Monthly',
+      'wd.lundi': 'Mon', 'wd.mardi': 'Tue', 'wd.mercredi': 'Wed', 'wd.jeudi': 'Thu', 'wd.vendredi': 'Fri', 'wd.samedi': 'Sat', 'wd.dimanche': 'Sun',
     },
     es: {
       'nav.search': 'Buscar', 'nav.dashboard': 'Panel', 'nav.pipeline': 'Pipeline',
@@ -1541,6 +1700,84 @@ const I18N = {
       'settings.logo.remove': 'Quitar logotipo',
       'settings.logo.none': '(sin logotipo)',
       'settings.logo.upload': 'Elegir un logotipo…',
+      // ----- Documentos impresos (cotizaciones, facturas, contratos) -----
+      'doc.kind.quote': 'Cotización', 'doc.kind.invoice': 'Factura',
+      'doc.date': 'Fecha', 'doc.version': 'Versión', 'doc.validity': 'Válida por {n} días',
+      'doc.duedate': 'Fecha de vencimiento',
+      'doc.preparedfor': 'Preparada para', 'doc.billto': 'Facturada a',
+      'doc.frequency': 'Frecuencia del servicio',
+      'doc.col.desc': 'Descripción', 'doc.col.qty': 'Cant.', 'doc.col.unit': 'Unidad',
+      'doc.col.unitprice': 'Precio unit.', 'doc.col.amount': 'Importe',
+      'doc.subtotal': 'Subtotal', 'doc.total': 'Total',
+      'doc.notes': 'Notas y condiciones',
+      'doc.sign.client': 'Firma del cliente — para aceptación', 'doc.sign.date': 'Fecha',
+      'doc.foot.quote': 'Gracias por su confianza.', 'doc.foot.invoice': 'Gracias por su pago.',
+      'ct.dateprefix': '',
+      'ct.subject': 'Asunto:', 'ct.subject.body': 'Oferta de servicios de limpieza',
+      'ct.subject.at': ' para los espacios ubicados en ',
+      'ct.salut.default': 'Estimados Señora y Señor', 'ct.salut.prefix': 'Estimado/a ',
+      'ct.intro': 'Atendiendo a su solicitud, nos complace presentarle nuestra oferta de servicios de limpieza',
+      'ct.intro.at': ' en ',
+      'ct.thanks': 'Le agradecemos especialmente su confianza y la atención que nos ha brindado, y esperamos contarle entre nuestros clientes satisfechos en un futuro próximo. Nuestra misión es ofrecer servicios de calidad, manteniendo siempre como prioridad la satisfacción del cliente.',
+      'ct.team.prefix': ' le ofrece personal cualificado y una supervisión rigurosa',
+      'ct.team.byPrefix': ' realizada por ',
+      'ct.team.suffix': ', con varios años de experiencia en el sector. Además, {company} utiliza equipos modernos y productos de alta calidad.',
+      'ct.invitation': 'Esperando que todo sea de su entera satisfacción, no dude en comunicarse con nosotros para más información.',
+      'ct.closing.prefix': 'Le ruego acepte, ',
+      'ct.closing.suffix': ', nuestros más distinguidos saludos y la garantía de nuestra dedicación.',
+      'ct.closing.madame': 'Señora', 'ct.closing.monsieur': 'Señor',
+      'ct.attach': 'Adjunto: Oferta de servicios',
+      'ct.contact.cell': 'Celular: ', 'ct.contact.office': 'Oficina: ', 'ct.contact.email': 'Correo: ',
+      'ct.cover.for': 'Preparada para', 'ct.cover.attn': 'Atención:', 'ct.cover.ref.quote': 'Cotización: ', 'ct.cover.ref.contract': 'Contrato: ',
+      'ct.toc.title': 'Tabla de contenido',
+      'ct.toc.schedule': 'Calendario de tareas',
+      'ct.toc.specs': 'Especificaciones generales',
+      'ct.toc.spec.service': 'Servicio ofrecido',
+      'ct.toc.spec.area': 'Superficie de limpieza',
+      'ct.toc.spec.state': 'Condición actual del edificio',
+      'ct.toc.spec.extra': 'Trabajos adicionales / llamadas de servicio',
+      'ct.toc.spec.insurance': 'Seguros',
+      'ct.toc.spec.cnesst': 'CNESST',
+      'ct.toc.spec.joint': 'Comité paritario',
+      'ct.toc.spec.taxes': 'Impuestos sobre ventas',
+      'ct.toc.spec.supervision': 'Supervisión',
+      'ct.toc.spec.confidentiality': 'Confidencialidad',
+      'ct.toc.spec.equipment': 'Equipo',
+      'ct.toc.spec.uniforms': 'Uniformes',
+      'ct.toc.spec.duration': 'Duración, renovación y no-solicitación',
+      'ct.toc.ondemand': 'Servicios a demanda (no incluidos)',
+      'ct.toc.references': 'Referencias',
+      'ct.toc.prices': 'Lista de precios',
+      'ct.schedule.title': 'Calendario de tareas',
+      'ct.schedule.freq': 'Frecuencia del servicio:', 'ct.schedule.on': ' — los ', 'ct.schedule.between': ', entre ', 'ct.schedule.and': ' y ',
+      'ct.schedule.col.desc': 'Descripción de la tarea', 'ct.schedule.col.qty': 'Cantidad', 'ct.schedule.col.unit': 'Unidad / frecuencia',
+      'ct.schedule.empty': 'No hay tareas detalladas en la cotización vinculada. Completar antes de firmar.',
+      'ct.notes.extra': 'Notas complementarias',
+      'ct.specs.title': 'Especificaciones generales',
+      'ct.ondemand.title': 'Servicios a demanda (no incluidos)',
+      'ct.ondemand.intro': 'Los siguientes servicios no están incluidos en el paquete mensual y pueden añadirse por solicitud puntual:',
+      'ct.ondemand.onquote': ' — a cotizar',
+      'ct.ondemand.default.stripping': 'Decapado y encerado de pisos',
+      'ct.ondemand.default.chairs': 'Lavado de sillas por extracción',
+      'ct.ondemand.default.lights': 'Limpieza de luminarias',
+      'ct.ondemand.default.spring': 'Limpieza profunda de temporada',
+      'ct.ondemand.default.disinfect': 'Desinfección puntual (tras incidente)',
+      'ct.refs.title': 'Referencias',
+      'ct.refs.empty': 'Lista de referencias proporcionada a solicitud.',
+      'ct.prices.title': 'Lista de precios',
+      'ct.prices.col.desc': 'Descripción', 'ct.prices.col.qty': 'Cant.', 'ct.prices.col.unit': 'Unidad',
+      'ct.prices.col.unitprice': 'Precio unitario', 'ct.prices.col.amount': 'Importe',
+      'ct.prices.subtotal': 'Subtotal', 'ct.prices.total.monthly': 'Total mensual', 'ct.prices.total.period': 'Total por período',
+      'ct.prices.empty': 'Sin líneas de precios. Completar antes de firmar.',
+      'ct.notes.title': 'Notas',
+      'ct.notes.annual': 'Esta tarifa mensual se basa en un contrato anual.',
+      'ct.notes.taxes': 'A estos importes hay que añadir los impuestos aplicables.',
+      'ct.notes.included': 'Incluido:', 'ct.notes.excluded': 'Excluido:',
+      'ct.sign.provider': 'Por el prestador — ', 'ct.sign.client': 'Por el cliente — ', 'ct.sign.date': 'Fecha: _______________________',
+      'ct.foot.offer': 'Oferta de servicios ',
+      'freq.ponctuelle': 'Puntual', 'freq.hebdo': 'Semanal', 'freq.2x-sem': '2× por semana',
+      'freq.3x-sem': '3× por semana', 'freq.bi-mens': 'Cada 2 semanas', 'freq.mensuelle': 'Mensual',
+      'wd.lundi': 'Lun', 'wd.mardi': 'Mar', 'wd.mercredi': 'Mié', 'wd.jeudi': 'Jue', 'wd.vendredi': 'Vie', 'wd.samedi': 'Sáb', 'wd.dimanche': 'Dom',
     },
   },
 };
@@ -1552,6 +1789,16 @@ function t(key, vars) {
   if (s == null) return key;
   if (vars) for (const k in vars) s = s.replace(new RegExp('\\{' + k + '\\}', 'g'), vars[k]);
   return s;
+}
+
+// Locale BCP47 utilisée pour formater les dates dans les documents imprimés.
+function docLocale() {
+  return { fr: 'fr-CA', en: 'en-CA', es: 'es-MX' }[I18N.lang] || 'fr-CA';
+}
+// Étiquette de fréquence localisée (utilisée dans les documents imprimés).
+function freqLabelI18n(key) {
+  const s = t('freq.' + key);
+  return s === 'freq.' + key ? freqLabel(key) : s;
 }
 
 function applyStaticTranslations() {
@@ -1593,17 +1840,12 @@ function initLang() {
 // TOUT explorer mais ne peut RIEN enregistrer, et la page « Modèle de
 // contrat » est verrouillée. En mode local, aucune restriction.
 //
-// ⚙️  COMPTES DE TEST — accès complet sans abonnement payant.
-//    Tout compte dont le courriel figure ci-dessous est traité comme abonné :
-//    il peut enregistrer et utiliser toute l'app sans passer par Stripe. Sert
-//    à tester les modifications. Ajoute simplement le courriel entre guillemets,
-//    séparé par une virgule. (Compare insensible à la casse.)
-const TEST_ACCOUNTS = [
-  'martinletourneau@gmail.com',
-];
+// Comptes de test : la liste est gérée côté Supabase (table
+// public.test_accounts), pas dans ce frontend public. Au chargement, on
+// appelle la RPC is_test_account() qui ne renvoie qu'un booléen pour le
+// compte courant — la liste elle-même reste invisible au client.
 function isTestAccount() {
-  const email = (SAAS.user && SAAS.user.email || '').trim().toLowerCase();
-  return !!email && TEST_ACCOUNTS.some(e => e.trim().toLowerCase() === email);
+  return SAAS.isTestAccount === true;
 }
 function isSubscribed() {
   if (isTestAccount()) return true;   // compte de test : accès complet
@@ -1701,7 +1943,7 @@ function updateLockedNav() {
 //    La clé "anon" est PUBLIQUE (faite pour le navigateur) : aucun risque
 //    à la mettre ici. La sécurité est assurée par la Row Level Security.
 const SUPABASE_URL = 'https://oijvhagvmzvggxlzvsye.supabase.co';
-const SUPABASE_ANON_KEY = 'COLLE-TA-CLE-ANON-ICI'; // ex. eyJhbGciOi...
+const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im9panZoYWd2bXp2Z2d4bHp2c3llIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODE1NDYwNzAsImV4cCI6MjA5NzEyMjA3MH0._LNZdPhjfA0iYl-ELtIkb0HO23BFnHhL1nAGA_c5XsM';
 
 // L'app fonctionne dans deux modes :
 //   * "saas"  → Supabase configuré : authentification + données isolées par
@@ -1715,9 +1957,23 @@ const SAAS = {
   organizations: [],   // [{ id, name, role }]
   currentOrg: null,    // organisation active (choix frontend)
   subscription: null,  // { status, active, ... }
+  isTestAccount: false, // résultat de la RPC is_test_account() — true = accès complet sans abonnement
   remoteUpdatedAt: null,
   saveTimer: null,
 };
+
+// Vérifie côté serveur si le compte connecté figure dans la liste des
+// comptes de test. La RPC ne renvoie qu'un booléen : la liste reste privée.
+async function saasRefreshTestAccount() {
+  if (SAAS.mode !== 'saas' || !SAAS.user) { SAAS.isTestAccount = false; return; }
+  try {
+    const { data, error } = await SAAS.sb.rpc('is_test_account');
+    if (error) throw error;
+    SAAS.isTestAccount = data === true;
+  } catch (_) {
+    SAAS.isTestAccount = false;
+  }
+}
 
 const CUR_ORG_KEY = 'lustre_current_org';
 
@@ -1759,6 +2015,7 @@ async function saasAfterAuth() {
     await saasLoadStateFromServer();
     await saasRefreshBilling();
   }
+  await saasRefreshTestAccount();
 }
 
 async function saasLoadOrgs() {
@@ -4533,12 +4790,12 @@ function printDoc(kind, doc, rev) {
   const s = STATE.settings;
   const client = clientById(doc.clientId);
   const items = kind === 'quote' ? rev.items : doc.items;
-  const t = calcTotals(items, s);
+  const tot = calcTotals(items, s);
   const isQuote = kind === 'quote';
 
   const meta = isQuote
-    ? `Date : ${fmtDate(rev.date)}<br>Version : v${rev.rev}<br>Valide ${rev.validity} jours`
-    : `Date : ${fmtDate(doc.date)}<br>Échéance : ${fmtDate(doc.dueDate)}`;
+    ? `${t('doc.date')}: ${fmtDate(rev.date)}<br>${t('doc.version')}: v${rev.rev}<br>${t('doc.validity', { n: rev.validity })}`
+    : `${t('doc.date')}: ${fmtDate(doc.date)}<br>${t('doc.duedate')}: ${fmtDate(doc.dueDate)}`;
 
   const taxIds = [s.tpsNum ? 'TPS : ' + s.tpsNum : '', s.tvqNum ? 'TVQ : ' + s.tvqNum : ''].filter(Boolean).join(' · ');
 
@@ -4553,7 +4810,7 @@ function printDoc(kind, doc, rev) {
         </div>
       </div>
       <div class="doc-kind">
-        <div class="doc-kind-label">${isQuote ? 'Soumission' : 'Facture'}</div>
+        <div class="doc-kind-label">${t(isQuote ? 'doc.kind.quote' : 'doc.kind.invoice')}</div>
         <div class="doc-kind-num">${doc.number}${isQuote && rev.rev > 1 ? ' · v' + rev.rev : ''}</div>
         <div class="doc-kind-meta">${meta}</div>
       </div>
@@ -4561,17 +4818,17 @@ function printDoc(kind, doc, rev) {
     <div class="doc-rule"></div>
     <div class="doc-parties">
       <div style="flex:1">
-        <div class="doc-party-label">${isQuote ? 'Préparée pour' : 'Facturée à'}</div>
+        <div class="doc-party-label">${t(isQuote ? 'doc.preparedfor' : 'doc.billto')}</div>
         <div class="doc-party-name">${client ? escapeHTML(client.name) : '—'}</div>
         <div class="doc-party-info">${client ? escapeHTML([client.contact, client.address, client.phone, client.email].filter(Boolean).join('\n')) : ''}</div>
       </div>
       ${isQuote ? `<div>
-        <div class="doc-party-label">Fréquence du service</div>
-        <div class="doc-party-name">${escapeHTML(freqLabel(rev.frequency || 'hebdo'))}</div>
+        <div class="doc-party-label">${t('doc.frequency')}</div>
+        <div class="doc-party-name">${escapeHTML(freqLabelI18n(rev.frequency || 'hebdo'))}</div>
       </div>` : ''}
     </div>
     <table class="doc-items">
-      <tr><th>Description</th><th class="num">Qté</th><th class="num">Unité</th><th class="num">Prix unit.</th><th class="num">Montant</th></tr>
+      <tr><th>${t('doc.col.desc')}</th><th class="num">${t('doc.col.qty')}</th><th class="num">${t('doc.col.unit')}</th><th class="num">${t('doc.col.unitprice')}</th><th class="num">${t('doc.col.amount')}</th></tr>
       ${items.filter(it => it.desc || parseNum(it.price)).map(it => `
         <tr>
           <td><div class="doc-item-desc">${escapeHTML(it.desc)}</div></td>
@@ -4582,22 +4839,22 @@ function printDoc(kind, doc, rev) {
         </tr>`).join('')}
     </table>
     <div class="doc-totals">
-      <div class="doc-totals-line"><span>Sous-total</span><span class="v">${fmtMoney(t.sub)}</span></div>
-      <div class="doc-totals-line"><span>TPS (${s.tps} %)</span><span class="v">${fmtMoney(t.tps)}</span></div>
-      <div class="doc-totals-line"><span>TVQ (${s.tvq} %)</span><span class="v">${fmtMoney(t.tvq)}</span></div>
-      <div class="doc-totals-line grand"><span>Total</span><span class="v">${fmtMoney(t.total)}</span></div>
+      <div class="doc-totals-line"><span>${t('doc.subtotal')}</span><span class="v">${fmtMoney(tot.sub)}</span></div>
+      <div class="doc-totals-line"><span>TPS (${s.tps} %)</span><span class="v">${fmtMoney(tot.tps)}</span></div>
+      <div class="doc-totals-line"><span>TVQ (${s.tvq} %)</span><span class="v">${fmtMoney(tot.tvq)}</span></div>
+      <div class="doc-totals-line grand"><span>${t('doc.total')}</span><span class="v">${fmtMoney(tot.total)}</span></div>
     </div>
     ${(isQuote ? rev.notes : doc.notes) ? `
       <div class="doc-notes">
-        <div class="doc-notes-label">Notes et conditions</div>
+        <div class="doc-notes-label">${t('doc.notes')}</div>
         <div class="doc-notes-body">${escapeHTML(isQuote ? rev.notes : doc.notes)}</div>
       </div>` : ''}
     ${isQuote ? `
       <div class="doc-sign">
-        <div class="doc-sign-block"><div class="doc-sign-line"></div><div class="doc-sign-label">Signature du client — pour acceptation</div></div>
-        <div class="doc-sign-block"><div class="doc-sign-line"></div><div class="doc-sign-label">Date</div></div>
+        <div class="doc-sign-block"><div class="doc-sign-line"></div><div class="doc-sign-label">${t('doc.sign.client')}</div></div>
+        <div class="doc-sign-block"><div class="doc-sign-line"></div><div class="doc-sign-label">${t('doc.sign.date')}</div></div>
       </div>` : ''}
-    <div class="doc-foot">${escapeHTML(s.company)}${taxIds ? ' · ' + taxIds : ''} — ${isQuote ? 'Merci de votre confiance.' : 'Merci de votre paiement.'}</div>
+    <div class="doc-foot">${escapeHTML(s.company)}${taxIds ? ' · ' + taxIds : ''} — ${t(isQuote ? 'doc.foot.quote' : 'doc.foot.invoice')}</div>
   </div>`;
   window.print();
 }
@@ -4848,19 +5105,28 @@ function printContract(contractId) {
   const q = c.quoteId ? STATE.quotes.find(x => x.id === c.quoteId) : null;
   const v = q ? q.versions[Math.min(c.quoteRev != null ? c.quoteRev - 1 : q.currentRev, q.versions.length - 1)] : null;
   const items = v ? v.items.filter(it => it.desc || parseNum(it.price)) : [];
-  const t = v ? calcTotals(items, s) : { sub: 0, tps: 0, tvq: 0, total: 0 };
-  const daysLabel = (c.days || []).map(d => WEEKDAYS.find(w => w[0] === d) || [d, d]).map(w => w[1]).join(' · ') || '—';
-  const today = new Date().toLocaleDateString('fr-CA', { day: 'numeric', month: 'long', year: 'numeric' });
+  const tot = v ? calcTotals(items, s) : { sub: 0, tps: 0, tvq: 0, total: 0 };
+  // Jours de la semaine localisés (clé interne FR → libellé court selon I18N.lang).
+  // Si la clé i18n n'existe pas, on retombe sur le libellé FR de WEEKDAYS.
+  const daysLabel = (c.days || []).map(d => {
+    const tr = t('wd.' + d);
+    if (tr !== 'wd.' + d) return tr;
+    const fallback = WEEKDAYS.find(w => w[0] === d);
+    return fallback ? fallback[1] : d;
+  }).join(' · ') || '—';
+  const today = new Date().toLocaleDateString(docLocale(), { day: 'numeric', month: 'long', year: 'numeric' });
   const taxIds = [s.tpsNum ? 'TPS/TVH : ' + s.tpsNum : '', s.tvqNum ? 'TVQ : ' + s.tvqNum : ''].filter(Boolean);
-  const ref = q ? 'Soumission : ' + q.number + (v ? ' v' + v.rev : '') : ('Contrat : ' + c.number);
+  const ref = q ? t('ct.cover.ref.quote') + q.number + (v ? ' v' + v.rev : '') : (t('ct.cover.ref.contract') + c.number);
   const placeholders = buildPlaceholders(c, client);
-  const itemsLookMonthly = items.length > 0 && items.every(it => /mois|mensuel/i.test(it.unit));
+  const itemsLookMonthly = items.length > 0 && items.every(it => /mois|mensuel|month/i.test(it.unit));
   const cityFromAddr = (() => {
     if (!client.address) return '';
     const lines = client.address.split('\n').map(l => l.trim()).filter(Boolean);
     return lines[lines.length - 1] || '';
   })();
-  const salutation = client.contact ? (/^(M\.|Mme|Madame|Monsieur)/i.test(client.contact) ? client.contact : 'Madame, Monsieur ' + client.contact) : 'Madame, Monsieur';
+  const salutation = client.contact
+    ? (/^(M\.|Mme|Madame|Monsieur|Mr|Mrs|Ms|Sr|Sra|Sir)/i.test(client.contact) ? client.contact : t('ct.salut.prefix') + client.contact)
+    : t('ct.salut.default');
   const refsList = (STATE.references && STATE.references.length)
     ? STATE.references
     : parseLegacyReferences(s.referencesText);
@@ -4876,7 +5142,7 @@ function printContract(contractId) {
         ${pdfLeafSVG()}
         <div style="font-family:'Instrument Serif',serif;font-size:18px;font-style:italic;color:#15191c;">${escapeHTML(s.company)}</div>
       </div>
-      <div style="text-align:right;font-size:11px;color:#5a6770;margin-bottom:40px;">Le ${today}</div>
+      <div style="text-align:right;font-size:11px;color:#5a6770;margin-bottom:40px;">${t('ct.dateprefix')}${today}</div>
 
       <div style="margin-bottom:30px;font-size:12px;line-height:1.5;">
         ${client.contact ? '<div>' + escapeHTML(client.contact) + '</div>' : ''}
@@ -4884,27 +5150,27 @@ function printContract(contractId) {
         ${client.address ? '<div style="white-space:pre-line;">' + escapeHTML(client.address) + '</div>' : ''}
       </div>
 
-      <p class="contract-p" style="margin-bottom:20px;"><strong>Objet :</strong> Offre de services pour l'entretien ménager${client.address ? ' des espaces situés au ' + escapeHTML(client.address.split('\n')[0]) : ''}</p>
+      <p class="contract-p" style="margin-bottom:20px;"><strong>${t('ct.subject')}</strong> ${t('ct.subject.body')}${client.address ? t('ct.subject.at') + escapeHTML(client.address.split('\n')[0]) : ''}</p>
 
       <p class="contract-p">${escapeHTML(salutation)},</p>
 
-      <p class="contract-p">Suite à votre demande, il nous fait plaisir de vous présenter notre offre pour les services d'entretien ménager${cityFromAddr ? ' à ' + escapeHTML(cityFromAddr) : ''}.</p>
+      <p class="contract-p">${t('ct.intro')}${cityFromAddr ? t('ct.intro.at') + escapeHTML(cityFromAddr) : ''}.</p>
 
-      <p class="contract-p">Nous tenons à vous remercier tout particulièrement de votre confiance et de l'attention dont vous nous faites preuve, et espérons vous compter parmi notre clientèle satisfaite dans un avenir rapproché. Nous tenons également à vous souligner que notre mission est d'offrir des services de qualité en gardant toujours comme priorité la satisfaction du client.</p>
+      <p class="contract-p">${t('ct.thanks')}</p>
 
-      <p class="contract-p"><strong>${escapeHTML(s.company)}</strong> vous offre un calibre de personnel qualifié ainsi qu'une supervision sérieuse${s.signerName ? ' effectuée par ' + escapeHTML(s.signerName) : ''}, qui compte plusieurs années d'expérience dans le domaine. De plus, ${escapeHTML(s.company)} utilise de l'équipement moderne et des produits de haute qualité.</p>
+      <p class="contract-p"><strong>${escapeHTML(s.company)}</strong>${t('ct.team.prefix')}${s.signerName ? t('ct.team.byPrefix') + escapeHTML(s.signerName) : ''}${t('ct.team.suffix', { company: escapeHTML(s.company) })}</p>
 
-      <p class="contract-p">Espérant le tout à votre entière satisfaction, n'hésitez pas à communiquer avec nous pour de plus amples informations.</p>
+      <p class="contract-p">${t('ct.invitation')}</p>
 
-      <p class="contract-p">Je vous prie d'agréer, ${client.contact && /^Mme|Madame/i.test(client.contact) ? 'Madame' : (client.contact && /^M\.|Monsieur/i.test(client.contact) ? 'Monsieur' : 'Madame, Monsieur')}, l'expression de nos salutations distinguées et l'assurance de notre dévouement.</p>
+      <p class="contract-p">${t('ct.closing.prefix')}${client.contact && /^Mme|Madame|Mrs|Ms|Sra/i.test(client.contact) ? t('ct.closing.madame') : (client.contact && /^M\.|Monsieur|Mr|Sr|Sir/i.test(client.contact) ? t('ct.closing.monsieur') : t('ct.salut.default'))}${t('ct.closing.suffix')}</p>
 
       <div style="margin-top:60px;">
         <div style="font-weight:600;font-size:13px;">${escapeHTML(s.signerName || '_________________________')}</div>
         <div style="font-size:11px;color:#5a6770;">${escapeHTML(s.signerTitle || '')}<br>${escapeHTML(s.company)}</div>
-        ${(s.signerCell || s.signerEmail || s.phone) ? `<div style="font-size:10.5px;color:#5a6770;margin-top:10px;">${s.signerCell ? 'Cellulaire : ' + escapeHTML(s.signerCell) + '<br>' : ''}${s.phone ? 'Bureau : ' + escapeHTML(s.phone) + '<br>' : ''}${s.signerEmail || s.email ? 'Courriel : ' + escapeHTML(s.signerEmail || s.email) : ''}</div>` : ''}
+        ${(s.signerCell || s.signerEmail || s.phone) ? `<div style="font-size:10.5px;color:#5a6770;margin-top:10px;">${s.signerCell ? t('ct.contact.cell') + escapeHTML(s.signerCell) + '<br>' : ''}${s.phone ? t('ct.contact.office') + escapeHTML(s.phone) + '<br>' : ''}${s.signerEmail || s.email ? t('ct.contact.email') + escapeHTML(s.signerEmail || s.email) : ''}</div>` : ''}
       </div>
 
-      <div style="margin-top:40px;font-size:11px;color:#5a6770;">Pièce jointe : Offre de services</div>
+      <div style="margin-top:40px;font-size:11px;color:#5a6770;">${t('ct.attach')}</div>
     </div>
 
     <div class="contract-pagebreak"></div>
@@ -4919,12 +5185,12 @@ function printContract(contractId) {
         ${s.slogan ? '<div style="font-size:14px;color:#5a6770;margin-top:14px;font-style:italic;">' + escapeHTML(s.slogan) + '</div>' : ''}
       </div>
       <div style="margin-top:100px;padding:28px;border:1.5px solid #2c3a45;border-radius:12px;">
-        <div style="font-size:11px;letter-spacing:0.14em;text-transform:uppercase;color:#8b979f;margin-bottom:14px;">Préparée pour</div>
+        <div style="font-size:11px;letter-spacing:0.14em;text-transform:uppercase;color:#8b979f;margin-bottom:14px;">${t('ct.cover.for')}</div>
         <div style="font-weight:700;font-size:20px;letter-spacing:0.02em;text-transform:uppercase;">${escapeHTML(client.name)}</div>
         ${client.address ? '<div style="white-space:pre-line;font-size:12.5px;color:#3d4850;margin-top:6px;">' + escapeHTML(client.address) + '</div>' : ''}
-        ${client.contact ? '<div style="margin-top:16px;font-size:12.5px;color:#3d4850;"><strong>Attention :</strong> ' + escapeHTML(client.contact) + '</div>' : ''}
+        ${client.contact ? '<div style="margin-top:16px;font-size:12.5px;color:#3d4850;"><strong>' + t('ct.cover.attn') + '</strong> ' + escapeHTML(client.contact) + '</div>' : ''}
         <div style="margin-top:24px;border-top:1px solid #edf0f2;padding-top:14px;font-family:'JetBrains Mono',monospace;font-size:12px;">${ref}</div>
-        <div style="font-size:11px;color:#5a6770;margin-top:4px;">Date : ${today}</div>
+        <div style="font-size:11px;color:#5a6770;margin-top:4px;">${t('doc.date')}: ${today}</div>
       </div>
       <div style="margin-top:80px;text-align:center;font-size:11px;color:#5a6770;line-height:1.6;">
         ${escapeHTML(s.address.replace(/\n/g, ' · '))}<br>
@@ -4935,58 +5201,58 @@ function printContract(contractId) {
     <div class="contract-pagebreak"></div>
 
     <!-- PAGE 3 — TABLE DES MATIÈRES -->
-    <h1 class="contract-h1">Table des matières</h1>
+    <h1 class="contract-h1">${t('ct.toc.title')}</h1>
     <ul class="contract-toc">
-      <li>Calendrier des tâches</li>
-      <li>Spécifications générales
+      <li>${t('ct.toc.schedule')}</li>
+      <li>${t('ct.toc.specs')}
         <ul>
-          <li>Service offert</li>
-          <li>Surface de nettoyage</li>
-          <li>Condition présente de l'édifice</li>
-          <li>Travaux supplémentaires / appels de services</li>
-          <li>Assurances</li>
-          <li>CNESST</li>
-          <li>Comité paritaire</li>
-          <li>Taxes de vente</li>
-          <li>Supervision</li>
-          <li>Confidentialité</li>
-          <li>Équipement</li>
-          <li>Uniformes</li>
-          <li>Durée, reconduction et non-sollicitation</li>
+          <li>${t('ct.toc.spec.service')}</li>
+          <li>${t('ct.toc.spec.area')}</li>
+          <li>${t('ct.toc.spec.state')}</li>
+          <li>${t('ct.toc.spec.extra')}</li>
+          <li>${t('ct.toc.spec.insurance')}</li>
+          <li>${t('ct.toc.spec.cnesst')}</li>
+          <li>${t('ct.toc.spec.joint')}</li>
+          <li>${t('ct.toc.spec.taxes')}</li>
+          <li>${t('ct.toc.spec.supervision')}</li>
+          <li>${t('ct.toc.spec.confidentiality')}</li>
+          <li>${t('ct.toc.spec.equipment')}</li>
+          <li>${t('ct.toc.spec.uniforms')}</li>
+          <li>${t('ct.toc.spec.duration')}</li>
         </ul>
       </li>
-      <li>Services sur demande (non inclus)</li>
-      <li>Références</li>
-      <li>Bordereau de prix</li>
+      <li>${t('ct.toc.ondemand')}</li>
+      <li>${t('ct.toc.references')}</li>
+      <li>${t('ct.toc.prices')}</li>
     </ul>
 
     <div class="contract-pagebreak"></div>
 
     <!-- PAGE 4 — CALENDRIER DES TÂCHES -->
-    <h1 class="contract-h1">Calendrier des tâches</h1>
-    <p class="contract-p"><strong>Fréquence du service :</strong> ${escapeHTML(freqLabel(c.frequency))}${daysLabel !== '—' ? ' — les <strong>' + escapeHTML(daysLabel) + '</strong>' : ''}${c.startTime ? ', entre <strong>' + c.startTime + '</strong> et <strong>' + c.endTime + '</strong>' : ''}.</p>
+    <h1 class="contract-h1">${t('ct.schedule.title')}</h1>
+    <p class="contract-p"><strong>${t('ct.schedule.freq')}</strong> ${escapeHTML(freqLabelI18n(c.frequency))}${daysLabel !== '—' ? t('ct.schedule.on') + '<strong>' + escapeHTML(daysLabel) + '</strong>' : ''}${c.startTime ? t('ct.schedule.between') + '<strong>' + c.startTime + '</strong>' + t('ct.schedule.and') + '<strong>' + c.endTime + '</strong>' : ''}.</p>
 
     ${items.length ? `
       <table class="doc-items" style="margin-top:16px;">
-        <tr><th>Description de la tâche</th><th class="num">Quantité</th><th class="num">Unité / fréquence</th></tr>
+        <tr><th>${t('ct.schedule.col.desc')}</th><th class="num">${t('ct.schedule.col.qty')}</th><th class="num">${t('ct.schedule.col.unit')}</th></tr>
         ${items.map(it => `
           <tr>
             <td><div class="doc-item-desc">${escapeHTML(it.desc)}</div></td>
             <td class="num">${it.qty}</td>
             <td class="num">${escapeHTML(it.unit)}</td>
           </tr>`).join('')}
-      </table>` : '<p class="contract-p"><em>Aucune tâche détaillée dans la soumission liée. Compléter avant signature.</em></p>'}
+      </table>` : '<p class="contract-p"><em>' + t('ct.schedule.empty') + '</em></p>'}
 
     ${c.notes ? `
       <div class="doc-notes" style="margin-top:18px;">
-        <div class="doc-notes-label">Notes complémentaires</div>
+        <div class="doc-notes-label">${t('ct.notes.extra')}</div>
         <div class="doc-notes-body">${escapeHTML(c.notes)}</div>
       </div>` : ''}
 
     <div class="contract-pagebreak"></div>
 
     <!-- PAGE 5 — SPÉCIFICATIONS GÉNÉRALES (depuis le modèle de contrat) -->
-    <h1 class="contract-h1">Spécifications générales</h1>
+    <h1 class="contract-h1">${t('ct.specs.title')}</h1>
     ${effectiveSections(c).map(sec => `
       <h2 class="contract-h2">${escapeHTML(applyPlaceholders(sec.title, placeholders))}</h2>
       ${escapeHTML(applyPlaceholders(sec.body, placeholders)).split(/\n\n+/).filter(Boolean).map(par => '<p class="contract-p">' + par.replace(/\n/g, '<br>') + '</p>').join('')}
@@ -4995,25 +5261,25 @@ function printContract(contractId) {
     <div class="contract-pagebreak"></div>
 
     <!-- PAGE 6 — SERVICES SUR DEMANDE -->
-    <h1 class="contract-h1">Services sur demande (non inclus)</h1>
-    <p class="contract-p">Les services suivants ne sont pas inclus dans le forfait mensuel et peuvent être ajoutés sur demande ponctuelle :</p>
+    <h1 class="contract-h1">${t('ct.ondemand.title')}</h1>
+    <p class="contract-p">${t('ct.ondemand.intro')}</p>
 
     ${onDemand.length ? `
       <ul class="contract-list">
         ${onDemand.slice(0, 14).map(svc => `<li><strong>${escapeHTML(svc.name)}</strong>${svc.unit ? ' — ' + fmtMoney(servicePrice(svc)) + ' / ' + escapeHTML(svc.unit) : ''}${svc.description ? '<div style="font-size:10.5px;color:#5a6770;margin-top:2px;">' + escapeHTML(svc.description) + '</div>' : ''}</li>`).join('')}
       </ul>` : `
       <ul class="contract-list">
-        <li><strong>Décapage et cirage des planchers</strong> — sur devis</li>
-        <li><strong>Lavage de chaises par extraction</strong> — sur devis</li>
-        <li><strong>Nettoyage des appareils d'éclairage</strong> — sur devis</li>
-        <li><strong>Grand ménage saisonnier</strong> — sur devis</li>
-        <li><strong>Désinfection ponctuelle (après incident)</strong> — sur devis</li>
+        <li><strong>${t('ct.ondemand.default.stripping')}</strong>${t('ct.ondemand.onquote')}</li>
+        <li><strong>${t('ct.ondemand.default.chairs')}</strong>${t('ct.ondemand.onquote')}</li>
+        <li><strong>${t('ct.ondemand.default.lights')}</strong>${t('ct.ondemand.onquote')}</li>
+        <li><strong>${t('ct.ondemand.default.spring')}</strong>${t('ct.ondemand.onquote')}</li>
+        <li><strong>${t('ct.ondemand.default.disinfect')}</strong>${t('ct.ondemand.onquote')}</li>
       </ul>`}
 
     <div class="contract-pagebreak"></div>
 
     <!-- PAGE 7 — RÉFÉRENCES -->
-    <h1 class="contract-h1">Références</h1>
+    <h1 class="contract-h1">${t('ct.refs.title')}</h1>
     ${refsList.length ? `
       <div class="contract-refs">
         ${refsList.map(r => '<div class="contract-ref">' + [
@@ -5023,16 +5289,16 @@ function printContract(contractId) {
             r.phone ? escapeHTML(r.phone) : '',
             r.email ? escapeHTML(r.email) : ''
           ].filter(Boolean).join('<br>') + '</div>').join('')}
-      </div>` : '<p class="contract-p"><em>Liste de références fournie sur demande.</em></p>'}
+      </div>` : '<p class="contract-p"><em>' + t('ct.refs.empty') + '</em></p>'}
 
     <div class="contract-pagebreak"></div>
 
     <!-- PAGE 8 — BORDEREAU DE PRIX -->
-    <h1 class="contract-h1">Bordereau de prix</h1>
+    <h1 class="contract-h1">${t('ct.prices.title')}</h1>
 
     ${items.length ? `
       <table class="doc-items" style="margin-top:16px;">
-        <tr><th>Description</th><th class="num">Qté</th><th class="num">Unité</th><th class="num">Prix unitaire</th><th class="num">Montant</th></tr>
+        <tr><th>${t('ct.prices.col.desc')}</th><th class="num">${t('ct.prices.col.qty')}</th><th class="num">${t('ct.prices.col.unit')}</th><th class="num">${t('ct.prices.col.unitprice')}</th><th class="num">${t('ct.prices.col.amount')}</th></tr>
         ${items.map(it => `
           <tr>
             <td><div class="doc-item-desc">${escapeHTML(it.desc)}</div></td>
@@ -5043,20 +5309,20 @@ function printContract(contractId) {
           </tr>`).join('')}
       </table>
       <div class="doc-totals">
-        <div class="doc-totals-line"><span>Sous-total</span><span class="v">${fmtMoney(t.sub)}</span></div>
-        <div class="doc-totals-line"><span>TPS (${s.tps} %)</span><span class="v">${fmtMoney(t.tps)}</span></div>
-        <div class="doc-totals-line"><span>TVQ (${s.tvq} %)</span><span class="v">${fmtMoney(t.tvq)}</span></div>
-        <div class="doc-totals-line grand"><span>Total ${itemsLookMonthly || c.frequency === 'mensuelle' ? 'mensuel' : 'par période'}</span><span class="v">${fmtMoney(t.total)}</span></div>
-      </div>` : '<p class="contract-p"><em>Aucune ligne de tarification. Compléter avant signature.</em></p>'}
+        <div class="doc-totals-line"><span>${t('ct.prices.subtotal')}</span><span class="v">${fmtMoney(tot.sub)}</span></div>
+        <div class="doc-totals-line"><span>TPS (${s.tps} %)</span><span class="v">${fmtMoney(tot.tps)}</span></div>
+        <div class="doc-totals-line"><span>TVQ (${s.tvq} %)</span><span class="v">${fmtMoney(tot.tvq)}</span></div>
+        <div class="doc-totals-line grand"><span>${itemsLookMonthly || c.frequency === 'mensuelle' ? t('ct.prices.total.monthly') : t('ct.prices.total.period')}</span><span class="v">${fmtMoney(tot.total)}</span></div>
+      </div>` : '<p class="contract-p"><em>' + t('ct.prices.empty') + '</em></p>'}
 
     <div class="doc-notes" style="margin-top:24px;">
-      <div class="doc-notes-label">Notes</div>
+      <div class="doc-notes-label">${t('ct.notes.title')}</div>
       <div class="doc-notes-body">
         <ul style="margin:0;padding-left:18px;">
-          <li>Cette tarification mensuelle est basée sur un contrat annuel.</li>
-          <li>À ces montants il faut ajouter les taxes applicables.</li>
-          ${s.inclusionsText ? '<li><strong>Inclus :</strong> ' + escapeHTML(s.inclusionsText) + '</li>' : ''}
-          ${s.exclusionsText ? '<li><strong>Exclus :</strong> ' + escapeHTML(s.exclusionsText) + '</li>' : ''}
+          <li>${t('ct.notes.annual')}</li>
+          <li>${t('ct.notes.taxes')}</li>
+          ${s.inclusionsText ? '<li><strong>' + t('ct.notes.included') + '</strong> ' + escapeHTML(s.inclusionsText) + '</li>' : ''}
+          ${s.exclusionsText ? '<li><strong>' + t('ct.notes.excluded') + '</strong> ' + escapeHTML(s.exclusionsText) + '</li>' : ''}
         </ul>
       </div>
     </div>
@@ -5064,15 +5330,15 @@ function printContract(contractId) {
     <div class="doc-sign" style="margin-top:40px;">
       <div class="doc-sign-block">
         <div class="doc-sign-line"></div>
-        <div class="doc-sign-label">Pour le prestataire — ${escapeHTML(s.signerName || '_______________________')}<br>${escapeHTML(s.signerTitle || '')}<br>Date : _______________________</div>
+        <div class="doc-sign-label">${t('ct.sign.provider')}${escapeHTML(s.signerName || '_______________________')}<br>${escapeHTML(s.signerTitle || '')}<br>${t('ct.sign.date')}</div>
       </div>
       <div class="doc-sign-block">
         <div class="doc-sign-line"></div>
-        <div class="doc-sign-label">Pour le client — ${escapeHTML(client.contact || '_______________________')}<br>${escapeHTML(client.name)}<br>Date : _______________________</div>
+        <div class="doc-sign-label">${t('ct.sign.client')}${escapeHTML(client.contact || '_______________________')}<br>${escapeHTML(client.name)}<br>${t('ct.sign.date')}</div>
       </div>
     </div>
 
-    <div class="doc-foot" style="margin-top:36px;">${escapeHTML(s.company)}${taxIds.length ? ' · ' + taxIds.join(' · ') : ''} — Offre de services ${c.number}</div>
+    <div class="doc-foot" style="margin-top:36px;">${escapeHTML(s.company)}${taxIds.length ? ' · ' + taxIds.join(' · ') : ''} — ${t('ct.foot.offer')}${c.number}</div>
   </div>`;
 
   window.print();
