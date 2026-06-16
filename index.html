@@ -836,6 +836,11 @@ kbd {
 /* ============ PRINT ============ */
 #printArea { display: none; }
 @media print {
+  /* Marge de page à 0 → le navigateur n'a plus d'espace pour imprimer ses
+     en-têtes/pieds automatiques (date, URL du site, « page X sur Y »). Les
+     marges blanches visibles du document sont assurées par le padding de .doc
+     ci-dessous, pour un rendu propre et professionnel. */
+  @page { margin: 0; }
   body { background: #fff; }
   .app, .modal-overlay, .toast { display: none !important; }
   #printArea { display: block; }
@@ -907,6 +912,9 @@ kbd {
   .contract-h2, .doc-sign, .contract-ref { page-break-inside: avoid; }
   .contract-p { orphans: 3; widows: 3; }
   .contract-letter, .contract-cover { min-height: auto; }
+  /* @page margin = 0 : on rétablit ici des marges blanches généreuses via le
+     padding du document, pour que rien ne touche le bord de la feuille. */
+  .doc { padding: 18mm 16mm; max-width: none; }
 }
 </style>
 </head>
@@ -1584,7 +1592,21 @@ function initLang() {
 // Règle métier : en mode SaaS, sans abonnement actif, l'utilisateur peut
 // TOUT explorer mais ne peut RIEN enregistrer, et la page « Modèle de
 // contrat » est verrouillée. En mode local, aucune restriction.
+//
+// ⚙️  COMPTES DE TEST — accès complet sans abonnement payant.
+//    Tout compte dont le courriel figure ci-dessous est traité comme abonné :
+//    il peut enregistrer et utiliser toute l'app sans passer par Stripe. Sert
+//    à tester les modifications. Ajoute simplement le courriel entre guillemets,
+//    séparé par une virgule. (Compare insensible à la casse.)
+const TEST_ACCOUNTS = [
+  'martinletourneau@gmail.com',
+];
+function isTestAccount() {
+  const email = (SAAS.user && SAAS.user.email || '').trim().toLowerCase();
+  return !!email && TEST_ACCOUNTS.some(e => e.trim().toLowerCase() === email);
+}
 function isSubscribed() {
+  if (isTestAccount()) return true;   // compte de test : accès complet
   return !!(SAAS.subscription && SAAS.subscription.active);
 }
 // canUse : peut lire l'app complète (page « Modèle » + données réelles).
@@ -2005,9 +2027,12 @@ function renderAccountBlock() {
   const orgName = SAAS.currentOrg ? SAAS.currentOrg.name : t('account.noorg');
   const role = SAAS.currentOrg ? SAAS.currentOrg.role : '';
   const sub = SAAS.subscription;
-  const subBadge = sub && sub.active
-    ? `<span class="account-status">${t('account.active')}</span>`
-    : `<span class="account-status inactive">${t('account.inactive')}</span>`;
+  const testAcct = isTestAccount();
+  const subBadge = testAcct
+    ? `<span class="account-status">🧪 Compte de test</span>`
+    : (sub && sub.active
+      ? `<span class="account-status">${t('account.active')}</span>`
+      : `<span class="account-status inactive">${t('account.inactive')}</span>`);
 
   const orgSwitcher = SAAS.organizations.length > 1
     ? `<select onchange="saasSwitchOrg(this.value)" style="font-size:11px;padding:4px 6px;margin-top:4px;">
@@ -2015,9 +2040,11 @@ function renderAccountBlock() {
        </select>`
     : '';
 
-  const billingBtn = sub && sub.active
-    ? `<button onclick="saasOpenPortal()">${t('account.manage')}</button>`
-    : `<button class="primary" onclick="saasStartCheckout()">${t('account.subscribe')}</button>`;
+  const billingBtn = testAcct
+    ? ''   // compte de test : pas de facturation à gérer
+    : (sub && sub.active
+      ? `<button onclick="saasOpenPortal()">${t('account.manage')}</button>`
+      : `<button class="primary" onclick="saasStartCheckout()">${t('account.subscribe')}</button>`);
 
   el.innerHTML = `
     <div class="account-row">
