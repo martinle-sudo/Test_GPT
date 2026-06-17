@@ -2920,28 +2920,65 @@ function clientOptions(selectedId) {
   return STATE.clients.map(c =>
     `<option value="${c.id}" ${c.id === selectedId ? 'selected' : ''}>${escapeHTML(c.name)}</option>`).join('');
 }
-function openDealModal(id) {
+function openDealModal(id, draft) {
+  if (!draft) DEAL_DRAFT = null;  // ouverture normale → purge tout brouillon résiduel
   const deal = id ? STATE.deals.find(d => d.id === id) : null;
-  if (!STATE.clients.length) { showToast('Crée d\'abord un client'); openClientModal(); return; }
+  // Pas de client ET pas de brouillon en cours → on redirige vers la création
+  // d'un premier client. (Avec un brouillon, on revient juste d'en créer un.)
+  if (!STATE.clients.length && !draft) { showToast('Crée d\'abord un client'); openClientModal(); return; }
+  // Valeurs initiales : un brouillon (retour depuis « + Client ») a priorité,
+  // sinon les valeurs de l'opportunité existante, sinon des valeurs vides.
+  const v = draft || (deal ? {
+    clientId: deal.clientId, title: deal.title, value: deal.value,
+    freq: deal.freq, stage: deal.stage, notes: deal.notes || ''
+  } : { clientId: null, title: '', value: '', freq: FREQS[0], stage: STAGES[0][0], notes: '' });
   openModal(`
     <div class="modal-title">${deal ? 'Modifier l\'opportunité' : 'Nouvelle opportunité'}</div>
-    <div class="field"><label>Client</label><select id="dealClient">${clientOptions(deal ? deal.clientId : null)}</select></div>
-    <div class="field"><label>Description du service</label><input id="dealTitle" value="${deal ? escapeHTML(deal.title) : ''}" placeholder="Ex: Entretien bureaux 2x/semaine"></div>
-    <div class="field"><label>Valeur mensuelle estimée ($)</label><input id="dealValue" inputmode="decimal" value="${deal ? deal.value : ''}" placeholder="1200"></div>
-    <div class="field"><label>Fréquence</label><select id="dealFreq">${FREQS.map(f => `<option ${deal && deal.freq === f ? 'selected' : ''}>${f}</option>`).join('')}</select></div>
-    <div class="field"><label>Étape</label><select id="dealStage">${STAGES.map(([k,l]) => `<option value="${k}" ${deal && deal.stage === k ? 'selected' : ''}>${l}</option>`).join('')}</select></div>
+    <div class="field"><label>Client</label>
+      <div style="display:flex;gap:8px;align-items:stretch;">
+        <select id="dealClient" style="flex:1;">${clientOptions(v.clientId)}</select>
+        <button type="button" class="btn sm" onclick="newClientFromDeal('${deal ? deal.id : ''}')" title="Créer un nouveau client">+ Client</button>
+      </div>
+    </div>
+    <div class="field"><label>Description du service</label><input id="dealTitle" value="${escapeHTML(v.title || '')}" placeholder="Ex: Entretien bureaux 2x/semaine"></div>
+    <div class="field"><label>Valeur mensuelle estimée ($)</label><input id="dealValue" inputmode="decimal" value="${v.value === '' || v.value == null ? '' : v.value}" placeholder="1200"></div>
+    <div class="field"><label>Fréquence</label><select id="dealFreq">${FREQS.map(f => `<option ${v.freq === f ? 'selected' : ''}>${f}</option>`).join('')}</select></div>
+    <div class="field"><label>Étape</label><select id="dealStage">${STAGES.map(([k,l]) => `<option value="${k}" ${v.stage === k ? 'selected' : ''}>${l}</option>`).join('')}</select></div>
     ${deal && deal.stage === 'lost' && deal.lostReason ? `
       <div class="field"><label>Raison de la perte</label>
         <textarea id="dealLostShown" rows="2" disabled style="opacity:0.85;">${escapeHTML(deal.lostReason)}</textarea>
         <div class="kpi-hint">Pour modifier la raison, change l'étape puis remets-la sur Perdu.</div>
       </div>` : ''}
-    <div class="field"><label>Notes</label><textarea id="dealNotes">${deal ? escapeHTML(deal.notes || '') : ''}</textarea></div>
+    <div class="field"><label>Notes</label><textarea id="dealNotes">${escapeHTML(v.notes || '')}</textarea></div>
     <div class="modal-actions">
       ${deal ? `<button class="btn danger" onclick="deleteDeal('${deal.id}')">Supprimer</button>
                 <button class="btn" onclick="createQuoteFromDeal('${deal.id}')">→ Soumission</button>` : ''}
       <button class="btn ghost" onclick="closeModal()">Annuler</button>
       <button class="btn primary" onclick="saveDeal('${deal ? deal.id : ''}')">Enregistrer</button>
     </div>`);
+}
+// Crée un nouveau client SANS quitter l'opportunité : on mémorise les champs
+// déjà saisis, on ouvre le modal client, puis on revient ici (client choisi).
+let DEAL_DRAFT = null;  // non-null ⇒ création de client lancée depuis l'opportunité
+function newClientFromDeal(dealId) {
+  const get = x => { const el = document.getElementById(x); return el ? el.value : ''; };
+  DEAL_DRAFT = {
+    dealId: dealId || '',
+    clientId: get('dealClient'),
+    title: get('dealTitle'),
+    value: get('dealValue'),
+    freq: get('dealFreq'),
+    stage: get('dealStage'),
+    notes: get('dealNotes'),
+  };
+  openClientModal(null, { fromDeal: true });
+}
+// Annuler la création de client → revenir à l'opportunité sans rien perdre.
+function backToDealFromClient() {
+  const draft = DEAL_DRAFT;
+  DEAL_DRAFT = null;
+  if (draft) openDealModal(draft.dealId || undefined, draft);
+  else closeModal();
 }
 function saveDeal(id) {
   const get = x => document.getElementById(x).value;
@@ -3365,8 +3402,15 @@ function updateClientMargin(id, value) {
 function newQuoteForClient(id) { showView('quotes'); newQuote(id); }
 function newInvoiceForClient(id) { showView('invoices'); newInvoice(id); }
 function newDealForClient(id) { showView('pipeline'); openDealModal(); setTimeout(() => { const sel = document.getElementById('dealClient'); if (sel) sel.value = id; }, 80); }
-function openClientModal(id) {
+function openClientModal(id, opts) {
   const c = id ? clientById(id) : null;
+  const fromDeal = !!(opts && opts.fromDeal);
+  if (!fromDeal) DEAL_DRAFT = null;  // ouverture normale → pas de retour à une opportunité
+  // Quand on crée le client depuis une opportunité, « Annuler » y retourne
+  // au lieu de simplement fermer (pour ne pas perdre la saisie de l'opportunité).
+  const cancelBtn = fromDeal
+    ? `<button class="btn ghost" onclick="backToDealFromClient()">← Retour à l'opportunité</button>`
+    : `<button class="btn ghost" onclick="closeModal()">Annuler</button>`;
   openModal(`
     <div class="modal-title">${c ? 'Modifier le client' : 'Nouveau client'}</div>
     <div class="field"><label>Nom (entreprise ou particulier)</label><input id="cName" value="${c ? escapeHTML(c.name) : ''}"></div>
@@ -3381,7 +3425,7 @@ function openClientModal(id) {
     <div class="field"><label>Notes (accès, clés, particularités…)</label><textarea id="cNotes">${c ? escapeHTML(c.notes || '') : ''}</textarea></div>
     <div class="modal-actions">
       ${c ? `<button class="btn danger" onclick="deleteClient('${c.id}')">Supprimer</button>` : ''}
-      <button class="btn ghost" onclick="closeModal()">Annuler</button>
+      ${cancelBtn}
       <button class="btn primary" onclick="saveClient('${c ? c.id : ''}')">Enregistrer</button>
     </div>`);
 }
@@ -3399,9 +3443,20 @@ function saveClient(id) {
     address: get('cAddress'),
     notes: get('cNotes')
   };
+  let newId = id;
   if (id) Object.assign(clientById(id), data);
-  else STATE.clients.push({ id: uid(), ...data });
-  save(); closeModal(); renderClients(); showToast('Client enregistré');
+  else { newId = uid(); STATE.clients.push({ id: newId, ...data }); }
+  save(); renderClients();
+  // Création lancée depuis une opportunité → on y revient, client sélectionné.
+  if (!id && DEAL_DRAFT) {
+    const draft = { ...DEAL_DRAFT, clientId: newId };
+    const dealId = DEAL_DRAFT.dealId;
+    DEAL_DRAFT = null;
+    showToast('Client créé · sélectionné dans l\'opportunité');
+    openDealModal(dealId || undefined, draft);
+    return;
+  }
+  closeModal(); showToast('Client enregistré');
 }
 function deleteClient(id) {
   const idx = STATE.clients.findIndex(c => c.id === id);
