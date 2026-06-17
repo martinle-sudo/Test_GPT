@@ -166,6 +166,70 @@ supabase functions deploy stripe-webhook --no-verify-jwt
 
 ---
 
+## Partie 5 — Équipes (inviter des membres)
+
+Un administrateur peut inviter des collègues. Chaque membre n'accède qu'aux
+données de SON entreprise (garanti par la Row Level Security). Tarif :
+**1ᵉʳ membre 19 $/mois, chaque membre suivant 5 $/mois**.
+
+### a) Base de données
+
+Dans **SQL Editor**, exécute `supabase/migrations/003_team.sql` (Run).
+Crée la table des invitations et les fonctions sécurisées (inviter, rejoindre,
+lister, retirer).
+
+### b) Confirmation de courriel — IMPORTANT pour la sécurité
+
+Active **Authentication → Providers → Email → « Confirm email » (ON)**.
+Ainsi, un invité doit prouver qu'il possède bien le courriel avant de
+rejoindre l'équipe (impossible d'usurper l'invitation de quelqu'un d'autre).
+Le code refuse déjà de rattacher une invitation à un courriel non confirmé.
+
+### c) Stripe — passer à un tarif « par siège » (gradué)
+
+Aujourd'hui ton prix est un montant fixe. Il faut le remplacer par un prix
+**gradué** (graduated) où la quantité = nombre de membres :
+
+1. Stripe → **Catalogue de produits** → ton produit Lustre → **Ajouter un
+   tarif**.
+2. Type : **Récurrent**, mensuel. Modèle de tarification : **Par paliers
+   (graduated / par tranches)**.
+3. Configure 2 paliers :
+   | Palier | Quantité | Prix |
+   |--------|----------|------|
+   | 1 | de **1 à 1** | **19 $** (par unité) |
+   | 2 | **2 et plus** (∞) | **5 $** par unité |
+   > En mode gradué, le 1ᵉʳ siège est facturé 19 $ et chaque siège suivant 5 $.
+   > Exemple : 3 membres = 19 + 5 + 5 = **29 $/mois**.
+4. Copie le nouvel **identifiant de prix** (`price_…`).
+5. Mets à jour le secret : Supabase → Edge Functions → Secrets →
+   `STRIPE_PRICE_ID` = le nouveau `price_…`.
+
+### d) Déployer la nouvelle fonction de synchronisation des sièges
+
+Une 4ᵉ Edge Function, `stripe-sync-seats`, ajuste automatiquement la quantité
+facturée quand un membre rejoint ou quitte l'équipe.
+
+- **Navigateur** : Edge Functions → Deploy a new function → nom exact
+  `stripe-sync-seats` → colle `supabase/functions/stripe-sync-seats/index.ts`
+  → Deploy. (Laisse « Verify JWT » activé — c'est un utilisateur connecté qui
+  l'appelle.)
+- **Terminal** : `supabase functions deploy stripe-sync-seats`
+
+> Aucun nouveau secret : elle réutilise `STRIPE_SECRET_KEY` et les variables
+> Supabase déjà fournies.
+
+### e) Comment ça marche pour toi au quotidien
+
+1. Dans l'app (en tant qu'admin), bloc compte en bas → **Gérer l'équipe**.
+2. Entre le courriel du collègue → **Inviter**.
+3. Le collègue crée un compte (ou se connecte) **avec ce courriel exact** →
+   il rejoint automatiquement ton entreprise, et un siège (5 $/mois) s'ajoute
+   à ta facture (au prorata).
+4. **Retirer** un membre enlève son accès et le siège correspondant.
+
+---
+
 ## Comment ça marche (en bref)
 
 ```
