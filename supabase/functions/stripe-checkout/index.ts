@@ -82,18 +82,10 @@ Deno.serve(async (req) => {
     }
 
     const baseUrl = Deno.env.get('APP_BASE_URL') ?? '';
-    // Quantité = nombre de membres de l'org (1 siège/membre). Prix gradué :
-    // 1ᵉʳ siège 19$, chacun des suivants 5$ (configuré côté Stripe).
-    const { count } = await admin
-      .from('memberships')
-      .select('user_id', { count: 'exact', head: true })
-      .eq('organization_id', organizationId);
-    const seats = Math.max(count ?? 1, 1);
-
     const session = await stripe.checkout.sessions.create({
       mode: 'subscription',
       customer: customerId,
-      line_items: [{ price: Deno.env.get('STRIPE_PRICE_ID'), quantity: seats }],
+      line_items: [{ price: Deno.env.get('STRIPE_PRICE_ID'), quantity: 1 }],
       subscription_data: { metadata: { organization_id: organizationId } },
       client_reference_id: organizationId,
       success_url: `${baseUrl}/?billing=success`,

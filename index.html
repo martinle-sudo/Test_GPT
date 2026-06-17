@@ -683,18 +683,6 @@ input:focus-visible, select:focus-visible, textarea:focus-visible { outline: non
 }
 .account-status.inactive { background: var(--warn-soft); color: #92400e; }
 
-/* Modal Équipe */
-.team-section-label { font-size: 11px; text-transform: uppercase; letter-spacing: 0.08em; color: var(--text-muted); margin: 16px 0 8px; font-weight: 600; }
-.team-row { display: flex; align-items: center; gap: 10px; padding: 9px 11px; border: 1px solid var(--border); border-radius: 8px; margin-bottom: 6px; }
-.team-row.pending { border-style: dashed; opacity: 0.85; }
-.team-row-main { flex: 1; min-width: 0; }
-.team-email { font-size: 13px; color: var(--text); font-weight: 500; overflow: hidden; text-overflow: ellipsis; }
-.team-role { font-size: 11px; color: var(--text-muted); margin-top: 1px; }
-.team-you { font-size: 10px; color: var(--accent); font-weight: 600; }
-.team-billing { display: flex; flex-direction: column; gap: 3px; margin: 14px 0 4px; padding: 11px 13px; background: var(--bg-card); border-radius: 8px; font-size: 13px; }
-.team-invite { display: flex; gap: 6px; margin-top: 4px; }
-.team-invite input { flex: 1; padding: 8px 10px; border: 1px solid var(--border); border-radius: 7px; background: var(--bg-elevated); color: var(--text); font-size: 13px; }
-
 /* Sélecteur de langue */
 .lang-switch {
   display: flex; gap: 3px;
@@ -1461,33 +1449,6 @@ const I18N = {
       'trial.cta': "S'abonner",
       'role.reader.readonly': "Compte en lecture seule — demande à un administrateur pour modifier.",
       'role.reader.banner': "Lecture seule — tu peux consulter, mais pas modifier.",
-      'role.admin': 'Administrateur', 'role.member': 'Membre', 'role.reader': 'Lecture seule',
-      'team.manage': '👥 Gérer l\'équipe',
-      'team.title': 'Équipe',
-      'team.subtitle': "Invite des collègues par courriel. Chaque membre n'accède qu'aux données de cette entreprise.",
-      'team.loading': 'Chargement…',
-      'team.loaderr': 'Impossible de charger l\'équipe :',
-      'team.close': 'Fermer',
-      'team.members': 'Membres',
-      'team.you': '(toi)',
-      'team.remove': 'Retirer',
-      'team.remove.confirm': 'Retirer {email} de l\'organisation ? Cette personne perdra l\'accès.',
-      'team.remove.ok': 'Membre retiré',
-      'team.remove.fail': 'Retrait impossible :',
-      'team.pending': 'Invitations en attente',
-      'team.invited.badge': 'Invité — en attente',
-      'team.revoke': 'Annuler',
-      'team.revoke.fail': 'Annulation impossible :',
-      'team.seats': 'Sièges facturés',
-      'team.monthly': 'Total mensuel',
-      'team.invite.label': 'Inviter un membre',
-      'team.invite.ph': 'courriel@exemple.com',
-      'team.invite.btn': 'Inviter',
-      'team.invite.hint': "La personne reçoit l'accès dès qu'elle crée un compte (ou se connecte) avec ce courriel. Un siège (5$/mois) s'ajoute à ce moment-là.",
-      'team.invite.ok': 'Invitation envoyée',
-      'team.invite.fail': 'Invitation impossible :',
-      'team.invite.bademail': 'Courriel invalide',
-      'team.adminonly': "Seul un administrateur peut inviter ou retirer des membres.",
       'billing.confirming': "Confirmation de ton abonnement…",
       'billing.confirming.body': "Stripe nous renvoie la confirmation. Quelques secondes…",
       'billing.notyet': "L'abonnement n'est pas encore confirmé. Recharge la page dans une minute.",
@@ -1608,33 +1569,6 @@ const I18N = {
       'trial.cta': 'Subscribe',
       'role.reader.readonly': 'Read-only account — ask an administrator to make changes.',
       'role.reader.banner': "Read-only — you can browse, but not edit.",
-      'role.admin': 'Administrator', 'role.member': 'Member', 'role.reader': 'Read-only',
-      'team.manage': '👥 Manage team',
-      'team.title': 'Team',
-      'team.subtitle': 'Invite coworkers by email. Each member only accesses this company\'s data.',
-      'team.loading': 'Loading…',
-      'team.loaderr': 'Could not load the team:',
-      'team.close': 'Close',
-      'team.members': 'Members',
-      'team.you': '(you)',
-      'team.remove': 'Remove',
-      'team.remove.confirm': 'Remove {email} from the organization? They will lose access.',
-      'team.remove.ok': 'Member removed',
-      'team.remove.fail': 'Could not remove:',
-      'team.pending': 'Pending invitations',
-      'team.invited.badge': 'Invited — pending',
-      'team.revoke': 'Cancel',
-      'team.revoke.fail': 'Could not cancel:',
-      'team.seats': 'Billed seats',
-      'team.monthly': 'Monthly total',
-      'team.invite.label': 'Invite a member',
-      'team.invite.ph': 'email@example.com',
-      'team.invite.btn': 'Invite',
-      'team.invite.hint': 'The person gets access as soon as they create an account (or sign in) with this email. A seat ($5/month) is added at that point.',
-      'team.invite.ok': 'Invitation sent',
-      'team.invite.fail': 'Could not invite:',
-      'team.invite.bademail': 'Invalid email',
-      'team.adminonly': 'Only an administrator can invite or remove members.',
       'billing.confirming': 'Confirming your subscription…',
       'billing.confirming.body': "We're waiting for Stripe to confirm. A few seconds…",
       'billing.notyet': "Your subscription isn't confirmed yet. Refresh the page in a minute.",
@@ -1752,33 +1686,6 @@ const I18N = {
       'trial.cta': 'Suscribirse',
       'role.reader.readonly': 'Cuenta de solo lectura — pide a un administrador para modificar.',
       'role.reader.banner': 'Solo lectura — puedes consultar, pero no modificar.',
-      'role.admin': 'Administrador', 'role.member': 'Miembro', 'role.reader': 'Solo lectura',
-      'team.manage': '👥 Gestionar equipo',
-      'team.title': 'Equipo',
-      'team.subtitle': 'Invita a compañeros por correo. Cada miembro solo accede a los datos de esta empresa.',
-      'team.loading': 'Cargando…',
-      'team.loaderr': 'No se pudo cargar el equipo:',
-      'team.close': 'Cerrar',
-      'team.members': 'Miembros',
-      'team.you': '(tú)',
-      'team.remove': 'Quitar',
-      'team.remove.confirm': '¿Quitar a {email} de la organización? Perderá el acceso.',
-      'team.remove.ok': 'Miembro eliminado',
-      'team.remove.fail': 'No se pudo quitar:',
-      'team.pending': 'Invitaciones pendientes',
-      'team.invited.badge': 'Invitado — pendiente',
-      'team.revoke': 'Cancelar',
-      'team.revoke.fail': 'No se pudo cancelar:',
-      'team.seats': 'Asientos facturados',
-      'team.monthly': 'Total mensual',
-      'team.invite.label': 'Invitar a un miembro',
-      'team.invite.ph': 'correo@ejemplo.com',
-      'team.invite.btn': 'Invitar',
-      'team.invite.hint': 'La persona obtiene acceso en cuanto crea una cuenta (o inicia sesión) con este correo. Se añade un asiento (5$/mes) en ese momento.',
-      'team.invite.ok': 'Invitación enviada',
-      'team.invite.fail': 'No se pudo invitar:',
-      'team.invite.bademail': 'Correo inválido',
-      'team.adminonly': 'Solo un administrador puede invitar o quitar miembros.',
       'billing.confirming': 'Confirmando tu suscripción…',
       'billing.confirming.body': 'Esperamos la confirmación de Stripe. Unos segundos…',
       'billing.notyet': 'Tu suscripción aún no está confirmada. Recarga la página en un minuto.',
@@ -1945,9 +1852,6 @@ function isSubscribed() {
 function isReader() {
   return SAAS.currentOrg && SAAS.currentOrg.role === 'reader';
 }
-function isAdmin() {
-  return !!(SAAS.currentOrg && SAAS.currentOrg.role === 'admin');
-}
 function canUse() {
   if (SAAS.mode !== 'saas') return true;   // mode local : tout permis
   return isSubscribed();
@@ -2088,13 +1992,9 @@ async function saasDetectAndBoot() {
   return true;
 }
 
-// Après connexion : réclame les invitations en attente (adhésions par
-// courriel), charge les organisations (en crée une si l'utilisateur n'en a
-// aucune), sélectionne l'organisation active, charge état + abonnement.
+// Après connexion : charge les organisations (en crée une si l'utilisateur
+// n'en a aucune), sélectionne l'organisation active, charge état + abonnement.
 async function saasAfterAuth() {
-  // D'abord : transformer toute invitation adressée à notre courriel en
-  // adhésion. Ainsi un invité rejoint l'org existante au lieu d'en créer une.
-  const joined = await saasClaimInvitations();
   await saasLoadOrgs();
   if (!SAAS.organizations.length) {
     const name = (SAAS.user.user_metadata && SAAS.user.user_metadata.name)
@@ -2110,29 +2010,6 @@ async function saasAfterAuth() {
     await saasRefreshBilling();
   }
   await saasRefreshTestAccount();
-  // Si on vient de rejoindre une org via invitation, aligne la facturation
-  // Stripe sur le nouveau nombre de membres (best-effort).
-  if (joined > 0) saasSyncSeats();
-}
-
-// Réclame les invitations en attente pour le courriel (confirmé) courant.
-// Renvoie le nombre d'organisations rejointes.
-async function saasClaimInvitations() {
-  try {
-    const { data, error } = await SAAS.sb.rpc('claim_invitations');
-    if (error) throw error;
-    return Number(data) || 0;
-  } catch (_) { return 0; }
-}
-
-// Aligne (best-effort) la quantité de l'abonnement Stripe sur le nombre réel
-// de membres de l'organisation active. Sans abonnement actif : ne fait rien.
-async function saasSyncSeats(orgId) {
-  const id = orgId || (SAAS.currentOrg && SAAS.currentOrg.id);
-  if (!id) return;
-  try {
-    await SAAS.sb.functions.invoke('stripe-sync-seats', { body: { organizationId: id } });
-  } catch (_) {}
 }
 
 async function saasLoadOrgs() {
@@ -2318,152 +2195,6 @@ async function saasOpenPortal() {
   }
 }
 
-// ============ ÉQUIPE — inviter / gérer les membres ============
-// Tarif : 1ᵉʳ membre 19$/mois, chaque membre suivant 5$/mois.
-const SEAT_BASE_PRICE = 19;
-const SEAT_EXTRA_PRICE = 5;
-function seatMonthlyTotal(n) {
-  n = Math.max(Number(n) || 1, 1);
-  return SEAT_BASE_PRICE + (n - 1) * SEAT_EXTRA_PRICE;
-}
-
-async function openTeamModal() {
-  if (SAAS.mode !== 'saas' || !SAAS.currentOrg) {
-    showToast('Disponible uniquement avec un compte en ligne', { variant: 'error' });
-    return;
-  }
-  openModal(`
-    <div class="modal-title">${t('team.title')}</div>
-    <p style="color:var(--text-muted);line-height:1.5;margin:-4px 0 14px;font-size:13px;">${t('team.subtitle')}</p>
-    <div id="teamBody" style="min-height:80px;color:var(--text-muted);">${t('team.loading')}</div>
-    <div class="modal-actions">
-      <button class="btn ghost" onclick="closeModal()">${t('team.close')}</button>
-    </div>`);
-  await renderTeamModalBody();
-}
-
-let TEAM_MEMBERS = [];  // cache des membres affichés (évite de passer l'email en littéral JS)
-async function renderTeamModalBody() {
-  const box = document.getElementById('teamBody');
-  if (!box) return;
-  const org = SAAS.currentOrg;
-  const admin = isAdmin();
-  let members = [], invites = [];
-  try {
-    const { data, error } = await SAAS.sb.rpc('org_members', { p_org: org.id });
-    if (error) throw error;
-    members = data || [];
-  } catch (err) {
-    box.innerHTML = `<div style="color:var(--danger,#dc2626);">${t('team.loaderr')} ${escapeHTML(await readFnError(err))}</div>`;
-    return;
-  }
-  if (admin) {
-    try {
-      const { data } = await SAAS.sb.from('invitations')
-        .select('id, email, role, created_at')
-        .eq('organization_id', org.id)
-        .order('created_at', { ascending: true });
-      invites = data || [];
-    } catch (_) {}
-  }
-
-  TEAM_MEMBERS = members;
-  const myId = SAAS.user && SAAS.user.id;
-  const roleLabel = r => t('role.' + r) === 'role.' + r ? r : t('role.' + r);
-  const memberRows = members.map(m => `
-    <div class="team-row">
-      <div class="team-row-main">
-        <div class="team-email">${escapeHTML(m.email)}${m.user_id === myId ? ' <span class="team-you">' + t('team.you') + '</span>' : ''}</div>
-        <div class="team-role">${escapeHTML(roleLabel(m.role))}</div>
-      </div>
-      ${admin && m.user_id !== myId
-        ? `<button class="btn sm danger" onclick="saasRemoveMember('${m.user_id}')">${t('team.remove')}</button>`
-        : ''}
-    </div>`).join('');
-
-  const inviteRows = invites.length ? `
-    <div class="team-section-label">${t('team.pending')}</div>
-    ${invites.map(i => `
-      <div class="team-row pending">
-        <div class="team-row-main">
-          <div class="team-email">${escapeHTML(i.email)}</div>
-          <div class="team-role">${t('team.invited.badge')}</div>
-        </div>
-        <button class="btn sm" onclick="saasRevokeInvite('${i.id}')">${t('team.revoke')}</button>
-      </div>`).join('')}` : '';
-
-  // Facturation : sièges = membres actuels (les invitations en attente ne sont
-  // facturées qu'une fois acceptées).
-  const seats = members.length || 1;
-  const billing = `
-    <div class="team-billing">
-      <div>${t('team.seats')} : <strong>${seats}</strong></div>
-      <div>${t('team.monthly')} : <strong>${seatMonthlyTotal(seats)} $/mois</strong>
-        <span style="color:var(--text-muted);">(${SEAT_BASE_PRICE}$ + ${Math.max(seats - 1, 0)} × ${SEAT_EXTRA_PRICE}$)</span></div>
-    </div>`;
-
-  const inviteForm = admin ? `
-    <div class="team-section-label">${t('team.invite.label')}</div>
-    <div class="team-invite">
-      <input id="teamInviteEmail" type="email" placeholder="${t('team.invite.ph')}" autocomplete="off">
-      <button class="btn primary sm" onclick="saasInviteMember()">${t('team.invite.btn')}</button>
-    </div>
-    <div class="kpi-hint" style="margin:6px 0 0;">${t('team.invite.hint')}</div>
-  ` : `<div class="kpi-hint">${t('team.adminonly')}</div>`;
-
-  box.innerHTML = `
-    <div class="team-section-label">${t('team.members')} (${members.length})</div>
-    ${memberRows}
-    ${inviteRows}
-    ${billing}
-    ${inviteForm}`;
-}
-
-async function saasInviteMember() {
-  const input = document.getElementById('teamInviteEmail');
-  if (!input) return;
-  const email = input.value.trim();
-  if (!email || email.indexOf('@') < 0) { showToast(t('team.invite.bademail'), { variant: 'error' }); return; }
-  try {
-    const { error } = await SAAS.sb.rpc('invite_member', {
-      p_org: SAAS.currentOrg.id, p_email: email, p_role: 'member',
-    });
-    if (error) throw error;
-    showToast(t('team.invite.ok'));
-    input.value = '';
-    await renderTeamModalBody();
-  } catch (err) {
-    showToast(t('team.invite.fail') + ' ' + (await readFnError(err)), { variant: 'error' });
-  }
-}
-
-async function saasRevokeInvite(id) {
-  try {
-    const { error } = await SAAS.sb.from('invitations').delete().eq('id', id);
-    if (error) throw error;
-    await renderTeamModalBody();
-  } catch (err) {
-    showToast(t('team.revoke.fail') + ' ' + (await readFnError(err)), { variant: 'error' });
-  }
-}
-
-async function saasRemoveMember(userId) {
-  const m = TEAM_MEMBERS.find(x => x.user_id === userId);
-  const email = m ? m.email : '';
-  if (!confirm(t('team.remove.confirm', { email }))) return;
-  try {
-    const { error } = await SAAS.sb.rpc('remove_member', {
-      p_org: SAAS.currentOrg.id, p_user: userId,
-    });
-    if (error) throw error;
-    showToast(t('team.remove.ok'));
-    await saasSyncSeats();        // ajuste la facturation Stripe (−1 siège)
-    await renderTeamModalBody();
-  } catch (err) {
-    showToast(t('team.remove.fail') + ' ' + (await readFnError(err)), { variant: 'error' });
-  }
-}
-
 // ============ UI — écran d'auth ============
 let AUTH_TAB = 'login';
 function authSwitchTab(tab) {
@@ -2565,11 +2296,6 @@ function renderAccountBlock() {
       ? `<button onclick="saasOpenPortal()">${t('account.manage')}</button>`
       : `<button class="primary" onclick="saasStartCheckout()">${t('account.subscribe')}</button>`);
 
-  // Gestion d'équipe : réservée aux administrateurs de l'organisation.
-  const teamBtn = isAdmin()
-    ? `<button onclick="openTeamModal()">${t('team.manage')}</button>`
-    : '';
-
   el.innerHTML = `
     <div class="account-row">
       <div class="account-avatar" aria-hidden="true">${escapeHTML(initials)}</div>
@@ -2581,7 +2307,6 @@ function renderAccountBlock() {
     ${subBadge}
     ${orgSwitcher}
     <div class="account-actions">
-      ${teamBtn}
       ${billingBtn}
       <button onclick="saasLogout()">${t('account.logout')}</button>
     </div>
