@@ -1,0 +1,561 @@
+<!DOCTYPE html>
+<html lang="fr-CA">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="theme-color" content="#0d9488">
+
+    <!-- ============ SEO ============ -->
+    <title>Lustre — Logiciel de gestion pour entreprise d'entretien ménager</title>
+    <meta name="description" content="Lustre est l'application web tout-en-un pour les entreprises d'entretien ménager : pipeline de vente (CRM), soumissions, contrats, horaires d'équipe et facturation. Dès 19 $/mois. Essai sans engagement.">
+    <meta name="robots" content="index, follow">
+    <meta name="author" content="Lustre">
+    <meta name="geo.region" content="CA-QC">
+    <meta name="geo.placename" content="Québec">
+    <link rel="canonical" href="https://www.jemenage.com/offre">
+
+    <!-- Open Graph (Facebook, LinkedIn…) -->
+    <meta property="og:type" content="website">
+    <meta property="og:site_name" content="Lustre">
+    <meta property="og:locale" content="fr_CA">
+    <meta property="og:title" content="Lustre — Logiciel de gestion pour entreprise d'entretien ménager">
+    <meta property="og:description" content="L'application tout-en-un pour gérer votre entreprise d'entretien ménager : soumissions, contrats, horaires et facturation. Dès 19 $/mois.">
+    <meta property="og:url" content="https://www.jemenage.com/offre">
+    <meta property="og:image" content="https://www.jemenage.com/og-image.png">
+
+    <!-- Twitter/X -->
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="Lustre — Logiciel de gestion pour entreprise d'entretien ménager">
+    <meta name="twitter:description" content="Soumissions, contrats, horaires et facturation pour votre entreprise d'entretien ménager. Dès 19 $/mois.">
+    <meta name="twitter:image" content="https://www.jemenage.com/og-image.png">
+
+    <!-- Favicon (feuille Lustre, en ligne — aucun fichier externe requis) -->
+    <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Cpath d='M5 27C5 14 14 5 27 5C27 18 18 27 5 27Z' fill='%230d9488'/%3E%3C/svg%3E">
+
+    <!-- Données structurées (Google : logiciel + offre + entreprise) -->
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "SoftwareApplication",
+      "name": "Lustre",
+      "applicationCategory": "BusinessApplication",
+      "operatingSystem": "Web",
+      "url": "https://www.jemenage.com/offre",
+      "description": "Application web tout-en-un pour les entreprises d'entretien ménager : pipeline de vente (CRM), soumissions, contrats, horaires d'équipe et facturation.",
+      "inLanguage": "fr-CA",
+      "offers": {
+        "@type": "Offer",
+        "price": "19.00",
+        "priceCurrency": "CAD",
+        "url": "https://www.jemenage.com/offre",
+        "availability": "https://schema.org/InStock"
+      },
+      "publisher": {
+        "@type": "Organization",
+        "name": "Lustre",
+        "url": "https://www.jemenage.com"
+      }
+    }
+    </script>
+
+    <!-- ============ Google Ads (gtag) ============
+         Remplace AW-XXXXXXXXXX par ton identifiant Google Ads. Tant que l'ID
+         reste le placeholder, aucun script Google n'est chargé. La conversion
+         « abonnement payé » se déclenche, elle, dans l'application. -->
+    <script>
+    window.LUSTRE_ADS = { id: 'AW-XXXXXXXXXX', ready: false };
+    (function (a) {
+      if (!/^AW-\d{6,}$/.test(a.id)) return;
+      var s = document.createElement('script');
+      s.async = true;
+      s.src = 'https://www.googletagmanager.com/gtag/js?id=' + a.id;
+      document.head.appendChild(s);
+      window.dataLayer = window.dataLayer || [];
+      window.gtag = function () { dataLayer.push(arguments); };
+      gtag('js', new Date());
+      gtag('config', a.id);
+      a.ready = true;
+    })(window.LUSTRE_ADS);
+    </script>
+
+    <!-- Ressources externes -->
+    <link rel="preconnect" href="https://cdn.tailwindcss.com">
+    <link rel="preconnect" href="https://cdnjs.cloudflare.com">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=JetBrains+Mono:wght@400;500;600&family=Geist:wght@300;400;500;600;700&family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            scroll-behavior: smooth;
+        }
+        .app-font-sans { font-family: 'Geist', -apple-system, sans-serif; }
+        .app-font-serif { font-family: 'Instrument Serif', serif; }
+        .app-font-mono { font-family: 'JetBrains Mono', monospace; }
+
+        .gradient-text {
+            background-clip: text;
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-image: linear-gradient(to right, #0d9488, #0ea5e9);
+        }
+        .hero-bg {
+            background-color: #f8fafc;
+            background-image: radial-gradient(#e2e8f0 1px, transparent 1px);
+            background-size: 20px 20px;
+        }
+    </style>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        teal: {
+                            50: '#f0fdfa',
+                            100: '#ccfbf1',
+                            200: '#99f6e4',
+                            300: '#5eead4',
+                            400: '#2dd4bf',
+                            500: '#14b8a6',
+                            600: '#0d9488',
+                            700: '#0f766e',
+                            800: '#115e59',
+                            900: '#134e4a',
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+</head>
+<body class="bg-slate-50 text-slate-800">
+
+    <header>
+    <nav class="fixed w-full z-50 bg-white/80 backdrop-blur-md border-b border-slate-200" aria-label="Navigation principale">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between h-16 items-center">
+                <div class="flex-shrink-0 flex items-center gap-2 app-font-serif italic text-2xl">
+                    <svg viewBox="0 0 32 32" width="24" height="24" style="transform:rotate(-8deg);" aria-hidden="true">
+                        <path d="M5 27 C 5 14, 14 5, 27 5 C 27 18, 18 27, 5 27 Z" fill="#0d9488"/>
+                        <path d="M5 27 L 22 10 M 12 21 L 18 17 M 16 17 L 20 13" stroke="#ffffff" stroke-opacity="0.55" stroke-width="1.2" stroke-linecap="round" fill="none"/>
+                    </svg>
+                    <span class="text-slate-900"><em class="text-teal-600">Lu</em>stre</span>
+                </div>
+                <div class="hidden md:flex space-x-8 items-center">
+                    <a href="#fonctionnalites" class="text-slate-600 hover:text-teal-600 transition">Fonctionnalités</a>
+                    <a href="#tarifs" class="text-slate-600 hover:text-teal-600 transition">Tarifs</a>
+                    <a href="https://www.jemenage.com" class="bg-teal-600 text-white px-5 py-2 rounded-full font-medium hover:bg-teal-700 transition shadow-md shadow-teal-200">
+                        Essayer gratuitement
+                    </a>
+                </div>
+                <!-- Mobile menu button -->
+                <div class="md:hidden flex items-center">
+                    <button id="mobile-menu-btn" class="text-slate-600 hover:text-slate-900 focus:outline-none" aria-label="Ouvrir le menu" aria-expanded="false" aria-controls="mobile-menu">
+                        <i class="fa-solid fa-bars text-2xl" aria-hidden="true"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+        <!-- Mobile Menu -->
+        <div id="mobile-menu" class="hidden md:hidden bg-white border-t border-slate-200 absolute w-full">
+            <div class="px-2 pt-2 pb-3 space-y-1 sm:px-3">
+                <a href="#fonctionnalites" class="block px-3 py-2 text-base font-medium text-slate-700 hover:text-teal-600 hover:bg-slate-50 rounded-md">Fonctionnalités</a>
+                <a href="#tarifs" class="block px-3 py-2 text-base font-medium text-slate-700 hover:text-teal-600 hover:bg-slate-50 rounded-md">Tarifs</a>
+                <a href="https://www.jemenage.com" class="block px-3 py-2 text-base font-medium text-teal-600 hover:bg-teal-50 rounded-md font-bold">Essayer gratuitement</a>
+            </div>
+        </div>
+    </nav>
+    </header>
+
+    <main>
+    <section class="hero-bg pt-32 pb-20 lg:pt-48 lg:pb-32 overflow-hidden">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative">
+            <div class="text-center max-w-4xl mx-auto">
+                <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-teal-100 text-teal-700 text-sm font-semibold mb-6">
+                    <span class="relative flex h-3 w-3">
+                      <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-teal-400 opacity-75"></span>
+                      <span class="relative inline-flex rounded-full h-3 w-3 bg-teal-500"></span>
+                    </span>
+                    La nouvelle référence en gestion d’entretien ménager
+                </div>
+                <h1 class="text-5xl md:text-6xl font-bold tracking-tight mb-8 leading-tight">
+                    Faites briller votre entreprise <span class="gradient-text">d’entretien ménager</span>
+                </h1>
+                <p class="text-xl text-slate-600 mb-10 leading-relaxed max-w-3xl mx-auto">
+                    <strong class="font-semibold text-slate-800">Lustre</strong> est la seule application web dont vous avez besoin pour gérer votre entreprise d’entretien ménager. De la prospection à la facturation, simplifiez chaque étape de vos opérations.
+                </p>
+                <div class="flex flex-col sm:flex-row justify-center gap-4">
+                    <a href="https://www.jemenage.com" class="bg-teal-600 text-white px-8 py-4 rounded-full font-semibold text-lg hover:bg-teal-700 transition shadow-lg shadow-teal-300 flex items-center justify-center gap-2">
+                        Démarrer maintenant <i class="fa-solid fa-arrow-right" aria-hidden="true"></i>
+                    </a>
+                    <a href="#fonctionnalites" class="bg-white text-slate-700 border border-slate-300 px-8 py-4 rounded-full font-semibold text-lg hover:bg-slate-50 transition flex items-center justify-center">
+                        Découvrir la plateforme
+                    </a>
+                </div>
+            </div>
+
+            <!-- Maquette de l'application (Hero) -->
+            <div class="mt-20 relative mx-auto max-w-5xl">
+                <div class="rounded-2xl border border-slate-200/50 bg-white/50 p-2 backdrop-blur-sm shadow-2xl shadow-teal-900/10">
+                    <div class="rounded-xl overflow-hidden border border-slate-200 bg-white aspect-[16/10] sm:aspect-[16/9] flex relative app-font-sans" role="img" aria-label="Aperçu du tableau de bord de Lustre : indicateurs, quarts planifiés et équipes assignées">
+
+                        <!-- Sidebar de la maquette -->
+                        <div class="w-16 sm:w-56 bg-[#f7f8fa] border-r border-slate-200 p-3 sm:p-5 flex flex-col gap-2 shrink-0">
+                            <div class="flex items-center gap-2 mb-6">
+                                <svg viewBox="0 0 32 32" class="w-6 h-6 sm:w-7 sm:h-7 shrink-0" style="transform:rotate(-8deg);" aria-hidden="true">
+                                    <path d="M5 27 C 5 14, 14 5, 27 5 C 27 18, 18 27, 5 27 Z" fill="#0d9488"/>
+                                    <path d="M5 27 L 22 10 M 12 21 L 18 17 M 16 17 L 20 13" stroke="#ffffff" stroke-opacity="0.55" stroke-width="1.2" stroke-linecap="round" fill="none"/>
+                                </svg>
+                                <span class="hidden sm:block app-font-serif italic text-2xl"><em class="text-teal-600">Lu</em>stre</span>
+                            </div>
+                            <div class="h-8 sm:h-9 bg-white border border-slate-200 shadow-sm rounded-lg flex items-center px-2 sm:px-3 text-teal-600 font-medium text-xs sm:text-sm">
+                                <i class="fa-solid fa-border-all sm:mr-3" aria-hidden="true"></i> <span class="hidden sm:block">Tableau de bord</span>
+                            </div>
+                            <div class="h-8 sm:h-9 rounded-lg flex items-center px-2 sm:px-3 text-slate-500 text-xs sm:text-sm">
+                                <i class="fa-solid fa-bars-progress sm:mr-3" aria-hidden="true"></i> <span class="hidden sm:block">Pipeline</span>
+                            </div>
+                            <div class="h-8 sm:h-9 rounded-lg flex items-center px-2 sm:px-3 text-slate-500 text-xs sm:text-sm">
+                                <i class="fa-solid fa-calendar-days sm:mr-3" aria-hidden="true"></i> <span class="hidden sm:block">Horaires</span>
+                            </div>
+                        </div>
+
+                        <!-- Contenu principal de la maquette -->
+                        <div class="flex-1 bg-white p-4 sm:p-8 flex flex-col">
+                            <div class="flex justify-between items-center mb-6">
+                                <div>
+                                    <div class="app-font-serif italic text-2xl sm:text-4xl text-slate-900 leading-none">Tableau de bord</div>
+                                    <div class="text-xs sm:text-sm text-slate-500 mt-1">Aujourd’hui</div>
+                                </div>
+                                <div class="hidden sm:flex gap-2">
+                                    <div class="bg-teal-600 text-white text-xs px-3 py-1.5 rounded-lg font-medium">+ Soumission</div>
+                                </div>
+                            </div>
+
+                            <!-- KPIs -->
+                            <div class="grid grid-cols-2 sm:grid-cols-4 gap-3 sm:gap-4 mb-6">
+                                <div class="bg-white border border-slate-200 rounded-xl p-3 sm:p-4 shadow-sm">
+                                    <div class="app-font-mono text-[9px] sm:text-[10px] text-slate-500 uppercase tracking-widest mb-2">Pipeline actif</div>
+                                    <div class="app-font-serif italic text-2xl sm:text-3xl text-teal-600 leading-none">4 200&nbsp;$</div>
+                                </div>
+                                <div class="bg-white border border-slate-200 rounded-xl p-3 sm:p-4 shadow-sm">
+                                    <div class="app-font-mono text-[9px] sm:text-[10px] text-slate-500 uppercase tracking-widest mb-2">À recevoir</div>
+                                    <div class="app-font-serif italic text-2xl sm:text-3xl text-amber-500 leading-none">1 850&nbsp;$</div>
+                                </div>
+                                <div class="hidden sm:block bg-white border border-slate-200 rounded-xl p-4 shadow-sm">
+                                    <div class="app-font-mono text-[10px] text-slate-500 uppercase tracking-widest mb-2">Soumissions</div>
+                                    <div class="app-font-serif italic text-3xl text-slate-900 leading-none">12</div>
+                                </div>
+                                <div class="hidden sm:block bg-white border border-slate-200 rounded-xl p-4 shadow-sm">
+                                    <div class="app-font-mono text-[10px] text-slate-500 uppercase tracking-widest mb-2">Heures (semaine)</div>
+                                    <div class="app-font-serif italic text-3xl text-slate-900 leading-none">42,5&nbsp;h</div>
+                                </div>
+                            </div>
+
+                            <!-- Liste de quarts -->
+                            <div class="flex-1 bg-white border border-slate-200 rounded-xl shadow-sm flex flex-col">
+                                <div class="p-3 sm:p-4 border-b border-slate-100 app-font-mono text-[10px] text-slate-500 uppercase tracking-widest">Aujourd’hui — quarts planifiés</div>
+                                <div class="p-2 flex flex-col gap-1">
+                                    <div class="flex items-center gap-3 p-2 hover:bg-slate-50 rounded-lg">
+                                        <div class="w-2.5 h-2.5 rounded-full bg-teal-400 shrink-0"></div>
+                                        <div class="flex-1 min-w-0">
+                                            <div class="text-sm font-medium text-slate-900 truncate">Clinique Dentaire Sourire</div>
+                                            <div class="text-xs text-slate-500">Équipe A</div>
+                                        </div>
+                                        <div class="app-font-mono text-xs text-slate-500">08:00–11:00</div>
+                                    </div>
+                                    <div class="flex items-center gap-3 p-2 hover:bg-slate-50 rounded-lg">
+                                        <div class="w-2.5 h-2.5 rounded-full bg-purple-400 shrink-0"></div>
+                                        <div class="flex-1 min-w-0">
+                                            <div class="text-sm font-medium text-slate-900 truncate">Bureaux TechNord</div>
+                                            <div class="text-xs text-slate-500">Équipe B</div>
+                                        </div>
+                                        <div class="app-font-mono text-xs text-slate-500">13:00–16:00</div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section id="fonctionnalites" class="py-24 bg-white overflow-hidden">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="text-center mb-20">
+                <p class="text-teal-600 font-semibold tracking-wide uppercase text-sm mb-2">Tout en un seul endroit</p>
+                <h2 class="text-3xl md:text-4xl font-bold text-slate-900 mb-4">Gérez le cycle complet de vos clients</h2>
+                <p class="text-lg text-slate-600 max-w-2xl mx-auto">Lustre centralise tous les outils nécessaires pour faire croître votre entreprise d’entretien ménager efficacement.</p>
+            </div>
+
+            <!-- Feature 1: Pipeline -->
+            <div class="flex flex-col lg:flex-row items-center gap-12 mb-24">
+                <div class="lg:w-1/2">
+                    <div class="w-14 h-14 bg-teal-100 text-teal-600 rounded-2xl flex items-center justify-center text-2xl mb-6 shadow-sm">
+                        <i class="fa-solid fa-bars-progress" aria-hidden="true"></i>
+                    </div>
+                    <h3 class="text-2xl font-bold text-slate-900 mb-4">Pipeline de vente intégré</h3>
+                    <p class="text-slate-600 leading-relaxed text-lg mb-6">Suivez vos prospects et organisez vos visites d’évaluation grâce à un tableau visuel (Kanban). Déplacez vos opportunités d’une étape à l’autre et convertissez plus de contacts en clients réguliers.</p>
+                </div>
+                <div class="lg:w-1/2 w-full">
+                    <div class="bg-[#f7f8fa] p-4 rounded-2xl border border-slate-200 shadow-lg transform rotate-2 hover:rotate-0 transition duration-300">
+                        <div class="flex gap-4 overflow-hidden app-font-sans">
+                            <!-- Colonne 1 -->
+                            <div class="w-48 bg-slate-100/50 border border-slate-200 rounded-xl p-3 shrink-0">
+                                <div class="flex justify-between items-center mb-3">
+                                    <span class="app-font-mono text-[9px] text-slate-500 uppercase tracking-widest">Leads · 2</span>
+                                </div>
+                                <div class="bg-white p-3 rounded-xl border border-slate-200 shadow-sm mb-2">
+                                    <div class="font-semibold text-sm mb-1 text-slate-900">Grand ménage</div>
+                                    <div class="text-xs text-slate-500 mb-2">Résidence Gagnon</div>
+                                    <div class="app-font-mono text-xs text-teal-600 font-semibold">650&nbsp;$ <span class="text-[9px] text-slate-400 font-normal">/Ponctuel</span></div>
+                                </div>
+                            </div>
+                            <!-- Colonne 2 -->
+                            <div class="w-48 bg-slate-100/50 border border-slate-200 rounded-xl p-3 shrink-0">
+                                <div class="flex justify-between items-center mb-3">
+                                    <span class="app-font-mono text-[9px] text-slate-500 uppercase tracking-widest">Négociation · 1</span>
+                                </div>
+                                <div class="bg-white p-3 rounded-xl border border-teal-400 shadow-md mb-2">
+                                    <div class="font-semibold text-sm mb-1 text-slate-900">Entretien 3x/sem</div>
+                                    <div class="text-xs text-slate-500 mb-2">Bureaux TechNord</div>
+                                    <div class="app-font-mono text-xs text-teal-600 font-semibold">2 400&nbsp;$ <span class="text-[9px] text-slate-400 font-normal">/Mois</span></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Feature 2: Horaires -->
+            <div class="flex flex-col lg:flex-row-reverse items-center gap-12 mb-24">
+                <div class="lg:w-1/2">
+                    <div class="w-14 h-14 bg-indigo-100 text-indigo-600 rounded-2xl flex items-center justify-center text-2xl mb-6 shadow-sm">
+                        <i class="fa-solid fa-calendar-check" aria-hidden="true"></i>
+                    </div>
+                    <h3 class="text-2xl font-bold text-slate-900 mb-4">Gestion des horaires d’équipe</h3>
+                    <p class="text-slate-600 leading-relaxed text-lg mb-6">Planifiez les visites récurrentes automatiquement grâce aux contrats. Assignez vos équipes intelligemment et gardez une vue d’ensemble sur le calendrier de la semaine pour éviter tout conflit d’horaire.</p>
+                </div>
+                <div class="lg:w-1/2 w-full">
+                    <div class="bg-white p-4 rounded-2xl border border-slate-200 shadow-lg transform -rotate-1 hover:rotate-0 transition duration-300 app-font-sans">
+                        <div class="flex gap-2 mb-4">
+                            <div class="bg-white border border-slate-200 px-3 py-1.5 rounded-full text-xs shadow-sm flex items-center gap-2"><div class="w-2 h-2 rounded-full bg-[#45d6c4]"></div>Équipe A</div>
+                            <div class="bg-white border border-slate-200 px-3 py-1.5 rounded-full text-xs shadow-sm flex items-center gap-2"><div class="w-2 h-2 rounded-full bg-[#a78bfa]"></div>Équipe B</div>
+                        </div>
+                        <div class="grid grid-cols-3 gap-2">
+                            <!-- Jour 1 -->
+                            <div class="bg-slate-50 border border-slate-200 rounded-xl p-2 h-32">
+                                <div class="app-font-mono text-[9px] text-slate-500 uppercase tracking-widest mb-2">Lun 12</div>
+                                <div class="bg-white border-l-2 border-[#45d6c4] p-2 rounded shadow-sm">
+                                    <div class="app-font-mono text-[9px] text-slate-500">08:00 - 11:00</div>
+                                    <div class="text-xs font-semibold text-slate-900 mt-0.5 truncate">Clinique Dentaire</div>
+                                </div>
+                            </div>
+                            <!-- Jour 2 -->
+                            <div class="bg-white border border-teal-500 shadow-sm rounded-xl p-2 h-32">
+                                <div class="app-font-mono text-[9px] text-teal-600 uppercase tracking-widest mb-2">Mar 13</div>
+                                <div class="bg-white border-l-2 border-[#a78bfa] p-2 rounded shadow-sm">
+                                    <div class="app-font-mono text-[9px] text-slate-500">13:00 - 16:00</div>
+                                    <div class="text-xs font-semibold text-slate-900 mt-0.5 truncate">TechNord</div>
+                                </div>
+                            </div>
+                            <!-- Jour 3 -->
+                            <div class="bg-slate-50 border border-slate-200 rounded-xl p-2 h-32">
+                                <div class="app-font-mono text-[9px] text-slate-500 uppercase tracking-widest mb-2">Mer 14</div>
+                                <div class="bg-white border-l-2 border-[#45d6c4] p-2 rounded shadow-sm">
+                                    <div class="app-font-mono text-[9px] text-slate-500">08:00 - 11:00</div>
+                                    <div class="text-xs font-semibold text-slate-900 mt-0.5 truncate">Clinique Dentaire</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Feature 3: Devis & Facturation -->
+            <div class="flex flex-col lg:flex-row items-center gap-12">
+                <div class="lg:w-1/2">
+                    <div class="w-14 h-14 bg-emerald-100 text-emerald-600 rounded-2xl flex items-center justify-center text-2xl mb-6 shadow-sm">
+                        <i class="fa-solid fa-file-invoice-dollar" aria-hidden="true"></i>
+                    </div>
+                    <h3 class="text-2xl font-bold text-slate-900 mb-4">Soumissions et facturation</h3>
+                    <p class="text-slate-600 leading-relaxed text-lg mb-6">Générez des devis professionnels et précis basés sur votre catalogue de services. Une fois le travail terminé, créez et gérez vos factures en quelques clics tout en suivant l’état de vos paiements de manière simplifiée.</p>
+                </div>
+                <div class="lg:w-1/2 w-full">
+                    <div class="bg-white p-4 rounded-2xl border border-slate-200 shadow-lg transform rotate-1 hover:rotate-0 transition duration-300 app-font-sans">
+                        <div class="flex justify-between items-center mb-4 border-b border-slate-100 pb-3">
+                            <div class="app-font-mono text-sm font-semibold">S-2024-001</div>
+                            <div class="bg-teal-50 text-teal-700 px-2 py-1 rounded text-[10px] font-semibold uppercase tracking-widest">Acceptée</div>
+                        </div>
+                        <div class="space-y-2 mb-4">
+                            <div class="flex justify-between text-xs p-2 bg-slate-50 rounded">
+                                <span class="font-medium">Entretien régulier — aires communes</span>
+                                <span class="app-font-mono">320&nbsp;$</span>
+                            </div>
+                            <div class="flex justify-between text-xs p-2 bg-slate-50 rounded">
+                                <span class="font-medium">Produits écologiques certifiés</span>
+                                <span class="app-font-mono">45&nbsp;$</span>
+                            </div>
+                        </div>
+                        <div class="flex justify-end border-t border-slate-200 pt-3">
+                            <div class="text-right">
+                                <div class="text-[10px] text-slate-500 uppercase">Total mensuel</div>
+                                <div class="app-font-serif italic text-2xl text-slate-900">365&nbsp;$</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Section Tarification -->
+    <section id="tarifs" class="py-24 bg-slate-50 border-t border-slate-200">
+        <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+            <p class="text-teal-600 font-semibold tracking-wide uppercase text-sm mb-2">Tarification</p>
+            <h2 class="text-3xl md:text-4xl font-bold text-slate-900 mb-8">Un prix simple, sans surprise</h2>
+
+            <div class="bg-white rounded-3xl p-8 md:p-12 shadow-xl border border-slate-100 max-w-lg mx-auto relative overflow-hidden">
+                <div class="absolute top-0 left-0 w-full h-2 bg-gradient-to-r from-teal-400 to-sky-400"></div>
+                <div class="text-6xl font-bold text-slate-900 mb-2 tracking-tight">19&nbsp;$<span class="text-xl text-slate-500 font-normal">/mois</span></div>
+                <p class="text-slate-600 mb-10 text-lg">L’outil complet pour faire croître votre entreprise d’entretien, à un prix imbattable.</p>
+
+                <ul class="space-y-4 text-left mb-10">
+                    <li class="flex items-center gap-3 text-slate-700">
+                        <div class="w-6 h-6 rounded-full bg-teal-100 flex items-center justify-center shrink-0"><i class="fa-solid fa-check text-teal-600 text-xs" aria-hidden="true"></i></div>
+                        Clients et contrats illimités
+                    </li>
+                    <li class="flex items-center gap-3 text-slate-700">
+                        <div class="w-6 h-6 rounded-full bg-teal-100 flex items-center justify-center shrink-0"><i class="fa-solid fa-check text-teal-600 text-xs" aria-hidden="true"></i></div>
+                        Génération de soumissions et factures
+                    </li>
+                    <li class="flex items-center gap-3 text-slate-700">
+                        <div class="w-6 h-6 rounded-full bg-teal-100 flex items-center justify-center shrink-0"><i class="fa-solid fa-check text-teal-600 text-xs" aria-hidden="true"></i></div>
+                        Gestion des horaires d’équipe
+                    </li>
+                    <li class="flex items-center gap-3 text-slate-700">
+                        <div class="w-6 h-6 rounded-full bg-teal-100 flex items-center justify-center shrink-0"><i class="fa-solid fa-check text-teal-600 text-xs" aria-hidden="true"></i></div>
+                        Pipeline de vente intégré (CRM)
+                    </li>
+                    <li class="flex items-center gap-3 text-slate-700">
+                        <div class="w-6 h-6 rounded-full bg-teal-100 flex items-center justify-center shrink-0"><i class="fa-solid fa-check text-teal-600 text-xs" aria-hidden="true"></i></div>
+                        Exportation PDF de qualité professionnelle
+                    </li>
+                </ul>
+
+                <a href="https://www.jemenage.com" class="block w-full bg-teal-600 text-white px-6 py-4 rounded-xl font-bold text-lg hover:bg-teal-700 transition shadow-lg shadow-teal-200">
+                    Commencer mon essai gratuit
+                </a>
+            </div>
+        </div>
+    </section>
+
+    <section class="py-24 bg-slate-900 text-white">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="text-center mb-16">
+                <p class="text-teal-400 font-semibold tracking-wide uppercase text-sm mb-2">Simplicité d’utilisation</p>
+                <h2 class="text-3xl md:text-4xl font-bold mb-4">Un flux de travail fluide et logique</h2>
+            </div>
+
+            <div class="relative">
+                <!-- Ligne connectrice -->
+                <div class="hidden md:block absolute top-1/2 left-0 w-full h-1 bg-slate-800 -translate-y-1/2 z-0"></div>
+
+                <div class="grid grid-cols-1 md:grid-cols-4 gap-8 relative z-10">
+                    <!-- Step 1 -->
+                    <div class="text-center">
+                        <div class="w-16 h-16 mx-auto bg-slate-800 border-2 border-teal-500 rounded-full flex items-center justify-center text-2xl font-bold text-teal-400 mb-4 shadow-[0_0_15px_rgba(20,184,166,0.4)]">1</div>
+                        <h3 class="text-xl font-semibold mb-2">Acquisition</h3>
+                        <p class="text-slate-400 text-sm">Saisissez les informations du prospect dans le CRM.</p>
+                    </div>
+                    <!-- Step 2 -->
+                    <div class="text-center">
+                        <div class="w-16 h-16 mx-auto bg-slate-800 border-2 border-teal-500 rounded-full flex items-center justify-center text-2xl font-bold text-teal-400 mb-4 shadow-[0_0_15px_rgba(20,184,166,0.4)]">2</div>
+                        <h3 class="text-xl font-semibold mb-2">Évaluation</h3>
+                        <p class="text-slate-400 text-sm">Générez une soumission et convertissez-la en contrat.</p>
+                    </div>
+                    <!-- Step 3 -->
+                    <div class="text-center">
+                        <div class="w-16 h-16 mx-auto bg-slate-800 border-2 border-teal-500 rounded-full flex items-center justify-center text-2xl font-bold text-teal-400 mb-4 shadow-[0_0_15px_rgba(20,184,166,0.4)]">3</div>
+                        <h3 class="text-xl font-semibold mb-2">Planification</h3>
+                        <p class="text-slate-400 text-sm">Assignez l’équipe et bloquez l’horaire dans le calendrier.</p>
+                    </div>
+                    <!-- Step 4 -->
+                    <div class="text-center">
+                        <div class="w-16 h-16 mx-auto bg-slate-800 border-2 border-teal-500 rounded-full flex items-center justify-center text-2xl font-bold text-teal-400 mb-4 shadow-[0_0_15px_rgba(20,184,166,0.4)]">4</div>
+                        <h3 class="text-xl font-semibold mb-2">Facturation</h3>
+                        <p class="text-slate-400 text-sm">Générez vos factures de manière simplifiée à partir des services rendus.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section class="py-20 bg-teal-700 relative overflow-hidden">
+        <!-- Éléments décoratifs -->
+        <div class="absolute top-0 right-0 -mr-20 -mt-20 w-64 h-64 rounded-full bg-white opacity-10 blur-2xl"></div>
+        <div class="absolute bottom-0 left-0 -ml-20 -mb-20 w-80 h-80 rounded-full bg-white opacity-10 blur-3xl"></div>
+
+        <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10 text-center">
+            <h2 class="text-3xl md:text-5xl font-bold text-white mb-6">Prêt à optimiser la gestion de votre entreprise&nbsp;?</h2>
+            <p class="text-xl text-teal-100 mb-10 max-w-2xl mx-auto">Rejoignez les professionnels de l’entretien ménager qui gagnent du temps et de l’argent chaque jour grâce à Lustre sur jemenage.com.</p>
+            <a href="https://www.jemenage.com" class="inline-block bg-white text-teal-700 px-10 py-4 rounded-full font-bold text-lg hover:bg-slate-50 transition shadow-xl hover:scale-105 transform duration-200">
+                Accéder à l’application
+            </a>
+            <p class="mt-6 text-sm text-teal-200">Configuration en moins de 5 minutes. Sans engagement.</p>
+        </div>
+    </section>
+    </main>
+
+    <footer class="bg-slate-50 py-12 border-t border-slate-200">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex flex-col md:flex-row justify-between items-center gap-6">
+                <div class="flex items-center gap-2 app-font-serif italic text-2xl">
+                    <svg viewBox="0 0 32 32" width="20" height="20" style="transform:rotate(-8deg);" aria-hidden="true">
+                        <path d="M5 27 C 5 14, 14 5, 27 5 C 27 18, 18 27, 5 27 Z" fill="#0d9488"/>
+                        <path d="M5 27 L 22 10 M 12 21 L 18 17 M 16 17 L 20 13" stroke="#ffffff" stroke-opacity="0.55" stroke-width="1.2" stroke-linecap="round" fill="none"/>
+                    </svg>
+                    <span class="text-slate-900">Lustre</span>
+                </div>
+                <div class="text-slate-500 text-sm">
+                    &copy; <span id="year"></span> Lustre (via jemenage.com). Tous droits réservés.
+                </div>
+                <div class="flex space-x-6">
+                    <a href="https://www.jemenage.com" class="text-slate-400 hover:text-teal-600">
+                        <span class="sr-only">Accéder à l’application Lustre</span>
+                        <i class="fa-solid fa-globe text-xl" aria-hidden="true"></i>
+                    </a>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        // Menu mobile toggle
+        const btn = document.getElementById('mobile-menu-btn');
+        const menu = document.getElementById('mobile-menu');
+
+        btn.addEventListener('click', () => {
+            const open = menu.classList.toggle('hidden');
+            btn.setAttribute('aria-expanded', String(!open));
+        });
+
+        // Set current year in footer
+        document.getElementById('year').textContent = new Date().getFullYear();
+
+        // Smooth scroll pour les ancres
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function (e) {
+                e.preventDefault();
+                menu.classList.add('hidden'); // Fermer le menu mobile au clic
+                btn.setAttribute('aria-expanded', 'false');
+                document.querySelector(this.getAttribute('href')).scrollIntoView({
+                    behavior: 'smooth'
+                });
+            });
+        });
+    </script>
+</body>
+</html>

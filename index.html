@@ -5,7 +5,47 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <meta name="theme-color" content="#0b0f12">
-<title>Lustre — Gestion d'entretien ménager v3.14</title>
+<title>Lustre — Logiciel de gestion pour entreprise d'entretien ménager</title>
+<meta name="description" content="Lustre : l'application web tout-en-un pour gérer votre entreprise d'entretien ménager. Soumissions, contrats, horaires d'équipe, facturation et CRM à partir de 19 $/mois.">
+<meta name="robots" content="index, follow">
+<meta name="author" content="Lustre">
+<meta name="geo.region" content="CA-QC">
+<link rel="canonical" href="https://www.jemenage.com/">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Lustre">
+<meta property="og:locale" content="fr_CA">
+<meta property="og:title" content="Lustre — Logiciel de gestion pour entreprise d'entretien ménager">
+<meta property="og:description" content="Soumissions, contrats, horaires d'équipe, facturation et CRM pour votre entreprise d'entretien ménager. Dès 19 $/mois.">
+<meta property="og:url" content="https://www.jemenage.com/">
+<meta property="og:image" content="https://www.jemenage.com/og-image.png">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="Lustre — Logiciel de gestion pour entreprise d'entretien ménager">
+<meta name="twitter:description" content="L'application tout-en-un pour les entreprises d'entretien ménager.">
+<meta name="twitter:image" content="https://www.jemenage.com/og-image.png">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Cpath d='M5 27C5 14 14 5 27 5C27 18 18 27 5 27Z' fill='%230d9488'/%3E%3C/svg%3E">
+<!-- ============ Google Ads (gtag) ============
+     Remplace AW-XXXXXXXXXX par ton identifiant Google Ads (Google Ads →
+     Outils et paramètres → Conversions). Tant que l'ID reste le placeholder,
+     AUCUN script Google n'est chargé (aucun impact sur la vie privée / la vitesse). -->
+<script>
+window.LUSTRE_ADS = {
+  id:    'AW-XXXXXXXXXX',   // ← ton identifiant Google Ads
+  label: 'AbCdEfGhIj',      // ← le libellé de l'action de conversion « abonnement »
+  ready: false
+};
+(function (a) {
+  if (!/^AW-\d{6,}$/.test(a.id)) return;   // pas encore configuré → on n'injecte rien
+  var s = document.createElement('script');
+  s.async = true;
+  s.src = 'https://www.googletagmanager.com/gtag/js?id=' + a.id;
+  document.head.appendChild(s);
+  window.dataLayer = window.dataLayer || [];
+  window.gtag = function () { dataLayer.push(arguments); };
+  gtag('js', new Date());
+  gtag('config', a.id);
+  a.ready = true;
+})(window.LUSTRE_ADS);
+</script>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=JetBrains+Mono:wght@400;500;600&family=Geist:wght@300;400;500;600;700&display=swap" rel="stylesheet">
@@ -5283,6 +5323,27 @@ function stateIsEmpty() {
          !(STATE.invoices && STATE.invoices.length) &&
          !(STATE.contracts && STATE.contracts.length);
 }
+// Déclenche la conversion Google Ads (abonnement payé). No-op si Google Ads
+// n'est pas configuré. `done` est appelé quand le pixel est parti — ou après
+// un court délai de sécurité — pour ne pas perdre l'événement avant le reload.
+function fireAdsConversion(done) {
+  let called = false;
+  const finish = () => { if (called) return; called = true; if (done) done(); };
+  const guard = setTimeout(finish, 1200);
+  try {
+    const a = window.LUSTRE_ADS;
+    if (a && a.ready && typeof gtag === 'function' && a.label && a.label !== 'AbCdEfGhIj') {
+      gtag('event', 'conversion', {
+        send_to: a.id + '/' + a.label,
+        event_callback: () => { clearTimeout(guard); finish(); }
+      });
+      return;
+    }
+  } catch (_) {}
+  clearTimeout(guard);
+  finish();
+}
+
 // ============ ONBOARDING POST-ABONNEMENT ============
 // L'utilisateur revient de Stripe Checkout avec ?billing=success.
 // On attend la confirmation (webhook), on purge les données démo
@@ -5315,12 +5376,16 @@ async function handleBillingSuccess() {
     return;
   }
 
-  // Purge des données démo dans CE tenant : on efface le cache local et on
-  // demande au prochain boot d'ouvrir les Réglages avec le message de bienvenue.
-  localStorage.removeItem('lustre_v3');
-  try { sessionStorage.setItem('lustre_show_welcome', '1'); } catch (_) {}
-  history.replaceState({}, '', location.pathname);
-  location.reload();
+  // Conversion Google Ads : l'abonnement est confirmé actif → on notifie Google
+  // (si configuré) AVANT de recharger, puis on poursuit l'onboarding.
+  fireAdsConversion(() => {
+    // Purge des données démo dans CE tenant : on efface le cache local et on
+    // demande au prochain boot d'ouvrir les Réglages avec le message de bienvenue.
+    localStorage.removeItem('lustre_v3');
+    try { sessionStorage.setItem('lustre_show_welcome', '1'); } catch (_) {}
+    history.replaceState({}, '', location.pathname);
+    location.reload();
+  });
 }
 
 (async () => {
