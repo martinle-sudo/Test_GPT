@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="fr-CA">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="theme-color" content="#0d9488">
+<!-- Page de confirmation post-abonnement : ne pas indexer (page de conversion). -->
+<meta name="robots" content="noindex, nofollow">
+<title>Merci — Bienvenue dans Lustre</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Cpath d='M5 27C5 14 14 5 27 5C27 18 18 27 5 27Z' fill='%230d9488'/%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Geist:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+
+<!-- ============ Google Ads (gtag) ============
+     C'EST ICI que la conversion « abonnement » est comptée : Google enregistre
+     une conversion dès que cette page /merci se charge (règle par URL configurée
+     dans Google Ads). Remplace AW-XXXXXXXXXX par TON identifiant Google Ads
+     (le même que dans index.html et offre.html). Tant que l'ID reste le
+     placeholder, aucun script Google n'est chargé. -->
+<script>
+window.LUSTRE_ADS = { id: 'AW-XXXXXXXXXX', ready: false };
+(function (a) {
+  if (!/^AW-\d{6,}$/.test(a.id)) return;
+  var s = document.createElement('script');
+  s.async = true;
+  s.src = 'https://www.googletagmanager.com/gtag/js?id=' + a.id;
+  document.head.appendChild(s);
+  window.dataLayer = window.dataLayer || [];
+  window.gtag = function () { dataLayer.push(arguments); };
+  gtag('js', new Date());
+  gtag('config', a.id);
+  a.ready = true;
+})(window.LUSTRE_ADS);
+</script>
+
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    font-family: 'Geist', -apple-system, sans-serif;
+    background: linear-gradient(180deg, #f0fdfa 0%, #ffffff 60%);
+    color: #1f2329;
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 24px;
+  }
+  .card {
+    width: 100%;
+    max-width: 460px;
+    background: #ffffff;
+    border: 1px solid #e7eaef;
+    border-radius: 18px;
+    box-shadow: 0 16px 40px rgba(16, 24, 40, 0.1);
+    padding: 40px 34px;
+    text-align: center;
+  }
+  .leaf { width: 56px; height: 56px; transform: rotate(-8deg); margin-bottom: 22px; }
+  .check {
+    width: 64px; height: 64px; border-radius: 50%;
+    background: #ccfbf1; color: #0d9488;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 32px; margin: 0 auto 20px;
+  }
+  h1 {
+    font-family: 'Instrument Serif', serif;
+    font-style: italic;
+    font-size: 34px;
+    letter-spacing: -0.02em;
+    color: #15191c;
+    margin-bottom: 12px;
+  }
+  p { color: #5c6470; font-size: 15px; line-height: 1.6; margin-bottom: 10px; }
+  .btn {
+    display: inline-block;
+    margin-top: 22px;
+    background: #0d9488;
+    color: #ffffff;
+    text-decoration: none;
+    font-weight: 600;
+    font-size: 16px;
+    padding: 14px 28px;
+    border-radius: 12px;
+    box-shadow: 0 4px 14px rgba(13, 148, 136, 0.25);
+    transition: background 0.15s;
+  }
+  .btn:hover { background: #0f766e; }
+  .hint { margin-top: 18px; font-size: 12.5px; color: #9ca3af; }
+</style>
+</head>
+<body>
+  <main class="card">
+    <svg class="leaf" viewBox="0 0 32 32" aria-hidden="true">
+      <path d="M5 27 C 5 14, 14 5, 27 5 C 27 18, 18 27, 5 27 Z" fill="#0d9488"/>
+      <path d="M5 27 L 22 10 M 12 21 L 18 17 M 16 17 L 20 13" stroke="#ffffff" stroke-opacity="0.55" stroke-width="1.2" stroke-linecap="round" fill="none"/>
+    </svg>
+    <div class="check" aria-hidden="true">✓</div>
+    <h1>Bienvenue dans Lustre&nbsp;!</h1>
+    <p>Ton abonnement est confirmé. Merci de ta confiance&nbsp;— tout est prêt pour faire briller ton entreprise d'entretien ménager.</p>
+    <p>Tu peux dès maintenant configurer ton entreprise et créer ton premier client.</p>
+    <a class="btn" href="https://www.jemenage.com/">Accéder à mon compte →</a>
+    <div class="hint">Redirection automatique dans quelques secondes…</div>
+  </main>
+
+  <script>
+    // Laisse le temps à la balise Google de comptabiliser la conversion, puis
+    // redirige doucement vers l'application.
+    setTimeout(function () {
+      window.location.assign('https://www.jemenage.com/');
+    }, 6000);
+  </script>
+</body>
+</html>
